@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あいもん - 問題出題</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .header .user-info {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .header .user-info a {
+            margin-left: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .question-area {
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .question-area p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 20px;
+            background-color: #f0f8ff;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e0f0ff;
+        }
+
+        .choices-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 30px;
+        }
+
+        .choices-list li {
+            margin-bottom: 10px;
+        }
+
+        .choices-list button {
+            width: 100%;
+            padding: 12px;
+            background-color: #e9ecef;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease;
+            text-align: left;
+        }
+
+        .choices-list button:hover {
+            background-color: #dee2e6;
+            border-color: #c0c0c0;
+        }
+
+        .choices-list button.selected {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .action-buttons button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .action-buttons button:hover {
+            background-color: #0056b3;
+        }
+
+        .action-buttons .secondary {
+            background-color: #6c757d;
+        }
+
+        .action-buttons .secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .action-buttons .check-later {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .action-buttons .check-later:hover {
+            background-color: #e0a800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>あいもん</h1>
+        <div class="user-info">
+            ようこそ、ユーザー名さん！
+            <a href="index.html">ログアウト</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>問題出題中 (グループ: 数学)</h2>
+        <div class="question-area">
+            <p><strong>問題1/10:</strong> 日本の首都はどこでしょう？</p>
+        </div>
+        <ul class="choices-list">
+            <li><button onclick="selectChoice(this)">東京</button></li>
+            <li><button onclick="selectChoice(this)">大阪</button></li>
+            <li><button onclick="selectChoice(this)">京都</button></li>
+            <li><button onclick="selectChoice(this)">福岡</button></li>
+        </ul>
+        <div class="action-buttons">
+            <button class="check-later" onclick="alert('この問題を後で確認します。')">後で確認する</button>
+            <button onclick="alert('次の問題へ進みます。')">次の問題へ</button>
+        </div>
+    </div>
+
+    <script>
+        function selectChoice(button) {
+            const buttons = document.querySelectorAll('.choices-list button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            alert('選択しました: ' + button.textContent);
+        }
+    </script>
+</body>
+
+</html>

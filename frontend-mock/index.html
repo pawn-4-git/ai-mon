@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あいもん - ログイン/登録</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .toggle-link {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>あいもん</h1>
+        <div id="login-form">
+            <h2>ログイン</h2>
+            <div class="form-group">
+                <label for="login-username">アカウント名:</label>
+                <input type="text" id="login-username" placeholder="8桁以上の英数字">
+            </div>
+            <button onclick="alert('ログイン機能は未実装です。')">ログイン</button>
+            <p class="toggle-link" onclick="showRegisterForm()">アカウントをお持ちでない方はこちら</p>
+        </div>
+
+        <div id="register-form" style="display: none;">
+            <h2>ユーザー登録</h2>
+            <div class="form-group">
+                <label for="register-username">アカウント名:</label>
+                <input type="text" id="register-username" placeholder="8桁以上の英数字">
+            </div>
+            <button onclick="alert('ユーザー登録機能は未実装です。')">登録</button>
+            <p class="toggle-link" onclick="showLoginForm()">すでにアカウントをお持ちの方はこちら</p>
+        </div>
+    </div>
+
+    <script>
+        function showRegisterForm() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
+
+        function showLoginForm() {
+            document.getElementById('register-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
