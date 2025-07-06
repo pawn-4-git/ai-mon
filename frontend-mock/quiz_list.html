@@ -172,7 +172,7 @@
     <div class="header">
         <h1>あいもん</h1>
         <div class="user-info">
-            ようこそ、ユーザー名さん！
+            <a href="score_history.html">ようこそ、ユーザー名さん！</a>
             <a href="index.html">ログアウト</a>
         </div>
     </div>
@@ -187,8 +187,8 @@
                 </div>
                 <span class="group-status not-taken-text">未受験</span>
                 <div class="action-buttons">
-                    <button onclick="alert('このグループでテストを開始します。')">テスト開始</button>
-                    <button class="edit-button" onclick="alert('問題編集機能は特権ユーザーのみ利用可能です。')">編集</button>
+                    <button onclick="location.href='quiz_play.html'">テスト開始</button>
+                    <button class="edit-button" onclick="location.href='create_quiz.html'">編集</button>
                 </div>
             </li>
             <li class="quiz-group-item updated">
@@ -198,8 +198,8 @@
                 </div>
                 <span class="group-status updated-text">更新あり</span>
                 <div class="action-buttons">
-                    <button onclick="alert('このグループでテストを開始します。')">テスト開始</button>
-                    <button class="edit-button" onclick="alert('問題編集機能は特権ユーザーのみ利用可能です。')">編集</button>
+                    <button onclick="location.href='quiz_play.html'">テスト開始</button>
+                    <button class="edit-button" onclick="location.href='create_quiz.html'">編集</button>
                 </div>
             </li>
             <li class="quiz-group-item">
@@ -209,8 +209,8 @@
                 </div>
                 <span class="group-status">最終受験: 2024/07/01</span>
                 <div class="action-buttons">
-                    <button onclick="alert('このグループでテストを開始します。')">テスト開始</button>
-                    <button class="edit-button" onclick="alert('問題編集機能は特権ユーザーのみ利用可能です。')">編集</button>
+                    <button onclick="location.href='quiz_play.html'">テスト開始</button>
+                    <button class="edit-button" onclick="location.href='create_quiz.html'">編集</button>
                 </div>
             </li>
             <li class="quiz-group-item">
@@ -220,12 +220,12 @@
                 </div>
                 <span class="group-status">最終受験: 2024/06/25</span>
                 <div class="action-buttons">
-                    <button onclick="alert('このグループでテストを開始します。')">テスト開始</button>
-                    <button class="edit-button" onclick="alert('問題編集機能は特権ユーザーのみ利用可能です。')">編集</button>
+                    <button onclick="location.href='quiz_play.html'">テスト開始</button>
+                    <button class="edit-button" onclick="location.href='create_quiz.html'">編集</button>
                 </div>
             </li>
         </ul>
-        <button class="add-button" onclick="alert('問題作成画面へ遷移します。')">新しい問題グループを作成</button>
+        <button class="add-button" onclick="location.href='create_quiz.html'">新しい問題グループを作成</button>
     </div>
 </body>
 
