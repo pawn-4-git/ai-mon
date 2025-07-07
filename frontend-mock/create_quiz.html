@@ -143,6 +143,70 @@
         .dummy-choices input[type="checkbox"] {
             margin-right: 10px;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+            padding-top: 60px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            /* Could be more or less, depending on screen size */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        #quiz-list-container ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #quiz-list-container li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #quiz-list-container li:hover {
+            background-color: #f0f0f0;
+        }
     </style>
 </head>
 
@@ -258,10 +322,116 @@
         <div class="button-group">
             <button onclick="alert('問題を保存します。')">問題を保存</button>
             <button class="secondary" onclick="location.href='quiz_list.html'">キャンセル</button>
+            <button onclick="openQuizListModal()"
+                style="background-color: #17a2b8; color: white; border: none; padding: 10px 20px; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background-color 0.3s ease;">問題の一覧を確認</button>
+        </div>
+
+        <!-- Quiz List Modal -->
+        <div id="quizListModal" class="modal">
+            <div class="modal-content">
+                <span class="close-button" onclick="closeQuizListModal()">&times;</span>
+                <h2>問題一覧</h2>
+                <div id="quiz-list-container">
+                    <!-- Quiz list will be loaded here -->
+                </div>
+                <div id="quiz-detail-container"
+                    style="display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+                    <h3>問題詳細</h3>
+                    <p><strong>問題文:</strong> <span id="detail-question-text"></span></p>
+                    <p><strong>正解:</strong> <span id="detail-correct-choice"></span></p>
+                    <p><strong>解説:</strong> <span id="detail-explanation-text"></span></p>
+                    <p><strong>誤った回答:</strong> <span id="detail-dummy-choices"></span></p>
+                    <button onclick="showQuizList()"
+                        style="margin-top: 15px; padding: 8px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">一覧に戻る</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="product-links-section" style="margin-top: 30px;">
+            <h3>関連商品リンク (最大10個)</h3>
+            <p style="font-size: 0.9em; color: #777;">問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
+            <div id="product-links-container">
+                <!-- Product link input fields will be added here by JavaScript -->
+            </div>
+            <button onclick="addProductLinkField()"
+                style="margin-top: 15px; padding: 8px 15px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">商品リンクを追加</button>
+            <button onclick="saveProductLinks()"
+                style="margin-top: 15px; margin-left: 10px; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">商品リンクを保存</button>
         </div>
     </div>
 
     <script>
+        function saveProductLinks() {
+            alert('商品リンクを保存します。（機能は未実装）');
+            // Here you would typically gather all product link data and send it to a backend.
+            // Example of gathering data:
+            // const productLinks = [];
+            // const container = document.getElementById('product-links-container');
+            // Array.from(container.children).forEach((item, i) => {
+            //     const imageUrl = item.querySelector(`[id^="product-image-url-"]`).value;
+            //     const productName = item.querySelector(`[id^="product-name-"]`).value;
+            //     const productLinkUrl = item.querySelector(`[id^="product-link-url-"]`).value;
+            //     productLinks.push({ imageUrl, productName, productLinkUrl });
+            // });
+            // console.log(productLinks);
+        }
+
+        function addProductLinkField() {
+            const container = document.getElementById('product-links-container');
+            const currentCount = container.children.length;
+
+            if (currentCount >= 10) {
+                alert('追加できる商品リンクは最大10個までです。');
+                return;
+            }
+
+            const index = currentCount + 1;
+            const productLinkDiv = document.createElement('div');
+            productLinkDiv.className = 'product-link-item';
+            productLinkDiv.style.marginBottom = '20px';
+            productLinkDiv.style.padding = '15px';
+            productLinkDiv.style.border = '1px solid #eee';
+            productLinkDiv.style.borderRadius = '4px';
+            productLinkDiv.style.backgroundColor = '#f9f9f9';
+
+            productLinkDiv.innerHTML = `
+                <h4>商品リンク ${index}</h4>
+                <div class="form-group">
+                    <label for="product-image-url-${index}">画像URL:</label>
+                    <input type="text" id="product-image-url-${index}" placeholder="例: https://example.com/image.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="product-name-${index}">商品名:</label>
+                    <input type="text" id="product-name-${index}" placeholder="例: 商品A">
+                </div>
+                <div class="form-group">
+                    <label for="product-link-url-${index}">商品リンクURL:</label>
+                    <input type="text" id="product-link-url-${index}" placeholder="例: https://example.com/product/A">
+                </div>
+                <button onclick="removeProductLinkField(this)" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-top: 10px;">削除</button>
+            `;
+            container.appendChild(productLinkDiv);
+        }
+
+        function removeProductLinkField(buttonElement) {
+            const productLinkItem = buttonElement.closest('.product-link-item');
+            productLinkItem.remove();
+            // Re-index the remaining items
+            const container = document.getElementById('product-links-container');
+            Array.from(container.children).forEach((item, i) => {
+                const index = i + 1;
+                item.querySelector('h4').innerText = `商品リンク ${index}`;
+                item.querySelector(`[id^="product-image-url-"]`).id = `product-image-url-${index}`;
+                item.querySelector(`[id^="product-name-"]`).id = `product-name-${index}`;
+                item.querySelector(`[id^="product-link-url-"]`).id = `product-link-url-${index}`;
+            });
+        }
+
+        // Initial product link field on page load
+        document.addEventListener('DOMContentLoaded', (event) => {
+            addProductLinkField(); // Add one field by default
+        });
+
         function toggleCreationMethod() {
             const manualDiv = document.getElementById('manual-creation');
             const autoDiv = document.getElementById('auto-generation');
@@ -296,6 +466,85 @@
 
         // 初期表示
         toggleCreationMethod();
+
+        // Modal functions
+        function openQuizListModal() {
+            const modal = document.getElementById('quizListModal');
+            modal.style.display = 'block';
+            loadQuizList();
+        }
+
+        function closeQuizListModal() {
+            const modal = document.getElementById('quizListModal');
+            modal.style.display = 'none';
+            showQuizList(); // Reset to list view when closing
+        }
+
+        function loadQuizList() {
+            const quizListContainer = document.getElementById('quiz-list-container');
+            const quizDetailContainer = document.getElementById('quiz-detail-container');
+
+            quizListContainer.style.display = 'block';
+            quizDetailContainer.style.display = 'none';
+
+            // Dummy quiz data for demonstration
+            const quizzes = [
+                {
+                    id: 1,
+                    question: '日本の首都はどこですか？',
+                    correct: '東京',
+                    explanation: '東京は日本の政治、経済、文化の中心です。',
+                    dummies: ['大阪', '京都', '札幌']
+                },
+                {
+                    id: 2,
+                    question: '世界で一番高い山は何ですか？',
+                    correct: 'エベレスト',
+                    explanation: 'エベレストはヒマラヤ山脈に位置し、標高8,848.86メートルです。',
+                    dummies: ['K2', '富士山', 'キリマンジャロ']
+                },
+                {
+                    id: 3,
+                    question: '光の速さは約何km/sですか？',
+                    correct: '30万km/s',
+                    explanation: '光速は真空中で約299,792.458 km/sです。',
+                    dummies: ['3万km/s', '300万km/s', '3千km/s']
+                }
+            ];
+
+            quizListContainer.innerHTML = '<ul>' +
+                quizzes.map(quiz =>
+                    `<li onclick="showQuizDetail(${quiz.id})">${quiz.question}</li>`
+                ).join('') +
+                '</ul>';
+
+            // Store quizzes in a global variable or data attribute for easy access
+            window.quizzes = quizzes;
+        }
+
+        function showQuizDetail(quizId) {
+            const quizListContainer = document.getElementById('quiz-list-container');
+            const quizDetailContainer = document.getElementById('quiz-detail-container');
+            const quiz = window.quizzes.find(q => q.id === quizId);
+
+            if (quiz) {
+                document.getElementById('detail-question-text').innerText = quiz.question;
+                document.getElementById('detail-correct-choice').innerText = quiz.correct;
+                document.getElementById('detail-explanation-text').innerText = quiz.explanation;
+                document.getElementById('detail-dummy-choices').innerText = quiz.dummies.join(', ');
+
+                quizListContainer.style.display = 'none';
+                quizDetailContainer.style.display = 'block';
+            }
+        }
+
+        function showQuizList() {
+            const quizListContainer = document.getElementById('quiz-list-container');
+            const quizDetailContainer = document.getElementById('quiz-detail-container');
+
+            quizListContainer.style.display = 'block';
+            quizDetailContainer.style.display = 'none';
+        }
     </script>
 </body>
 
