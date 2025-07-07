@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あいもん - 解答状況一覧</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        .header .user-info {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .header .user-info a {
+            margin-left: 15px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .status-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            background-color: #f9f9f9;
+            text-align: left;
+        }
+
+        .status-item.answered {
+            border-left: 5px solid #28a745;
+            /* 解答済み */
+        }
+
+        .status-item.unanswered {
+            border-left: 5px solid #dc3545;
+            /* 未解答 */
+        }
+
+        .status-item.checked-later {
+            border-left: 5px solid #ffc107;
+            /* 後で確認 */
+        }
+
+        .question-info h3 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+
+        .question-info p {
+            margin: 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .status-badge.answered {
+            background-color: #28a745;
+        }
+
+        .status-badge.unanswered {
+            background-color: #dc3545;
+        }
+
+        .status-badge.checked-later {
+            background-color: #ffc107;
+            color: #333;
+        }
+
+        .back-button {
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>あいもん</h1>
+        <div class="user-info">
+            <a href="score_history.html">ようこそ、ユーザー名さん！</a>
+            <a href="index.html">ログアウト</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>解答状況一覧 (グループ: 数学)</h2>
+        <ul class="status-list">
+            <li class="status-item answered">
+                <div class="question-info">
+                    <h3>問題1: 日本の首都はどこでしょう？</h3>
+                    <p>あなたの回答: 東京</p>
+                </div>
+                <span class="status-badge answered">解答済み</span>
+            </li>
+            <li class="status-item unanswered">
+                <div class="question-info">
+                    <h3>問題2: 富士山の高さは？</h3>
+                    <p>あなたの回答: 未解答</p>
+                </div>
+                <span class="status-badge unanswered">未解答</span>
+            </li>
+            <li class="status-item checked-later">
+                <div class="question-info">
+                    <h3>問題3: 世界で一番長い川は？</h3>
+                    <p>あなたの回答: ナイル川</p>
+                </div>
+                <span class="status-badge checked-later">後で確認</span>
+            </li>
+            <li class="status-item answered">
+                <div class="question-info">
+                    <h3>問題4: 日本の国花は？</h3>
+                    <p>あなたの回答: 桜</p>
+                </div>
+                <span class="status-badge answered">解答済み</span>
+            </li>
+        </ul>
+        <button class="back-button" onclick="location.href='quiz_play.html'">問題に戻る</button>
+        <button class="back-button" onclick="location.href='quiz_result.html'">テストを終える</button>
+    </div>
+</body>
+
+</html>
