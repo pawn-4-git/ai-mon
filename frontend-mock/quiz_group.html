@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>問題グループ設定</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        select,
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .button-group {
+            margin-top: 20px;
+        }
+
+        .button-group button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button-group button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>問題グループ設定</h2>
+        <div class="form-group">
+            <label for="quiz-group">問題グループ:</label>
+            <select id="quiz-group">
+                <option value="">-- 既存グループを選択 または 新規作成 --</option>
+                <option value="math">数学</option>
+                <option value="history">歴史</option>
+                <option value="science">科学</option>
+            </select>
+            <input type="text" id="new-group" placeholder="新しいグループ名（任意）" style="margin-top: 10px;">
+        </div>
+        <div class="form-group">
+            <label for="number-of-questions">問題数:</label>
+            <input type="number" id="number-of-questions" placeholder="例: 10" min="1">
+        </div>
+
+        <div class="form-group">
+            <label for="time-limit">時間設定 (分):</label>
+            <input type="number" id="time-limit" placeholder="例: 15" min="1">
+        </div>
+        <div class="button-group">
+            <button onclick="alert('グループ設定を保存します')">保存</button>
+            <button onclick="window.location.href='create_quiz.html'">戻る</button>
+        </div>
+    </div>
+</body>
+
+</html>
