@@ -1,265 +1,216 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '@/components/Header';
-import Card from '@/components/Card';
-import Button from '@/components/Button';
+import Link from 'next/link';
+
+// Mock data for quizzes
+const mockQuizzes = [
+    { id: 1, question: '日本の首都はどこですか？', correct: '東京', explanation: '東京は日本の政治、経済、文化の中心です。', dummies: ['大阪', '京都', '札幌'] },
+    { id: 2, question: '世界で一番高い山は何ですか？', correct: 'エベレスト', explanation: 'エベレストはヒマラヤ山脈に位置し、標高8,848.86メートルです。', dummies: ['K2', '富士山', 'キリマンジャロ'] },
+    { id: 3, question: '光の速さは約何km/sですか？', correct: '30万km/s', explanation: '光速は真空中で約299,792.458 km/sです。', dummies: ['3万km/s', '300万km/s', '3千km/s'] }
+];
 
 export default function CreateQuizPage() {
-  const [isAutoMode, setIsAutoMode] = useState(false);
-  const [showQuizList, setShowQuizList] = useState(false);
-  const [formData, setFormData] = useState({
-    question: '',
-    choice1: '',
-    choice2: '',
-    choice3: '',
-    choice4: '',
-    correctAnswer: '',
-    explanation: '',
-    category: '',
-    autoTopic: '',
-    autoCount: 10
-  });
-  const router = useRouter();
+    const router = useRouter();
+    const [creationMethod, setCreationMethod] = useState('manual');
+    const [showDummyChoices, setShowDummyChoices] = useState(false);
+    const [showAutoDummyChoices, setAutoShowDummyChoices] = useState(false);
+    const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [quizzes, setQuizzes] = useState(mockQuizzes);
+    const [selectedQuiz, setSelectedQuiz] = useState(null);
+    const [productLinks, setProductLinks] = useState([{}]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+    const handleCreationMethodChange = (e) => {
+        setCreationMethod(e.target.value);
+    };
 
-  const generateDummyChoices = () => {
-    setFormData({
-      ...formData,
-      choice1: 'ダミー選択肢1',
-      choice2: 'ダミー選択肢2',
-      choice3: 'ダミー選択肢3',
-      choice4: 'ダミー選択肢4'
-    });
-  };
+    const addProductLinkField = () => {
+        if (productLinks.length < 10) {
+            setProductLinks([...productLinks, {}]);
+        } else {
+            alert('追加できる商品リンクは最大10個までです。');
+        }
+    };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    alert('クイズが保存されました！');
-    router.push('/quiz-list');
-  };
+    const removeProductLinkField = (index) => {
+        const newProductLinks = productLinks.filter((_, i) => i !== index);
+        setProductLinks(newProductLinks);
+    };
+    
+    useEffect(() => {
+        // Add one product link field by default
+        addProductLinkField();
+    }, []);
 
-  const handleAutoGenerate = () => {
-    alert(`「${formData.autoTopic}」に関する${formData.autoCount}問のクイズを自動生成します。`);
-  };
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      
-      <div className="container">
-        <h1 className="text-2xl font-bold text-gray-800 mb-6">クイズ作成</h1>
-
-        <div className="flex mb-6">
-          <button
-            type="button"
-            onClick={() => setIsAutoMode(false)}
-            className={`flex-1 py-2 px-4 text-center border-b-2 transition-colors ${
-              !isAutoMode 
-                ? 'border-blue-600 text-blue-600 font-medium' 
-                : 'border-gray-300 text-gray-500'
-            }`}
-          >
-            手動作成
-          </button>
-          <button
-            type="button"
-            onClick={() => setIsAutoMode(true)}
-            className={`flex-1 py-2 px-4 text-center border-b-2 transition-colors ${
-              isAutoMode 
-                ? 'border-blue-600 text-blue-600 font-medium' 
-                : 'border-gray-300 text-gray-500'
-            }`}
-          >
-            自動生成
-          </button>
-        </div>
-
-        {!isAutoMode ? (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <Card title="問題設定">
-              <div className="form-group">
-                <label htmlFor="question">問題文:</label>
-                <textarea
-                  id="question"
-                  name="question"
-                  value={formData.question}
-                  onChange={handleInputChange}
-                  placeholder="問題文を入力してください"
-                  rows={3}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="category">カテゴリ:</label>
-                <select
-                  id="category"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleInputChange}
-                >
-                  <option value="">カテゴリを選択</option>
-                  <option value="math">数学</option>
-                  <option value="history">歴史</option>
-                  <option value="science">科学</option>
-                  <option value="language">言語</option>
-                </select>
-              </div>
-            </Card>
-
-            <Card title="選択肢">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">選択肢を入力:</h3>
-                <Button type="button" onClick={generateDummyChoices} variant="secondary">
-                  ダミー選択肢生成
-                </Button>
-              </div>
-
-              <div className="space-y-3">
-                {[1, 2, 3, 4].map((num) => (
-                  <div key={num} className="form-group">
-                    <label htmlFor={`choice${num}`}>選択肢{num}:</label>
-                    <input
-                      type="text"
-                      id={`choice${num}`}
-                      name={`choice${num}`}
-                      value={formData[`choice${num}` as keyof typeof formData]}
-                      onChange={handleInputChange}
-                      placeholder={`選択肢${num}を入力`}
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="correctAnswer">正解:</label>
-                <select
-                  id="correctAnswer"
-                  name="correctAnswer"
-                  value={formData.correctAnswer}
-                  onChange={handleInputChange}
-                  required
-                >
-                  <option value="">正解を選択</option>
-                  <option value="1">選択肢1</option>
-                  <option value="2">選択肢2</option>
-                  <option value="3">選択肢3</option>
-                  <option value="4">選択肢4</option>
-                </select>
-              </div>
-            </Card>
-
-            <Card title="解説・参考資料">
-              <div className="form-group">
-                <label htmlFor="explanation">解説:</label>
-                <textarea
-                  id="explanation"
-                  name="explanation"
-                  value={formData.explanation}
-                  onChange={handleInputChange}
-                  placeholder="解説を入力してください"
-                  rows={3}
-                />
-              </div>
-
-              <div className="bg-gray-50 p-4 rounded">
-                <h4 className="font-semibold mb-2">商品リンク:</h4>
-                <div className="space-y-2 text-sm">
-                  <a href="https://www.amazon.co.jp" className="text-blue-600 hover:underline block">
-                    Amazon - 関連書籍を検索
-                  </a>
-                  <a href="https://books.rakuten.co.jp" className="text-blue-600 hover:underline block">
-                    楽天ブックス - 参考書を探す
-                  </a>
+    return (
+        <div className="create-quiz-page">
+            <div className="header">
+                <h1>あいもん</h1>
+                <div className="user-info">
+                    <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
+                    <Link href="/">ログアウト</Link>
                 </div>
-              </div>
-            </Card>
-
-            <div className="flex space-x-4">
-              <Button type="submit" variant="primary">
-                クイズを保存
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => setShowQuizList(true)} 
-                variant="secondary"
-              >
-                クイズ一覧を表示
-              </Button>
-              <Button 
-                type="button" 
-                onClick={() => router.push('/quiz-group')} 
-                variant="warning"
-              >
-                グループ設定
-              </Button>
             </div>
-          </form>
-        ) : (
-          <Card title="自動生成">
-            <div className="space-y-4">
-              <div className="form-group">
-                <label htmlFor="autoTopic">トピック:</label>
-                <input
-                  type="text"
-                  id="autoTopic"
-                  name="autoTopic"
-                  value={formData.autoTopic}
-                  onChange={handleInputChange}
-                  placeholder="例: 日本の歴史、基本的な数学"
-                />
-              </div>
 
-              <div className="form-group">
-                <label htmlFor="autoCount">問題数:</label>
-                <input
-                  type="number"
-                  id="autoCount"
-                  name="autoCount"
-                  value={formData.autoCount}
-                  onChange={handleInputChange}
-                  min="1"
-                  max="50"
-                />
-              </div>
+            <div className="container">
+                <h2>新しい問題を作成</h2>
 
-              <Button onClick={handleAutoGenerate} variant="primary">
-                自動生成開始
-              </Button>
+                <div className="form-group">
+                    <label htmlFor="quiz-title">問題タイトル:</label>
+                    <input type="text" id="quiz-title" placeholder="例: 日本史の基礎" />
+                </div>
+
+                <p>現在のグループ: <span id="current-group">未設定</span></p>
+                <div className="form-group">
+                    <Link href="/quiz-group">問題グループを設定</Link>
+                </div>
+
+                <div className="radio-group">
+                    <label>
+                        <input type="radio" name="creation-method" value="manual" checked={creationMethod === 'manual'} onChange={handleCreationMethodChange} />
+                        手動作成
+                    </label>
+                    <label>
+                        <input type="radio" name="creation-method" value="auto" checked={creationMethod === 'auto'} onChange={handleCreationMethodChange} />
+                        自動生成
+                    </label>
+                </div>
+
+                {/* Manual Creation Section */}
+                <div id="manual-creation" style={{ display: creationMethod === 'manual' ? 'block' : 'none' }}>
+                    <div className="form-group">
+                        <label htmlFor="question-text">問題文:</label>
+                        <textarea id="question-text" placeholder="問題文を入力してください"></textarea>
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="correct-choice">正解の選択肢:</label>
+                        <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" />
+                    </div>
+                    <button onClick={() => {setShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）');}}>ダミー選択肢を10個生成</button>
+
+                    {showDummyChoices && (
+                        <div className="dummy-choices">
+                            <h3>生成されたダミー選択肢 (3つ選択):</h3>
+                            <ul>
+                                {Array.from({ length: 10 }, (_, i) => (
+                                    <li key={i}><label><input type="checkbox" name="dummy-choice" /> ダミー選択肢{i + 1}</label></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    <div className="form-group">
+                        <label htmlFor="explanation-text">解説文:</label>
+                        <textarea id="explanation-text" placeholder="解説文を入力してください"></textarea>
+                    </div>
+                </div>
+
+                {/* Auto Generation Section */}
+                <div id="auto-generation" style={{ display: creationMethod === 'auto' ? 'block' : 'none' }}>
+                    <div className="form-group">
+                        <label htmlFor="source-text">問題生成元となる文章:</label>
+                        <textarea id="source-text" placeholder="問題を作成したい文章を入力してください"></textarea>
+                    </div>
+                    <button onClick={() => {setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）');}}>文章から問題を自��生成</button>
+                    
+                    {showGeneratedQuiz && (
+                        <div className="generated-quiz" style={{ marginTop: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                            <h3>生成された問題（確認・修正）:</h3>
+                            <div className="form-group">
+                                <label>問題文:</label>
+                                <textarea id="generated-question-text" defaultValue="（自動生成された問題文）"></textarea>
+                            </div>
+                            <div className="form-group">
+                                <label>正解の選択肢:</label>
+                                <input type="text" id="generated-correct-choice" defaultValue="（自動生成された正解）" />
+                            </div>
+                            <button onClick={() => {setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）');}}>ダミー選択肢を10個生成</button>
+                            {showAutoDummyChoices && (
+                                <div className="dummy-choices-auto">
+                                    <h3>生成されたダミー選択肢 (3つ選択):</h3>
+                                    <ul>
+                                        {Array.from({ length: 10 }, (_, i) => (
+                                            <li key={i}><label><input type="checkbox" name="dummy-choice-auto" /> ダミー選択肢{String.fromCharCode(65 + i)}</label></li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <div className="form-group">
+                                <label>解説文:</label>
+                                <textarea id="generated-explanation-text" defaultValue="（自動生成された解説）"></textarea>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="button-group">
+                    <button onClick={() => alert('問題を保存します。')}>問題を保存</button>
+                    <button className="secondary" onClick={() => router.push('/quiz-list')}>キャンセル</button>
+                    <button onClick={() => setIsModalOpen(true)} style={{ backgroundColor: '#17a2b8' }}>問題の一覧を確認</button>
+                </div>
+
+                {/* Quiz List Modal */}
+                {isModalOpen && (
+                    <div className="modal" style={{ display: 'block' }}>
+                        <div className="modal-content">
+                            <span className="close-button" onClick={() => {setIsModalOpen(false); setSelectedQuiz(null);}}>&times;</span>
+                            {!selectedQuiz ? (
+                                <>
+                                    <h2>問題一覧</h2>
+                                    <div id="quiz-list-container">
+                                        <ul>
+                                            {quizzes.map(quiz => (
+                                                <li key={quiz.id} onClick={() => setSelectedQuiz(quiz)}>
+                                                    {quiz.question}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </>
+                            ) : (
+                                <div id="quiz-detail-container">
+                                    <h3>問題詳細</h3>
+                                    <p><strong>問題文:</strong> {selectedQuiz.question}</p>
+                                    <p><strong>正解:</strong> {selectedQuiz.correct}</p>
+                                    <p><strong>解説:</strong> {selectedQuiz.explanation}</p>
+                                    <p><strong>誤った回答:</strong> {selectedQuiz.dummies.join(', ')}</p>
+                                    <button onClick={() => setSelectedQuiz(null)} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>一覧に戻る</button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                <div className="product-links-section" style={{ marginTop: '30px' }}>
+                    <h3>関連商品リンク (最大10個)</h3>
+                    <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してく���さい。</p>
+                    <div id="product-links-container">
+                        {productLinks.map((link, index) => (
+                            <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                                <h4>商品リンク {index + 1}</h4>
+                                <div className="form-group">
+                                    <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
+                                    <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor={`product-name-${index}`}>商品名:</label>
+                                    <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
+                                    <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
+                                </div>
+                                <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                            </div>
+                        ))}
+                    </div>
+                    <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
+                    <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                </div>
             </div>
-          </Card>
-        )}
-
-        {showQuizList && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <Card className="max-w-md w-full">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">作成済みクイズ一覧</h3>
-                <button
-                  onClick={() => setShowQuizList(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="space-y-2">
-                <div className="p-3 border rounded">数学基礎 - 10問</div>
-                <div className="p-3 border rounded">歴史問題 - 15問</div>
-                <div className="p-3 border rounded">科学知識 - 12問</div>
-              </div>
-            </Card>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }

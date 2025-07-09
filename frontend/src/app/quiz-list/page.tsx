@@ -1,126 +1,95 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Header from '@/components/Header';
-import Card from '@/components/Card';
-import Button from '@/components/Button';
-import { QuizGroup } from '@/types';
 
-const mockQuizGroups: QuizGroup[] = [
+const quizGroups = [
   {
-    id: '1',
-    name: '数学基礎',
-    status: 'not-taken',
+    id: 1,
+    name: '未受験グループA',
     questionCount: 10,
-    timeLimit: 15
+    status: 'not-taken',
+    statusText: '未受験',
   },
   {
-    id: '2',
-    name: '歴史問題',
-    status: 'updated',
+    id: 2,
+    name: '更新ありグループB',
     questionCount: 15,
-    timeLimit: 20,
-    lastScore: 85
+    status: 'updated',
+    statusText: '更新あり',
   },
   {
-    id: '3',
-    name: '科学知識',
-    status: 'completed',
-    questionCount: 12,
-    timeLimit: 18,
-    lastScore: 92,
-    lastTaken: new Date('2024-01-15')
-  }
+    id: 3,
+    name: '受験済みグループC',
+    questionCount: 20,
+    status: 'taken',
+    statusText: '最終受験: 2024/07/01',
+  },
+  {
+    id: 4,
+    name: '受験済みグループD',
+    questionCount: 8,
+    status: 'taken',
+    statusText: '最終受験: 2024/06/25',
+  },
 ];
 
 export default function QuizListPage() {
-  const [quizGroups] = useState<QuizGroup[]>(mockQuizGroups);
+  const router = useRouter();
 
-  const getStatusBadge = (status: QuizGroup['status']) => {
+  const getStatusClass = (status) => {
     switch (status) {
       case 'not-taken':
-        return <span className="status-badge status-not-taken">未受験</span>;
+        return 'not-taken';
       case 'updated':
-        return <span className="status-badge status-updated">更新あり</span>;
-      case 'completed':
-        return <span className="status-badge status-completed">受験済み</span>;
+        return 'updated';
       default:
-        return null;
+        return '';
     }
   };
 
-  const getActionButton = (group: QuizGroup) => {
-    if (group.status === 'not-taken') {
-      return (
-        <Link href={`/quiz-play?groupId=${group.id}`}>
-          <Button variant="primary">テスト開始</Button>
-        </Link>
-      );
-    } else {
-      return (
-        <div className="flex space-x-2">
-          <Link href={`/quiz-play?groupId=${group.id}`}>
-            <Button variant="primary">再受験</Button>
-          </Link>
-          <Link href={`/create-quiz?groupId=${group.id}`}>
-            <Button variant="secondary">編集</Button>
-          </Link>
-        </div>
-      );
-    }
-  };
+  const getStatusTextClass = (status) => {
+    switch (status) {
+        case 'not-taken':
+          return 'not-taken-text';
+        case 'updated':
+          return 'updated-text';
+        default:
+          return '';
+      }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header />
-      
+    <div className="quiz-list-page">
+      <div className="header">
+        <h1>あいもん</h1>
+        <div className="user-info">
+          <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
+          <Link href="/">ログアウト</Link>
+        </div>
+      </div>
+
       <div className="container">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">クイズ一覧</h1>
-          <Link href="/create-quiz">
-            <Button variant="success">新しいクイズを作成</Button>
-          </Link>
-        </div>
-
-        <div className="space-y-4">
+        <h2>問題グループ一覧</h2>
+        <ul className="quiz-group-list">
           {quizGroups.map((group) => (
-            <div key={group.id} className="quiz-item">
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-lg font-semibold text-gray-800">{group.name}</h3>
-                    {getStatusBadge(group.status)}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <p>問題数: {group.questionCount}問</p>
-                    <p>制限時間: {group.timeLimit}分</p>
-                    {group.lastScore && (
-                      <p>前回スコア: {group.lastScore}点</p>
-                    )}
-                    {group.lastTaken && (
-                      <p>最終受験日: {group.lastTaken.toLocaleDateString('ja-JP')}</p>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="ml-4">
-                  {getActionButton(group)}
-                </div>
+            <li key={group.id} className={`quiz-group-item ${getStatusClass(group.status)}`}>
+              <div className="group-info">
+                <h3>{group.name}</h3>
+                <p>問題数: {group.questionCount}問</p>
               </div>
-            </div>
+              <span className={`group-status ${getStatusTextClass(group.status)}`}>{group.statusText}</span>
+              <div className="action-buttons">
+                <button onClick={() => router.push('/quiz-play')}>テスト開始</button>
+                <button className="edit-button" onClick={() => router.push('/create-quiz')}>編集</button>
+              </div>
+            </li>
           ))}
-        </div>
-
-        {quizGroups.length === 0 && (
-          <Card className="text-center py-12">
-            <p className="text-gray-500 mb-4">まだクイズが作成されていません。</p>
-            <Link href="/create-quiz">
-              <Button variant="primary">最初のクイズを作成する</Button>
-            </Link>
-          </Card>
-        )}
+        </ul>
+        <button className="add-button" onClick={() => router.push('/create-quiz')}>
+          新しい問題グループを作成
+        </button>
       </div>
     </div>
   );
