@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 // Mock data for demonstration
 const answerStatuses = [
@@ -41,13 +42,7 @@ export default function AnswerStatusPage() {
 
   return (
     <div className="answer-status-page">
-      <div className="header">
-        <h1>あいもん</h1>
-        <div className="user-info">
-          <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
-          <Link href="/">ログアウト</Link>
-        </div>
-      </div>
+      <Header />
 
       <div className="container">
         <h2>解答状況一覧 (グループ: 数学)</h2>

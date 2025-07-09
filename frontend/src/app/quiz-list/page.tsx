@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 const quizGroups = [
   {
@@ -62,13 +63,7 @@ export default function QuizListPage() {
 
   return (
     <div className="quiz-list-page">
-      <div className="header">
-        <h1>あいもん</h1>
-        <div className="user-info">
-          <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
-          <Link href="/">ログアウト</Link>
-        </div>
-      </div>
+      <Header />
 
       <div className="container">
         <h2>問題グループ一覧</h2>

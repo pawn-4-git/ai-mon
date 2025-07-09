@@ -3,6 +3,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 const scoreRecords = [
   { id: 1, text: '2024/06/01 - 数学テスト (正答率: 85%)' },
@@ -16,13 +17,7 @@ export default function ScoreHistoryPage() {
 
   return (
     <div className="score-history-page">
-      <div className="header">
-        <h1>あいもん</h1>
-        <div className="user-info">
-          ようこそ、ユーザー名さん！
-          <Link href="/">ログアウト</Link>
-        </div>
-      </div>
+      <Header />
 
       <div className="container">
         <h2>成績確認</h2>

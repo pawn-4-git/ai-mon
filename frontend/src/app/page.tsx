@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
 
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -14,7 +15,7 @@ export default function LoginPage() {
   return (
     <div className="login-page">
       <div className="container">
-        <h1>あいもん</h1>
+        <Header />
         
         {/* Login Form */}
         <div id="login-form" style={{ display: isLoginView ? 'block' : 'none' }}>

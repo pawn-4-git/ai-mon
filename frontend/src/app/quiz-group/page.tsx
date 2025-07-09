@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Header from '@/components/Header';
 
 export default function QuizGroupPage() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function QuizGroupPage() {
 
   return (
     <div className="quiz-group-page">
+      <Header />
       <div className="container">
         <h2>問題グループ設定</h2>
         <div className="form-group">

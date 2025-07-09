@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 const currentQuestion = {
   number: 1,
@@ -22,13 +23,7 @@ export default function QuizPlayPage() {
 
   return (
     <div className="quiz-play-page">
-      <div className="header">
-        <h1>あいもん</h1>
-        <div className="user-info">
-          <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
-          <Link href="/">ログアウト</Link>
-        </div>
-      </div>
+      <Header />
 
       <div className="container">
         <h2>問題出題中 (グループ: 数学)</h2>

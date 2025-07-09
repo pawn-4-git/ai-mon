@@ -590,18 +590,22 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    max-width: 600px;
-    margin: 0 auto;
+    max-width: 600px; /* コンテナの最大幅を調整 */
+    margin: 0 auto; /* コンテンツを中央寄せ */
+    padding: 30px; /* 内側の余白を調整 */
 }
 
 .quiz-group-page h2 {
     color: #333;
     margin-top: 0;
     margin-bottom: 20px;
+    text-align: center; /* 見出しを中央寄せ */
+    margin-bottom: 30px;
 }
 
 .quiz-group-page .form-group {
     margin-bottom: 15px;
+    margin-bottom: 20px; /* フォーム要素間の余白を調整 */
 }
 
 .quiz-group-page label {
@@ -609,6 +613,8 @@ body {
     margin-bottom: 5px;
     color: #555;
     font-weight: bold;
+    font-size: 16px; /* ラベルのフォントサイズを調整 */
+    margin-bottom: 8px;
 }
 
 .quiz-group-page select,
@@ -619,10 +625,16 @@ body {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
+    padding: 12px; /* 入力フィールドのパディングを調整 */
+    font-size: 16px; /* 入力フィールドのフォントサイズを調整 */
 }
 
 .quiz-group-page .button-group {
     margin-top: 20px;
+    display: flex;
+    justify-content: center; /* ボタンを中央寄せ */
+    gap: 15px; /* ボタン間の間隔 */
+    margin-top: 30px;
 }
 
 .quiz-group-page .button-group button {
@@ -634,6 +646,8 @@ body {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    padding: 12px 25px; /* ボタンのパディングを調整 */
+    font-size: 16px; /* ボタンのフォントサイズを調整 */
 }
 
 .quiz-group-page .button-group button:hover {
@@ -1309,3 +1323,39 @@ body {
 
 
 
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff; /* ヘッダーの背景色 */
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 600px; /* コンテナの幅に合わせる */
+    margin: 0 auto; /* ヘッダーを中央寄せ */
+    margin-bottom: 20px; /* コンテナとの間隔 */
+    box-sizing: border-box; /* paddingとborderをwidthに含める */
+}
+
+.header h1 {
+    margin: 0;
+    color: #333; /* ロゴの文字色 */
+    font-size: 24px; /* ロゴの文字サイズ */
+}
+
+.header .user-info {
+    font-size: 16px;
+    color: #555; /* ユーザー情報の文字色 */
+}
+
+.header .user-info a {
+    margin-left: 15px;
+    color: #007bff; /* リンクの色 */
+    text-decoration: none;
+}
+
+.header .user-info a:hover {
+    text-decoration: underline; /* ホバー時の下線 */
+}

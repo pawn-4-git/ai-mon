@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Header from '@/components/Header';
 
 // Mock data for quizzes
 const mockQuizzes = [
@@ -47,13 +48,7 @@ export default function CreateQuizPage() {
 
     return (
         <div className="create-quiz-page">
-            <div className="header">
-                <h1>あいもん</h1>
-                <div className="user-info">
-                    <Link href="/score-history">ようこそ、ユーザー名さん！</Link>
-                    <Link href="/">ログアウト</Link>
-                </div>
-            </div>
+            <Header />
 
             <div className="container">
                 <h2>新しい問題を作成</h2>
@@ -118,7 +113,7 @@ export default function CreateQuizPage() {
                     
                     {showGeneratedQuiz && (
                         <div className="generated-quiz" style={{ marginTop: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                            <h3>生成された問題（確認・修正）:</h3>
+                            <h3>生成された問��（確認・修正）:</h3>
                             <div className="form-group">
                                 <label>問題文:</label>
                                 <textarea id="generated-question-text" defaultValue="（自動生成された問題文）"></textarea>
@@ -130,7 +125,7 @@ export default function CreateQuizPage() {
                             <button onClick={() => {setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）');}}>ダミー選択肢を10個生成</button>
                             {showAutoDummyChoices && (
                                 <div className="dummy-choices-auto">
-                                    <h3>生成されたダミー選択肢 (3つ選択):</h3>
+                                    <h3>生成されたダ���ー選択肢 (3つ選択):</h3>
                                     <ul>
                                         {Array.from({ length: 10 }, (_, i) => (
                                             <li key={i}><label><input type="checkbox" name="dummy-choice-auto" /> ダミー選択肢{String.fromCharCode(65 + i)}</label></li>
@@ -186,7 +181,7 @@ export default function CreateQuizPage() {
 
                 <div className="product-links-section" style={{ marginTop: '30px' }}>
                     <h3>関連商品リンク (最大10個)</h3>
-                    <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してく���さい。</p>
+                    <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
                     <div id="product-links-container">
                         {productLinks.map((link, index) => (
                             <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
