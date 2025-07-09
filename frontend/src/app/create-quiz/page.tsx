@@ -109,11 +109,11 @@ export default function CreateQuizPage() {
                         <label htmlFor="source-text">問題生成元となる文章:</label>
                         <textarea id="source-text" placeholder="問題を作成したい文章を入力してください"></textarea>
                     </div>
-                    <button onClick={() => {setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）');}}>文章から問題を自��生成</button>
+                    <button onClick={() => {setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）');}}>文章から問題を自動生成</button>
                     
                     {showGeneratedQuiz && (
                         <div className="generated-quiz" style={{ marginTop: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                            <h3>生成された問��（確認・修正）:</h3>
+                            <h3>生成された問題（確認・修正）:</h3>
                             <div className="form-group">
                                 <label>問題文:</label>
                                 <textarea id="generated-question-text" defaultValue="（自動生成された問題文）"></textarea>
