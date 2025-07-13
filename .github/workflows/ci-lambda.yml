@@ -42,7 +42,9 @@ jobs:
         working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
 
       - name: Install SharedLogicLayer Dependencies
-        run: npm install
+        run: |
+         npm install
+         sam build
         working-directory: ./backend/src/nodejs/node_modules/
 
       - name: cd
