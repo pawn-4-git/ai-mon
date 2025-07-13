@@ -19,7 +19,7 @@ jobs:
           ls -la
 
       - name: Change directory to backend/src/lambda
-        run: cd ai-mon/backend/src/lambda
+        run: cd ./backend/src/lambda
 
       - name: Checkout code
         uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
