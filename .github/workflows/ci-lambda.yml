@@ -34,30 +34,15 @@ jobs:
         run: npm install # Lambda関数の依存関係をインストール
         working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
 
-      # 必要に応じてビルドステップを追加
-      # - name: Build Lambda Function
-      #   run: npm run build # 例: TypeScriptのビルドなど
-      #   working-directory: ./backend/src/lambda/usersRegister
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v4 # AWS認証情報を設定
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-1 # デプロイ先のリージョンを指定
-
-      - name: Deploy Lambda with AWS CDK
+      - name: cd
         run: |
-          npm install -g aws-cdk # AWS CDKをグローバルにインストール
-          cdk bootstrap # CDKのブートストラップ (初回のみ必要)
-          cdk deploy --require-approval never # Lambda関数をデプロイ (承認を自動化)
-        working-directory: ./backend/src/lambda # CDKスタックがあるディレクトリを指定 (例として)
-        env:
-          # CDKスタックで必要な環境変数を設定
-          # 例: USERS_TABLE_NAME など
-          USERS_TABLE_NAME: UsersTable # ここは実際のテーブル名や環境変数に合わせてください
-          SESSIONS_TABLE_NAME: SessionsTable
-          SCORES_TABLE_NAME: ScoresTable
-          RESOURCES_TABLE_NAME: ResourcesTable
-          QUIZ_GROUPS_TABLE_NAME: QuizGroupsTable
-          QUESTIONS_TABLE_NAME: QuestionsTable
+          cd ./backend/src/lambda/
+          ls -alrt
+          npm install @aws-sdk/client-dynamodb
+          npm install @aws-sdk/lib-dynamodb
+      - name: ls
+        run: ls -alrt
+      - name: build
+        run: sam build -t ./backend/src/lambda/template.yaml
+      - name: deploy
+        run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml
