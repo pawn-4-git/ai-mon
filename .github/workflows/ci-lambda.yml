@@ -41,6 +41,10 @@ jobs:
         run: npm install # Lambda関数の依存関係をインストール
         working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
 
+      - name: Install SharedLogicLayer Dependencies
+        run: npm install
+        working-directory: ./backend/src/common/nodejs
+
       - name: cd
         run: |
           cd ./backend/src/lambda/
