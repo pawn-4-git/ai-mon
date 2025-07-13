@@ -13,6 +13,11 @@ jobs:
     runs-on: ubuntu-latest # ジョブを実行するランナーを指定
 
     steps:
+      - name: Print current directory and list files
+        run: |
+          pwd
+          ls -la
+
       - name: Change directory to backend/src/lambda
         run: cd ai-mon/backend/src/lambda
 
