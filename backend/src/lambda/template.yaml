@@ -17,7 +17,7 @@ Resources:
   SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      ContentUri: /home/runner/work/ai-mon/ai-mon/backend/src/common/ # ここで共通ロジックのルートディレクトリを指定
+      ContentUri: ../common/
       CompatibleRuntimes:
         - nodejs22.x # 使用するLambdaのランタイムに合わせて指定 (例: nodejs18.x, nodejs20.x など)
       Description: My shared utility functions.
@@ -25,6 +25,8 @@ Resources:
   UsersRegisterFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      Layers:
+        - !Ref SharedLogicLayer
       CodeUri: usersRegister/
       Handler: app.lambdaHandler
       Runtime: nodejs22.x
