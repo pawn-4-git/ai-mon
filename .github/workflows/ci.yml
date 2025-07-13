@@ -6,11 +6,14 @@ on:
       - main
 
 jobs:
-  backend-ci:
+  deploy-dynamodb-tables:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend/iac/dynamodb/UsersTable
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        table: [UsersTable, QuizGroupsTable, QuestionsTable, ScoresTable, ResourcesTable, SessionsTable]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js
@@ -23,17 +26,12 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-1 # 必要に応じてリージョンを変更してください
+          aws-region: ap-northeast-1
 
-      - name: Install Dependencies
-        run: npm ci
-      - name: Build
-        run: npm run build
-      - name: Test
-        run: npm run test
-      - name: CDK Synth
-        run: npm run cdk -- synth
-      - name: CDK Deploy
-        run: npm run cdk -- deploy --require-approval never
-
-  
+      - name: Install, Build, Test, and Deploy ${{ matrix.table }}
+        working-directory: ./backend/iac/dynamodb/${{ matrix.table }}
+        run: |
+          npm ci
+          npm run build
+          npm run test
+          npm run cdk -- deploy --require-approval never
