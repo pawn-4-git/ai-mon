@@ -13,7 +13,7 @@ export class UsersTableStack extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.DESTROY, // DEV -> DESTROY, PROD -> RETAIN
+      removalPolicy: cdk.RemovalPolicy.RETAIN, // DEV -> DESTROY, PROD -> RETAIN
       timeToLiveAttribute: 'ExpiresAt',
     });
 
