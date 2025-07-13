@@ -52,4 +52,4 @@ jobs:
       - name: build
         run: sam build -t ./backend/src/lambda/template.yaml
       - name: deploy
-        run: sam deploy --region ap-northeast-1 --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml
+        run: sam deploy --region ap-northeast-1 --stack-name aimon --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml
