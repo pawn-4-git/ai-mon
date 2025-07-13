@@ -19,7 +19,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # Node.js環境をセットアップ
         with:
-          node-version: '24' # 使用するNode.jsのバージョンを指定
+          node-version: '22' # 使用するNode.jsのバージョンを指定
           cache: 'npm' # npmのキャッシュを有効にする
 
       - name: Install Dependencies
