@@ -13,6 +13,10 @@ jobs:
     runs-on: ubuntu-latest # ジョブを実行するランナーを指定
 
     steps:
+      
+      - name: Checkout code
+        uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
+
       - name: Print current directory and list files
         run: |
           pwd
@@ -20,9 +24,6 @@ jobs:
 
       - name: Change directory to backend/src/lambda
         run: cd ./backend/src/lambda
-
-      - name: Checkout code
-        uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
 
       - name: Setup Node.js
         uses: actions/setup-node@v4 # Node.js環境をセットアップ
