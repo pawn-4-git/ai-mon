@@ -28,8 +28,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4 # Node.js環境をセットアップ
         with:
-          node-version: '22' # 使用するNode.jsのバージョンを指定
-          cache: 'npm' # npmのキャッシュを有効にする
+          node-version: '22.x'
 
       - name: Install Dependencies
         run: npm install # Lambda関数の依存関係をインストール
