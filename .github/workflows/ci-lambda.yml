@@ -1,0 +1,55 @@
+# Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main # mainブランチへのプッシュをトリガーとする
+  pull_request:
+    branches: 
+      - main # mainブランチへのプルリクエストもトリガーとする
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest # ジョブを実行するランナーを指定
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # Node.js環境をセットアップ
+        with:
+          node-version: '24' # 使用するNode.jsのバージョンを指定
+          cache: 'npm' # npmのキャッシュを有効にする
+
+      - name: Install Dependencies
+        run: npm install # Lambda関数の依存関係をインストール
+        working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
+
+      # 必要に応じてビルドステップを追加
+      # - name: Build Lambda Function
+      #   run: npm run build # 例: TypeScriptのビルドなど
+      #   working-directory: ./backend/src/lambda/usersRegister
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4 # AWS認証情報を設定
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1 # デプロイ先のリージョンを指定
+
+      - name: Deploy Lambda with AWS CDK
+        run: |
+          npm install -g aws-cdk # AWS CDKをグローバルにインストール
+          cdk bootstrap # CDKのブートストラップ (初回のみ必要)
+          cdk deploy --require-approval never # Lambda関数をデプロイ (承認を自動化)
+        working-directory: ./backend/src/lambda # CDKスタックがあるディレクトリを指定 (例として)
+        env:
+          # CDKスタックで必要な環境変数を設定
+          # 例: USERS_TABLE_NAME など
+          USERS_TABLE_NAME: UsersTable # ここは実際のテーブル名や環境変数に合わせてください
+          SESSIONS_TABLE_NAME: SessionsTable
+          SCORES_TABLE_NAME: ScoresTable
+          RESOURCES_TABLE_NAME: ResourcesTable
+          QUIZ_GROUPS_TABLE_NAME: QuizGroupsTable
+          QUESTIONS_TABLE_NAME: QuestionsTable
