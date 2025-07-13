@@ -14,7 +14,6 @@
 // common/userHelper.js をインポート
 import { updateUserTtl } from '/opt/nodejs/node_modules/userHelper.js';
 
-
 export const lambdaHandler = async (event, context) => {
   // ユーザー登録処理など（ここでは仮の実装）
   const userId = event.body ? JSON.parse(event.body).accountName : 'defaultUser'; // 例としてaccountNameをuserIdとする

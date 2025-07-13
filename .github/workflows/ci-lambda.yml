@@ -44,7 +44,7 @@ jobs:
       - name: Install SharedLogicLayer Dependencies
         run: |
          npm install
-        working-directory: ./backend/src/nodejs/node_modules/
+        working-directory: ./backend/src/nodejs/
 
       - name: cd
         run: |
