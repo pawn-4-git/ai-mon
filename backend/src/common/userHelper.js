@@ -38,7 +38,7 @@ export const updateUserTtl = async (userId) => { // ttlTimestamp パラメータ
 
   try {
     const response = await docClient.send(command);
-    console.log(`User TTL updated successfully for userId: ${userId} to ${ttlTimestamp}`, response);
+    console.log(`User TTL updated successfully for userId: ${userId} to ${ttlTimestamp}`);
   } catch (error) {
     console.error(`Error updating user TTL for userId: ${userId}`, error);
     throw error;

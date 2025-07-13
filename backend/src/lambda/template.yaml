@@ -29,7 +29,7 @@ Resources:
           QUIZ_GROUPS_TABLE_NAME: QuizGroupsTable
           QUESTIONS_TABLE_NAME: QuestionsTable
       Events:
-        HelloWorld:
+        UsersRegisterEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /users/register
