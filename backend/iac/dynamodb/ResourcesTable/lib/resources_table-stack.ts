@@ -2,25 +2,24 @@ import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 
-export class UsersTableStack extends cdk.Stack {
+export class ResourcesTableStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const table = new dynamodb.Table(this, 'UsersTable', {
-      tableName: 'UsersTable',
+    const table = new dynamodb.Table(this, 'ResourcesTable', {
+      tableName: 'ResourcesTable',
       partitionKey: {
-        name: 'UserId',
+        name: 'ResourceId',
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-      removalPolicy: cdk.RemovalPolicy.RETAIN, // DEV -> DESTROY, PROD -> RETAIN
-      timeToLiveAttribute: 'ExpiresAt',
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
     table.addGlobalSecondaryIndex({
-      indexName: 'AccountNameIndex',
+      indexName: 'GroupIdIndex',
       partitionKey: {
-        name: 'AccountName',
+        name: 'GroupId',
         type: dynamodb.AttributeType.STRING,
       },
     });
