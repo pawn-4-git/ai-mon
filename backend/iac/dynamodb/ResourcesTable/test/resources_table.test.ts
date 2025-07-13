@@ -1,17 +1,35 @@
-// import * as cdk from 'aws-cdk-lib';
-// import { Template } from 'aws-cdk-lib/assertions';
-// import * as ResourcesTable from '../lib/resources_table-stack';
+import * as cdk from 'aws-cdk-lib';
+import { Template } from 'aws-cdk-lib/assertions';
+import * as ResourcesTable from '../lib/resources_table-stack';
 
-// example test. To run these tests, uncomment this file along with the
-// example resource in lib/resources_table-stack.ts
-test('SQS Queue Created', () => {
-//   const app = new cdk.App();
-//     // WHEN
-//   const stack = new ResourcesTable.ResourcesTableStack(app, 'MyTestStack');
-//     // THEN
-//   const template = Template.fromStack(stack);
+test('ResourcesTable Created with correct properties', () => {
+  const app = new cdk.App();
+  // WHEN
+  const stack = new ResourcesTable.ResourcesTableStack(app, 'MyTestStack');
+  // THEN
+  const template = Template.fromStack(stack);
 
-//   template.hasResourceProperties('AWS::SQS::Queue', {
-//     VisibilityTimeout: 300
-//   });
+  template.hasResourceProperties('AWS::DynamoDB::Table', {
+    TableName: 'ResourcesTable',
+    KeySchema: [
+      { AttributeName: 'ResourceId', KeyType: 'HASH' }
+    ],
+    GlobalSecondaryIndexes: [
+      {
+        IndexName: 'GroupIdIndex',
+        KeySchema: [
+          { AttributeName: 'GroupId', KeyType: 'HASH' }
+        ],
+        Projection: {
+          ProjectionType: 'ALL'
+        }
+      }
+    ],
+    BillingMode: 'PAY_PER_REQUEST'
+  });
+
+  template.hasResource('AWS::DynamoDB::Table', {
+    UpdateReplacePolicy: 'Retain',
+    DeletionPolicy: 'Retain',
+  });
 });
