@@ -17,7 +17,7 @@ Resources:
   SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      ContentUri: ../nodejs/node_modules/
+      ContentUri: ../nodejs/
       CompatibleRuntimes:
         - nodejs22.x # 使用するLambdaのランタイムに合わせて指定 (例: nodejs18.x, nodejs20.x など)
       Description: My shared utility functions.

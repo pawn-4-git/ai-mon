@@ -42,12 +42,8 @@ jobs:
         working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
 
       - name: Install SharedLogicLayer Dependencies
-        run: |
-         cd ./backend/src/nodejs/node_modules/
-         npm install
-         cd ../
-         cp -p userHelper.js ./node_modules/userHelper.js
-        # working-directory: ./backend/src/nodejs/node_modules/
+        run: npm install
+        working-directory: ./backend/src/nodejs
 
       - name: cd
         run: |
