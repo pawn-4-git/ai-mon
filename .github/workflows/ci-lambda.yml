@@ -47,7 +47,7 @@ jobs:
          npm install
          cd ../
          cp -p userHelper.js ./node_modules/userHelper.js
-        working-directory: ./backend/src/nodejs/node_modules/
+        # working-directory: ./backend/src/nodejs/node_modules/
 
       - name: cd
         run: |
