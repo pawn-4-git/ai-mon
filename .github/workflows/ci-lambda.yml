@@ -43,8 +43,10 @@ jobs:
 
       - name: Install SharedLogicLayer Dependencies
         run: |
+         cd ./backend/src/nodejs/
          npm install
-        working-directory: ./backend/src/nodejs/
+         cp -p userHelper.js ./node_modules/userHelper.js
+        working-directory: ./backend/src/nodejs/node_modules/
 
       - name: cd
         run: |
