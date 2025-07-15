@@ -1,0 +1,59 @@
+# Deploy Lambda Function
+
+on:
+  push:
+    branches:
+      - main # mainブランチへのプッシュをトリガーとする
+  pull_request:
+    branches: 
+      - main # mainブランチへのプルリクエストもトリガーとする
+
+jobs:
+  deploy-lambda:
+    runs-on: ubuntu-latest # ジョブを実行するランナーを指定
+
+    steps:
+      
+      - name: Checkout code
+        uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-1
+
+      - name: Print current directory and list files
+        run: |
+          pwd
+          ls -la
+
+      - name: Change directory to backend/src/lambda
+        run: cd ./backend/src/lambda
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # Node.js環境をセットアップ
+        with:
+          node-version: '22.x'
+
+      - name: Install Dependencies
+        run: npm install # Lambda関数の依存関係をインストール
+        working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
+
+      - name: Install SharedLogicLayer Dependencies
+        run: npm install
+        working-directory: ./backend/src/nodejs
+
+      - name: cd
+        run: |
+          cd ./backend/src/lambda/
+          ls -alrt
+          npm install @aws-sdk/client-dynamodb
+          npm install @aws-sdk/lib-dynamodb
+      - name: ls
+        run: ls -alrt
+      - name: build
+        run: sam build -t ./backend/src/lambda/template.yaml
+      - name: deploy
+        run: sam deploy --region ap-northeast-1 --stack-name aimon --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml

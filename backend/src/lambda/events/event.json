@@ -1,0 +1,13 @@
+{
+  "body": "{\"accountName\": \"test-user\"}",
+  "httpMethod": "POST",
+  "path": "/users/register",
+  "requestContext": {
+    "httpMethod": "POST",
+    "path": "/users/register"
+  },
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "isBase64Encoded": false
+}
