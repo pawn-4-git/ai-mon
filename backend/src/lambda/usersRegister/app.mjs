@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 
 const client = new DynamoDBClient({});
@@ -18,6 +18,12 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
+        if (!event.body) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "Request body is missing." }),
+            };
+        }
         const body = JSON.parse(event.body);
         const accountName = body.accountName;
 
@@ -42,7 +48,6 @@ export const lambdaHandler = async (event) => {
         sessionTtlDate.setDate(sessionTtlDate.getDate() + 1);
         const sessionTtlTimestamp = Math.floor(sessionTtlDate.getTime() / 1000);
 
-        // ユーザー情報を登録
         const userItem = {
             userId: userId,
             accountName: accountName,
@@ -51,22 +56,30 @@ export const lambdaHandler = async (event) => {
             ExpiresAt: userTtlTimestamp,
         };
 
-        await docClient.send(new PutCommand({
-            TableName: USERS_TABLE_NAME,
-            Item: userItem,
-        }));
-
-        // セッション情報を登録
         const sessionItem = {
             sessionId: sessionId,
             userId: userId,
             ExpiresAt: sessionTtlTimestamp,
         };
 
-        await docClient.send(new PutCommand({
-            TableName: SESSIONS_TABLE_NAME,
-            Item: sessionItem,
-        }));
+        const transactCommand = new TransactWriteCommand({
+            TransactItems: [
+                {
+                    Put: {
+                        TableName: USERS_TABLE_NAME,
+                        Item: userItem,
+                    },
+                },
+                {
+                    Put: {
+                        TableName: SESSIONS_TABLE_NAME,
+                        Item: sessionItem,
+                    },
+                },
+            ],
+        });
+
+        await docClient.send(transactCommand);
 
         return {
             statusCode: 201,
@@ -80,7 +93,7 @@ export const lambdaHandler = async (event) => {
         console.error("Error processing request:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Internal server error", error: error.message }),
+            body: JSON.stringify({ message: "Internal server error" }),
         };
     }
 };
