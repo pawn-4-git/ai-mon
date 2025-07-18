@@ -5,9 +5,6 @@ on:
   push:
     branches:
       - main # mainブランチへのプッシュをトリガーとする
-  pull_request:
-    branches: 
-      - main # mainブランチへのプルリクエストもトリガーとする
 
 jobs:
   deploy-lambda:
