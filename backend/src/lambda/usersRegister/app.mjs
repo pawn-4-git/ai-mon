@@ -19,9 +19,9 @@ export const lambdaHandler = async (event) => {
 
     try {
         const body = JSON.parse(event.body);
-        const userId = body.accountName;
+        const accountName = body.accountName;
 
-        if (!userId) {
+        if (!accountName) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: "accountName is required." }),
@@ -29,18 +29,26 @@ export const lambdaHandler = async (event) => {
         }
 
         const now = new Date();
+        const userId = randomUUID();
         const sessionId = randomUUID();
         
-        // TTLを1ヶ月後に設定 (秒単位のUNIXタイムスタンプ)
-        const ttl = new Date(now.setMonth(now.getMonth() + 1));
-        const ttlTimestamp = Math.floor(ttl.getTime() / 1000);
+        // User TTLを1ヶ月後に設定 (秒単位のUNIXタイムスタンプ)
+        const userTtlDate = new Date(now);
+        userTtlDate.setMonth(userTtlDate.getMonth() + 1);
+        const userTtlTimestamp = Math.floor(userTtlDate.getTime() / 1000);
+
+        // Session TTLを1日後に設定 (秒単位のUNIXタイムスタンプ)
+        const sessionTtlDate = new Date(now);
+        sessionTtlDate.setDate(sessionTtlDate.getDate() + 1);
+        const sessionTtlTimestamp = Math.floor(sessionTtlDate.getTime() / 1000);
 
         // ユーザー情報を登録
         const userItem = {
             userId: userId,
-            CreatedAt: new Date().toISOString(),
-            LastLoginAt: new Date().toISOString(),
-            ExpiresAt: ttlTimestamp,
+            accountName: accountName,
+            CreatedAt: now.toISOString(),
+            LastLoginAt: now.toISOString(),
+            ExpiresAt: userTtlTimestamp,
         };
 
         await docClient.send(new PutCommand({
@@ -52,7 +60,7 @@ export const lambdaHandler = async (event) => {
         const sessionItem = {
             sessionId: sessionId,
             userId: userId,
-            ExpiresAt: ttlTimestamp,
+            ExpiresAt: sessionTtlTimestamp,
         };
 
         await docClient.send(new PutCommand({
@@ -64,6 +72,7 @@ export const lambdaHandler = async (event) => {
             statusCode: 201,
             body: JSON.stringify({
                 message: "User registered and session created successfully.",
+                userId: userId,
                 sessionId: sessionId,
             }),
         };
