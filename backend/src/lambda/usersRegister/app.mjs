@@ -41,10 +41,18 @@ export const lambdaHandler = async (event) => {
 
         const accountName = body.AccountName;
 
-        if (!accountName) {
+        if (!accountName || !accountName.trim()) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "AccountName is required." }),
+                body: JSON.stringify({ message: "AccountName is required and cannot be empty." }),
+            };
+        }
+
+        const trimmedAccountName = accountName.trim();
+        if (trimmedAccountName.length < 3 || trimmedAccountName.length > 50) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "AccountName must be between 3 and 50 characters." }),
             };
         }
 
@@ -76,7 +84,7 @@ export const lambdaHandler = async (event) => {
 
         // AccountNameの一意性を保証するためのアイテム
         const accountNameUniqueItem = {
-            PK: `UNAME#${accountName}`,
+            UserId: `UNAME#${accountName}`,
             // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
             ExpiresAt: userTtlTimestamp, 
         };
@@ -88,7 +96,7 @@ export const lambdaHandler = async (event) => {
                     Put: {
                         TableName: USERS_TABLE_NAME,
                         Item: accountNameUniqueItem,
-                        ConditionExpression: "attribute_not_exists(PK)",
+                        ConditionExpression: "attribute_not_exists(UserId)",
                     },
                 },
                 {
@@ -121,8 +129,8 @@ export const lambdaHandler = async (event) => {
     } catch (error) {
         // トランザクションが条件チェックの失敗によってキャンセルされたかを確認
         if (error.name === 'TransactionCanceledException' && error.CancellationReasons) {
-            const isAccountNameTaken = error.CancellationReasons.some(reason => reason.Code === 'ConditionalCheckFailed');
-            if (isAccountNameTaken) {
+            // The first transaction item is the one that checks for AccountName uniqueness.
+            if (error.CancellationReasons[0]?.Code === 'ConditionalCheckFailed') {
                 return {
                     statusCode: 409, // Conflict
                     body: JSON.stringify({ message: "AccountName is already taken." }),
