@@ -19,23 +19,24 @@ export const updateUserTtl = async (userId) => { // ttlTimestamp パラメータ
         throw new Error("USERS_TABLE_NAME environment variable is not set.");
     }
 
-    // 現在時刻を取得し、1ヶ月後を計算
+    // 現在時刻を取得
     const now = new Date();
+    // 最終ログイン時刻をISO 8601形式で取得
+    const lastLoginAt = now.toISOString();
+
+    // 1ヶ月後のTTLを計算
     const oneMonthLater = new Date(now.setMonth(now.getMonth() + 1));
     const ttlTimestamp = Math.floor(oneMonthLater.getTime() / 1000); // 秒単位のUNIXタイムスタンプ
-
-    // 現在時刻をISO 8601形式で取得
-    const lastLoginAt = new Date().toISOString();
 
     const command = new UpdateCommand({
         TableName: USERS_TABLE_NAME,
         Key: {
             userId: userId, // プライマリキーに合わせて変更してください
         },
-        UpdateExpression: "SET ttl = :ttl, LastLoginAt = :lastLoginAt", // ttlとLastLoginAtを更新
+        UpdateExpression: "SET ExpiresAt = :expiresAt, LastLoginAt = :lastLoginAt", // ExpiresAtとLastLoginAtを更新
         ExpressionAttributeValues: {
-            ":ttl": ttlTimestamp,
-            ":lastLoginAt": lastLoginAt, // 最終ログイン時刻を設定
+            ":expiresAt": ttlTimestamp,
+            ":lastLoginAt": lastLoginAt, // 最終ログイ���時刻を設定
         },
         ReturnValues: "UPDATED_NEW", // 更新後の属性を返す
     });
