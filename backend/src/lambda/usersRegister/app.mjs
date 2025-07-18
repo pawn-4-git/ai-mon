@@ -1,42 +1,77 @@
-/**
- * 
- * Event doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html#api-gateway-simple-proxy-for-lambda-input-format
- * @param {Object} event - API Gateway Lambda Proxy Input Format
- * 
- * Context doc: https://docs.aws.amazon.com/lambda/latest/dg/nodejs-prog-model-context.html 
- * @param {Object} context
- *
- * Return doc: https://docs.aws.amazon.com/apigateway/latest/developerguide/set-up-lambda-proxy-integrations.html
- * @returns {Object} object - API Gateway Lambda Proxy Output Format
- * 
- */
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { randomUUID } from "crypto";
 
-// common/userHelper.js をインポート
-import { updateUserTtl } from '/opt/userHelper.js';
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
 
-export const lambdaHandler = async (event, context) => {
-  // ユーザー登録処理など（ここでは仮の実装）
-  const userId = event.body ? JSON.parse(event.body).accountName : 'defaultUser'; // 例としてaccountNameをuserIdとする
+const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
+const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
-  try {
-    // ユーザーのTTLを更新
-    await updateUserTtl(userId);
-    console.log(`TTL updated for user: ${userId}`);
-  } catch (error) {
-    console.error(`Failed to update TTL for user: ${userId}`, error);
-    // エラーハンドリング
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Failed to update user TTL', error: error.message }),
-    };
-  }
+export const lambdaHandler = async (event) => {
+    if (!USERS_TABLE_NAME || !SESSIONS_TABLE_NAME) {
+        console.error("Table name environment variables are not set.");
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Internal server error: Table configuration is missing." }),
+        };
+    }
 
-  const response = {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: 'usersRegister', // 先ほど置換したメッセージ
-    }),
-  };
+    try {
+        const body = JSON.parse(event.body);
+        const userId = body.accountName;
 
-  return response;
+        if (!userId) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "accountName is required." }),
+            };
+        }
+
+        const now = new Date();
+        const sessionId = randomUUID();
+        
+        // TTLを1ヶ月後に設定 (秒単位のUNIXタイムスタンプ)
+        const ttl = new Date(now.setMonth(now.getMonth() + 1));
+        const ttlTimestamp = Math.floor(ttl.getTime() / 1000);
+
+        // ユーザー情報を登録
+        const userItem = {
+            userId: userId,
+            CreatedAt: new Date().toISOString(),
+            LastLoginAt: new Date().toISOString(),
+            ExpiresAt: ttlTimestamp,
+        };
+
+        await docClient.send(new PutCommand({
+            TableName: USERS_TABLE_NAME,
+            Item: userItem,
+        }));
+
+        // セッション情報を登録
+        const sessionItem = {
+            sessionId: sessionId,
+            userId: userId,
+            ExpiresAt: ttlTimestamp,
+        };
+
+        await docClient.send(new PutCommand({
+            TableName: SESSIONS_TABLE_NAME,
+            Item: sessionItem,
+        }));
+
+        return {
+            statusCode: 201,
+            body: JSON.stringify({
+                message: "User registered and session created successfully.",
+                sessionId: sessionId,
+            }),
+        };
+    } catch (error) {
+        console.error("Error processing request:", error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Internal server error", error: error.message }),
+        };
+    }
 };
