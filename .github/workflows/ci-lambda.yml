@@ -1,12 +1,10 @@
 # Deploy Lambda Function
+name: Deploy Lambda Function
 
 on:
   push:
     branches:
       - main # mainブランチへのプッシュをトリガーとする
-  pull_request:
-    branches: 
-      - main # mainブランチへのプルリクエストもトリガーとする
 
 jobs:
   deploy-lambda:
