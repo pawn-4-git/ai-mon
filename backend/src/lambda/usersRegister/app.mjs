@@ -8,7 +8,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
-const USER_TTL_MONTHS = 1;
+const USER_TTL_DAYS = 30;
 const SESSION_TTL_DAYS = 1;
 
 export const lambdaHandler = async (event) => {
@@ -44,7 +44,7 @@ export const lambdaHandler = async (event) => {
         if (!accountName) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "accountName is required." }),
+                body: JSON.stringify({ message: "AccountName is required." }),
             };
         }
 
@@ -52,12 +52,10 @@ export const lambdaHandler = async (event) => {
         const userId = randomUUID();
         const sessionId = randomUUID();
         
-        // User TTLを1ヶ月後に設定 (秒単位のUNIXタイムスタンプ)
         const userTtlDate = new Date(now);
-        userTtlDate.setMonth(userTtlDate.getMonth() + USER_TTL_MONTHS);
+        userTtlDate.setDate(userTtlDate.getDate() + USER_TTL_DAYS);
         const userTtlTimestamp = Math.floor(userTtlDate.getTime() / 1000);
 
-        // Session TTLを1日後に設定 (秒単位のUNIXタイムスタンプ)
         const sessionTtlDate = new Date(now);
         sessionTtlDate.setDate(sessionTtlDate.getDate() + SESSION_TTL_DAYS);
         const sessionTtlTimestamp = Math.floor(sessionTtlDate.getTime() / 1000);
@@ -76,15 +74,32 @@ export const lambdaHandler = async (event) => {
             ExpiresAt: sessionTtlTimestamp,
         };
 
+        // AccountNameの一意性を保証するためのアイテム
+        const accountNameUniqueItem = {
+            PK: `UNAME#${accountName}`,
+            // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
+            ExpiresAt: userTtlTimestamp, 
+        };
+
         const transactCommand = new TransactWriteCommand({
             TransactItems: [
                 {
+                    // 1. AccountNameのユニーク制約をかける
+                    Put: {
+                        TableName: USERS_TABLE_NAME,
+                        Item: accountNameUniqueItem,
+                        ConditionExpression: "attribute_not_exists(PK)",
+                    },
+                },
+                {
+                    // 2. ユーザー情報を登録する
                     Put: {
                         TableName: USERS_TABLE_NAME,
                         Item: userItem,
                     },
                 },
                 {
+                    // 3. セッション情報を登録する
                     Put: {
                         TableName: SESSIONS_TABLE_NAME,
                         Item: sessionItem,
@@ -104,6 +119,17 @@ export const lambdaHandler = async (event) => {
             }),
         };
     } catch (error) {
+        // トランザクションが条件チェックの失敗によってキャンセルされたかを確認
+        if (error.name === 'TransactionCanceledException' && error.CancellationReasons) {
+            const isAccountNameTaken = error.CancellationReasons.some(reason => reason.Code === 'ConditionalCheckFailed');
+            if (isAccountNameTaken) {
+                return {
+                    statusCode: 409, // Conflict
+                    body: JSON.stringify({ message: "AccountName is already taken." }),
+                };
+            }
+        }
+        
         console.error("Error processing request:", error);
         return {
             statusCode: 500,
