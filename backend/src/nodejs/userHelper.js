@@ -1,4 +1,4 @@
-// backend/src/common/userHelper.js
+// backend/src/nodejs/userHelper.js
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
@@ -9,7 +9,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME; // 環境変数からテーブル名を取得
 
 /**
- * ユーザーの有効期限 (TTL) を更新する関数
+ * ユーザーの有効期限 (TTL) と最終ログイン時刻を更新する関数
  * 有効期限は現在時刻に1ヶ月後を設定します。
  * @param {string} userId - 更新対象のユーザーID
  * @returns {Promise<void>}
@@ -24,23 +24,27 @@ export const updateUserTtl = async (userId) => { // ttlTimestamp パラメータ
     const oneMonthLater = new Date(now.setMonth(now.getMonth() + 1));
     const ttlTimestamp = Math.floor(oneMonthLater.getTime() / 1000); // 秒単位のUNIXタイムスタンプ
 
+    // 現在時刻をISO 8601形式で取得
+    const lastLoginAt = new Date().toISOString();
+
     const command = new UpdateCommand({
         TableName: USERS_TABLE_NAME,
         Key: {
             userId: userId, // プライマリキーに合わせて変更してください
         },
-        UpdateExpression: "SET ttl = :ttl",
+        UpdateExpression: "SET ttl = :ttl, LastLoginAt = :lastLoginAt", // ttlとLastLoginAtを更新
         ExpressionAttributeValues: {
             ":ttl": ttlTimestamp,
+            ":lastLoginAt": lastLoginAt, // 最終ログイン時刻を設定
         },
         ReturnValues: "UPDATED_NEW", // 更新後の属性を返す
     });
 
     try {
         const response = await docClient.send(command);
-        console.log(`User TTL updated successfully for userId: ${userId} to ${ttlTimestamp}`);
+        console.log(`User TTL updated to ${ttlTimestamp} and LastLoginAt updated to ${lastLoginAt} for userId: ${userId}`, response);
     } catch (error) {
-        console.error(`Error updating user TTL for userId: ${userId}`, error);
+        console.error(`Error updating user TTL and LastLoginAt for userId: ${userId}`, error);
         throw error;
     }
 };
