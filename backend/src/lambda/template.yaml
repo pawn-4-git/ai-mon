@@ -30,6 +30,11 @@ Resources:
       CodeUri: usersRegister/
       Handler: app.lambdaHandler
       Runtime: nodejs22.x
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SessionsTable
       Environment:
         Variables:
           USERS_TABLE_NAME: UsersTable
