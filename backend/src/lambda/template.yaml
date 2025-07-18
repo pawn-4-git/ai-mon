@@ -17,21 +17,27 @@ Parameters:
   UsersTableName:
     Type: String
     Description: The name of the DynamoDB table for users.
+    Default: UsersTable
   SessionsTableName:
     Type: String
     Description: The name of the DynamoDB table for sessions.
+    Default: SessionsTable
   ScoresTableName:
     Type: String
     Description: The name of the DynamoDB table for scores.
+    Default: ScoresTable
   ResourcesTableName:
     Type: String
     Description: The name of the DynamoDB table for resources.
+    Default: ResourcesTable
   QuizGroupsTableName:
     Type: String
     Description: The name of the DynamoDB table for quiz groups.
+    Default: QuizGroupsTable
   QuestionsTableName:
     Type: String
     Description: The name of the DynamoDB table for questions.
+    Default: QuestionsTable
 
 Resources:
   SharedLogicLayer:
