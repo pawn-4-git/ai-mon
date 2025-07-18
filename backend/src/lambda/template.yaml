@@ -13,6 +13,26 @@ Globals:
     # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
     LoggingConfig:
       LogFormat: JSON
+Parameters:
+  UsersTableName:
+    Type: String
+    Description: The name of the DynamoDB table for users.
+  SessionsTableName:
+    Type: String
+    Description: The name of the DynamoDB table for sessions.
+  ScoresTableName:
+    Type: String
+    Description: The name of the DynamoDB table for scores.
+  ResourcesTableName:
+    Type: String
+    Description: The name of the DynamoDB table for resources.
+  QuizGroupsTableName:
+    Type: String
+    Description: The name of the DynamoDB table for quiz groups.
+  QuestionsTableName:
+    Type: String
+    Description: The name of the DynamoDB table for questions.
+
 Resources:
   SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
@@ -32,17 +52,17 @@ Resources:
       Runtime: nodejs22.x
       Policies:
         - DynamoDBWritePolicy:
-            TableName: !Ref UsersTable
+            TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
-            TableName: !Ref SessionsTable
+            TableName: !Ref SessionsTableName
       Environment:
         Variables:
-          USERS_TABLE_NAME: UsersTable
-          SESSIONS_TABLE_NAME: SessionsTable
-          SCORES_TABLE_NAME: ScoresTable
-          RESOURCES_TABLE_NAME: ResourcesTable
-          QUIZ_GROUPS_TABLE_NAME: QuizGroupsTable
-          QUESTIONS_TABLE_NAME: QuestionsTable
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersRegisterEvent:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
