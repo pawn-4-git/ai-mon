@@ -31,9 +31,9 @@ Resources:
       Handler: app.lambdaHandler
       Runtime: nodejs22.x
       Policies:
-        - DynamoDBCrudPolicy:
+        - DynamoDBWritePolicy:
             TableName: !Ref UsersTable
-        - DynamoDBCrudPolicy:
+        - DynamoDBWritePolicy:
             TableName: !Ref SessionsTable
       Environment:
         Variables:
