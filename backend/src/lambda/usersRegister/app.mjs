@@ -11,6 +11,21 @@ const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 const USER_TTL_DAYS = 30;
 const SESSION_TTL_DAYS = 1;
 
+const calculateTtl = (baseDate, days) => {
+    const ttlDate = new Date(baseDate);
+    ttlDate.setDate(ttlDate.getDate() + days);
+    return Math.floor(ttlDate.getTime() / 1000);
+};
+
+const generateRandomAccountName = (length) => {
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += charset.charAt(Math.floor(Math.random() * charset.length));
+    }
+    return result;
+};
+
 export const lambdaHandler = async (event) => {
     if (!USERS_TABLE_NAME || !SESSIONS_TABLE_NAME) {
         console.error("Table name environment variables are not set.");
@@ -39,38 +54,32 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const accountName = body.AccountName;
+        let finalAccountName;
+        const requestedAccountName = body.AccountName;
 
-        if (!accountName || !accountName.trim()) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "AccountName is required and cannot be empty." }),
-            };
-        }
-
-        const trimmedAccountName = accountName.trim();
-        if (trimmedAccountName.length < 3 || trimmedAccountName.length > 50) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "AccountName must be between 3 and 50 characters." }),
-            };
+        if (requestedAccountName && requestedAccountName.trim()) {
+            const trimmedAccountName = requestedAccountName.trim();
+            if (trimmedAccountName.length < 3 || trimmedAccountName.length > 50) {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ message: "AccountName must be between 3 and 50 characters." }),
+                };
+            }
+            finalAccountName = trimmedAccountName;
+        } else {
+            finalAccountName = generateRandomAccountName(15);
         }
 
         const now = new Date();
         const userId = randomUUID();
         const sessionId = randomUUID();
         
-        const userTtlDate = new Date(now);
-        userTtlDate.setDate(userTtlDate.getDate() + USER_TTL_DAYS);
-        const userTtlTimestamp = Math.floor(userTtlDate.getTime() / 1000);
-
-        const sessionTtlDate = new Date(now);
-        sessionTtlDate.setDate(sessionTtlDate.getDate() + SESSION_TTL_DAYS);
-        const sessionTtlTimestamp = Math.floor(sessionTtlDate.getTime() / 1000);
+        const userTtlTimestamp = calculateTtl(now, USER_TTL_DAYS);
+        const sessionTtlTimestamp = calculateTtl(now, SESSION_TTL_DAYS);
 
         const userItem = {
             UserId: userId,
-            AccountName: accountName,
+            AccountName: finalAccountName,
             CreatedAt: now.toISOString(),
             LastLoginAt: now.toISOString(),
             ExpiresAt: userTtlTimestamp,
@@ -82,9 +91,9 @@ export const lambdaHandler = async (event) => {
             ExpiresAt: sessionTtlTimestamp,
         };
 
-        // AccountNameの一意性を保証するためのアイテム
+        // AccountNameの一意性を保証��るためのアイテム
         const accountNameUniqueItem = {
-            UserId: `UNAME#${accountName}`,
+            UserId: `UNAME#${finalAccountName}`,
             // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
             ExpiresAt: userTtlTimestamp, 
         };
