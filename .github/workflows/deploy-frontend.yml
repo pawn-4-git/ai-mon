@@ -1,84 +1,47 @@
-name: Deploy Next.js site to Pages
+# .github/workflows/deploy.yml
+name: Deploy Next.js App to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches:
+      - main # mainブランチへのプッシュでこのワークフローが実行されます
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest # ビルド環境としてUbuntuを使用
+    permissions:
+      contents: write # リポジトリへの書き込み権限
+      pages: write # GitHub Pagesへのデプロイ権限
+      id-token: write # OpenID Connect (OIDC) トークンを要求する権限
+
+    env:
+      # GitHub Pagesのベースパスを設定
+      # 例: リポジトリ名が "my-nextjs-repo" なら "/my-nextjs-repo" となる
+      NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Detect package manager
-        id: detect-package-manager
-        working-directory: ./frontend 
-        run: |
-          if [ -f "${{ github.workspace }}/frontend/yarn.lock" ]; then
-            echo "manager=yarn" >> $GITHUB_OUTPUT
-            echo "command=install" >> $GITHUB_OUTPUT
-            echo "runner=yarn" >> $GITHUB_OUTPUT
-            exit 0
-          elif [ -f "${{ github.workspace }}/frontend/package.json" ]; then
-            echo "manager=npm" >> $GITHUB_OUTPUT
-            echo "command=ci" >> $GITHUB_OUTPUT
-            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
-            exit 0
-          else
-            echo "Unable to determine package manager"
-            exit 1
-          fi
-      - name: Setup Node 
-        uses: actions/setup-node@v4
-        working-directory: ./frontend
+      - name: Checkout repository
+        uses: actions/checkout@v4 # リポジトリのコードをチェックアウト
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4 # Node.js環境をセットアップ
         with:
-          node-version: "20"
-          cache: ${{ steps.detect-package-manager.outputs.manager }}
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        working-directory: ./frontend
-        with:
-          static_site_generator: next
-      - name: Restore cache
-        uses: actions/cache@v4
-        working-directory: ./frontend
-        with:
-          path: |
-            .next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+          node-version: '20' # 使用するNode.jsのバージョンを指定（あなたのアプリに合わせて変更）
+
       - name: Install dependencies
-        working-directory: ./frontend  
-        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
-      - name: Build with Next.js
-        working-directory: ./frontend 
-        run: ${{ steps.detect-package-manager.outputs.runner }} next build
-      - name: Export Next.js site
-        working-directory: ./frontend 
-        run: ${{ steps.detect-package-manager.outputs.runner }} next export
-      - name: Upload artifact for GitHub Pages
+        run: npm install
+        working-directory: ./frontend # ★ Next.jsアプリのディレクトリを指定
+
+      - name: Build Next.js project
+        run: npm run build
+        working-directory: ./frontend # ★ Next.jsアプリのディレクトリを指定
+
+      - name: Upload artifact
+        # Next.jsの静的エクスポートの出力は通常 'out' ディレクトリ
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: './frontend/out' # ★ ビルド結果の 'out' ディレクトリを指定
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v4 # GitHub Pagesへのデプロイアクション
