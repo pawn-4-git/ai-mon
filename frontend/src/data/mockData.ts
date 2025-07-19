@@ -54,12 +54,18 @@ export const mockQuestions: Question[] = [
   }
 ];
 
+// Updated mockQuiz to include properties required by the Quiz interface
 export const mockQuiz: Quiz = {
   id: '1',
   groupId: '1',
   questions: mockQuestions,
   timeLimit: 15,
-  createdAt: new Date()
+  createdAt: new Date(),
+  // Added missing properties:
+  question: '日本の首都はどこですか？',
+  correct: '東京',
+  explanation: '日本の首都は東京です。1868年に江戸から東京に改名されました。',
+  dummies: ['大阪', '京都', '札幌']
 };
 
 export const mockScoreRecords: ScoreRecord[] = [

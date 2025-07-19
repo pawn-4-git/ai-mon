@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Header from '@/components/Header';
+import Image from 'next/image';
 
 const quizResults = [
   {
@@ -45,7 +45,7 @@ const allReferenceBooks = [
     { imgSrc: "https://via.placeholder.com/150x200?text=Programming+Book+1", title: "プログラミング基礎", link: "https://example.com/programming-book-1" }
 ];
 
-const getRandomBooks = (arr, num) => {
+const getRandomBooks = (arr: { imgSrc: string; title: string; link: string }[], num: number) => {
     const shuffled = [...arr].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, num);
 };
@@ -53,7 +53,7 @@ const getRandomBooks = (arr, num) => {
 
 export default function QuizResultPage() {
   const router = useRouter();
-  const [recommendedBooks, setRecommendedBooks] = useState([]);
+  const [recommendedBooks, setRecommendedBooks] = useState<{ imgSrc: string; title: string; link: string }[]>([]);
 
   useEffect(() => {
     setRecommendedBooks(getRandomBooks(allReferenceBooks, 3));
@@ -95,7 +95,7 @@ export default function QuizResultPage() {
                 {recommendedBooks.map((book, index) => (
                     <li key={index}>
                         <a href={book.link} target="_blank" rel="noopener noreferrer">
-                            <img src={book.imgSrc} alt={book.title} />
+                            <Image src={book.imgSrc} alt={book.title} width={150} height={200} />
                             {book.title}
                         </a>
                     </li>

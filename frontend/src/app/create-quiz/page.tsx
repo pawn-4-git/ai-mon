@@ -1,49 +1,48 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
+import { Quiz } from '@/types/index'; // Import the Quiz type
 
-// Mock data for quizzes
-const mockQuizzes = [
-    { id: 1, question: '日本の首都はどこですか？', correct: '東京', explanation: '東京は日本の政治、経済、文化の中心です。', dummies: ['大阪', '京都', '札幌'] },
-    { id: 2, question: '世界で一番高い山は何ですか？', correct: 'エベレスト', explanation: 'エベレストはヒマラヤ山脈に位置し、標高8,848.86メートルです。', dummies: ['K2', '富士山', 'キリマンジャロ'] },
-    { id: 3, question: '光の速さは約何km/sですか？', correct: '30万km/s', explanation: '光速は真空中で約299,792.458 km/sです。', dummies: ['3万km/s', '300万km/s', '3千km/s'] }
-];
+// Removed unused mockQuizzes array from this file.
+// The mockQuiz constant in data/mockData.ts is now the source of truth.
 
 export default function CreateQuizPage() {
     const router = useRouter();
     const [creationMethod, setCreationMethod] = useState('manual');
     const [showDummyChoices, setShowDummyChoices] = useState(false);
-    const [showAutoDummyChoices, setAutoShowDummyChoices] = useState(false);
+    const [showAutoDummyChoices, setAutoShowDummyChoices] = useState<boolean>(false);
     const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [quizzes, setQuizzes] = useState(mockQuizzes);
-    const [selectedQuiz, setSelectedQuiz] = useState(null);
+
+    const [quizzes] = useState<Quiz[]>([]);
+    // Updated selectedQuiz state to use the Quiz type directly and match the id type (string)
+    const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productLinks, setProductLinks] = useState([{}]);
 
-    const handleCreationMethodChange = (e) => {
+    const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
     };
 
-    const addProductLinkField = () => {
+    const addProductLinkField = useCallback(() => {
         if (productLinks.length < 10) {
             setProductLinks([...productLinks, {}]);
         } else {
             alert('追加できる商品リンクは最大10個までです。');
         }
-    };
+    }, [productLinks]);
 
-    const removeProductLinkField = (index) => {
+    const removeProductLinkField = (index: number) => {
         const newProductLinks = productLinks.filter((_, i) => i !== index);
         setProductLinks(newProductLinks);
     };
-    
+
     useEffect(() => {
         // Add one product link field by default
         addProductLinkField();
-    }, []);
+    }, [addProductLinkField]);
 
 
     return (
@@ -84,7 +83,7 @@ export default function CreateQuizPage() {
                         <label htmlFor="correct-choice">正解の選択肢:</label>
                         <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" />
                     </div>
-                    <button onClick={() => {setShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）');}}>ダミー選択肢を10個生成</button>
+                    <button onClick={() => { setShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個生成</button>
 
                     {showDummyChoices && (
                         <div className="dummy-choices">
@@ -109,8 +108,8 @@ export default function CreateQuizPage() {
                         <label htmlFor="source-text">問題生成元となる文章:</label>
                         <textarea id="source-text" placeholder="問題を作成したい文章を入力してください"></textarea>
                     </div>
-                    <button onClick={() => {setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）');}}>文章から問題を自動生成</button>
-                    
+                    <button onClick={() => { setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）'); }}>文章から問題を自動生成</button>
+
                     {showGeneratedQuiz && (
                         <div className="generated-quiz" style={{ marginTop: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
                             <h3>生成された問題（確認・修正）:</h3>
@@ -122,10 +121,10 @@ export default function CreateQuizPage() {
                                 <label>正解の選択肢:</label>
                                 <input type="text" id="generated-correct-choice" defaultValue="（自動生成された正解）" />
                             </div>
-                            <button onClick={() => {setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）');}}>ダミー選択肢を10個生成</button>
+                            <button onClick={() => { setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個生成</button>
                             {showAutoDummyChoices && (
                                 <div className="dummy-choices-auto">
-                                    <h3>生成されたダ���ー選択肢 (3つ選択):</h3>
+                                    <h3>生成されたダミー選択肢 (3つ選択):</h3>
                                     <ul>
                                         {Array.from({ length: 10 }, (_, i) => (
                                             <li key={i}><label><input type="checkbox" name="dummy-choice-auto" /> ダミー選択肢{String.fromCharCode(65 + i)}</label></li>
@@ -151,7 +150,7 @@ export default function CreateQuizPage() {
                 {isModalOpen && (
                     <div className="modal" style={{ display: 'block' }}>
                         <div className="modal-content">
-                            <span className="close-button" onClick={() => {setIsModalOpen(false); setSelectedQuiz(null);}}>&times;</span>
+                            <span className="close-button" onClick={() => { setIsModalOpen(false); setSelectedQuiz(null); }}>&times;</span>
                             {!selectedQuiz ? (
                                 <>
                                     <h2>問題一覧</h2>
