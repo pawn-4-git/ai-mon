@@ -1,18 +1,17 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  usersRegister
+  AI-Mon Backend API
 
-  Sample SAM Template for usersRegister
+  SAM Template for AI-Mon Lambda Functions
 
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 3
-
-    # You can add LoggingConfig parameters such as the Logformat, Log Group, and SystemLogLevel or ApplicationLogLevel. Learn more here https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html#sam-function-loggingconfig.
+    Timeout: 30
+    Runtime: nodejs22.x
     LoggingConfig:
       LogFormat: JSON
+
 Parameters:
   UsersTableName:
     Type: String
@@ -45,17 +44,16 @@ Resources:
     Properties:
       ContentUri: ../nodejs/
       CompatibleRuntimes:
-        - nodejs22.x # 使用するLambdaのランタイムに合わせて指定 (例: nodejs18.x, nodejs20.x など)
-      Description: My shared utility functions.
+        - nodejs22.x
+      Description: Shared utility functions for AI-Mon application.
 
   UsersRegisterFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Type: AWS::Serverless::Function
     Properties:
       Layers:
         - !Ref SharedLogicLayer
       CodeUri: usersRegister/
       Handler: app.lambdaHandler
-      Runtime: nodejs22.x
       Policies:
         - DynamoDBWritePolicy:
             TableName: !Ref UsersTableName
@@ -71,10 +69,775 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersRegisterEvent:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Type: Api
           Properties:
             Path: /users/register
             Method: post
+
+  UsersLoginFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: usersLogin/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UsersLoginEvent:
+          Type: Api
+          Properties:
+            Path: /users/login
+            Method: post
+
+  UsersLogoutFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: usersLogout/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UsersLogoutEvent:
+          Type: Api
+          Properties:
+            Path: /users/logout
+            Method: post
+
+  UsersDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: usersDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UsersDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /users/{userId}
+            Method: delete
+
+  QuizGroupsCreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsCreate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsCreateEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups
+            Method: post
+
+  QuizGroupsListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsList/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsListEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups
+            Method: get
+
+  QuizGroupsGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsGetEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}
+            Method: get
+
+  QuizGroupsUpdateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsUpdate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}
+            Method: put
+
+  QuizGroupsDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}
+            Method: delete
+
+  QuestionsCreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: questionsCreate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuestionsCreateEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}/questions
+            Method: post
+
+  QuestionsListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: questionsList/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuestionsListEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}/questions
+            Method: get
+
+  QuestionsGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: questionsGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuestionsGetEvent:
+          Type: Api
+          Properties:
+            Path: /questions/{questionId}
+            Method: get
+
+  QuestionsUpdateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: questionsUpdate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuestionsUpdateEvent:
+          Type: Api
+          Properties:
+            Path: /questions/{questionId}
+            Method: put
+
+  QuestionsDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: questionsDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuestionsDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /questions/{questionId}
+            Method: delete
+
+  AnswersSubmitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: answersSubmit/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        AnswersSubmitEvent:
+          Type: Api
+          Properties:
+            Path: /quizzes/{quizId}/answers
+            Method: post
+
+  ResultsGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: resultsGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScoresTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ResultsGetEvent:
+          Type: Api
+          Properties:
+            Path: /quizzes/{quizId}/results
+            Method: get
+
+  ScoreHistoryGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: scoreHistoryGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScoresTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ScoreHistoryGetEvent:
+          Type: Api
+          Properties:
+            Path: /users/{userId}/score-history
+            Method: get
+
+  ScoresCreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: scoresCreate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ScoresTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ScoresCreateEvent:
+          Type: Api
+          Properties:
+            Path: /users/{userId}/scores
+            Method: post
+
+  ScoresDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: scoresDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ScoresTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ScoresDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /scores/{scoreId}
+            Method: delete
+
+  PerformanceAnalysisGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: performanceAnalysisGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScoresTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        PerformanceAnalysisGetEvent:
+          Type: Api
+          Properties:
+            Path: /users/{userId}/performance-analysis
+            Method: get
+
+  ResourcesCreateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: resourcesCreate/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ResourcesTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ResourcesCreateEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}/resources
+            Method: post
+
+  ResourcesListFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: resourcesList/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref ResourcesTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ResourcesListEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups/{groupId}/resources
+            Method: get
+
+  ResourcesDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: resourcesDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ResourcesTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ResourcesDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /resources/{resourceId}
+            Method: delete
+
+  AiGenerateQuestionFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: aiGenerateQuestion/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        AiGenerateQuestionEvent:
+          Type: Api
+          Properties:
+            Path: /ai/generate-question
+            Method: post
+
+  AiGenerateChoicesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: aiGenerateChoices/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        AiGenerateChoicesEvent:
+          Type: Api
+          Properties:
+            Path: /ai/generate-choices
+            Method: post
+
+  UsersInactiveDeleteFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: usersInactiveDelete/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UsersInactiveDeleteEvent:
+          Type: Api
+          Properties:
+            Path: /users/inactive
+            Method: delete
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -89,16 +852,11 @@ Resources:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
+
 Outputs:
-  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
-  # Find out more about other implicit resources you can reference within SAM
-  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  UsersRegisterApi:
-    Description: API Gateway endpoint URL for Prod stage for Users Register function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/users/register/"
-  UsersRegisterFunction:
-    Description: Users Register Lambda Function ARN
-    Value: !GetAtt UsersRegisterFunction.Arn
+  ApiGatewayEndpoint:
+    Description: API Gateway endpoint URL for Prod stage
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
   SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
-    Value: !Ref SharedLogicLayer # LayerのARNを出力
+    Value: !Ref SharedLogicLayer

@@ -1,5 +1,5 @@
-# Deploy Lambda Function
-name: Deploy Lambda Function
+# Deploy Lambda Functions
+name: Deploy Lambda Functions
 
 on:
   push:
@@ -27,31 +27,35 @@ jobs:
           pwd
           ls -la
 
-      - name: Change directory to backend/src/lambda
-        run: cd ./backend/src/lambda
-
       - name: Setup Node.js
         uses: actions/setup-node@v4 # Node.js環境をセットアップ
         with:
           node-version: '22.x'
 
-      - name: Install Dependencies
-        run: npm install # Lambda関数の依存関係をインストール
-        working-directory: ./backend/src/lambda/usersRegister # Lambda関数のディレクトリを指定
-
       - name: Install SharedLogicLayer Dependencies
         run: npm install
         working-directory: ./backend/src/nodejs
 
-      - name: cd
+      - name: Install Lambda Function Dependencies
         run: |
           cd ./backend/src/lambda/
-          ls -alrt
+          
+          # Install dependencies for each Lambda function
+          for dir in */; do
+            if [ -f "${dir}package.json" ]; then
+              echo "Installing dependencies for ${dir}"
+              cd "${dir}"
+              npm install
+              cd ..
+            fi
+          done
+          
+          # Install AWS SDK dependencies globally in lambda directory
           npm install @aws-sdk/client-dynamodb
           npm install @aws-sdk/lib-dynamodb
-      - name: ls
-        run: ls -alrt
-      - name: build
+
+      - name: Build SAM Application
         run: sam build -t ./backend/src/lambda/template.yaml
-      - name: deploy
+
+      - name: Deploy SAM Application
         run: sam deploy --region ap-northeast-1 --stack-name aimon --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml
