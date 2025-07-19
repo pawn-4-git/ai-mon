@@ -39,6 +39,8 @@ export default function LoginPage() {
             <input type="text" id="register-username" placeholder="8桁以上の英数字" />
           </div>
           <button onClick={handleNavigation}>登録</button>
+          {/* 匿名アカウント作成ボタンを追加 */}
+          <button onClick={handleAnonymousCreation}>匿名でアカウント作成</button>
           <p className="toggle-link" onClick={() => setIsLoginView(true)}>
             すでにアカウントをお持ちの方はこちら
           </p>
@@ -47,3 +49,12 @@ export default function LoginPage() {
     </div>
   );
 }
+
+// handleAnonymousCreation 関数を追加
+const handleAnonymousCreation = () => {
+  // 匿名アカウント作成のロジックを実装
+  // 例: バックエンドAPIを叩く、またはローカルで仮のユーザー情報を生成するなど
+  console.log("Creating anonymous account...");
+  // 仮にログイン画面に遷移させる
+  router.push('/quiz-list');
+};
