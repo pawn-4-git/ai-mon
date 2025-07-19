@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Header from '@/components/Header';
 
 const quizGroups = [
@@ -39,7 +38,7 @@ const quizGroups = [
 export default function QuizListPage() {
   const router = useRouter();
 
-  const getStatusClass = (status) => {
+  const getStatusClass = (status: string) => {
     switch (status) {
       case 'not-taken':
         return 'not-taken';
@@ -50,7 +49,7 @@ export default function QuizListPage() {
     }
   };
 
-  const getStatusTextClass = (status) => {
+  const getStatusTextClass = (status: string) => {
     switch (status) {
         case 'not-taken':
           return 'not-taken-text';

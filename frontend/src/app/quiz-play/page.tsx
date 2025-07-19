@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import Header from '@/components/Header';
 
 const currentQuestion = {
@@ -14,9 +13,9 @@ const currentQuestion = {
 
 export default function QuizPlayPage() {
   const router = useRouter();
-  const [selectedChoice, setSelectedChoice] = useState(null);
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
 
-  const handleSelectChoice = (choice) => {
+  const handleSelectChoice = (choice: string) => {
     setSelectedChoice(choice);
     alert('選択しました: ' + choice);
   };

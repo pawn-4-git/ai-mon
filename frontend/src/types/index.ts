@@ -29,6 +29,11 @@ export interface Quiz {
   questions: Question[];
   timeLimit: number;
   createdAt: Date;
+  // Added missing properties to match the expected type for selectedQuiz
+  question: string;
+  correct: string;
+  explanation: string;
+  dummies: string[];
 }
 
 export interface QuizAnswer {
