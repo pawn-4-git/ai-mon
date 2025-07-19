@@ -23,11 +23,7 @@ const calculateTtl = (baseDate, days) => {
 
 const generateRandomAccountName = (length) => {
     const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-        result += charset.charAt(randomInt(0, charset.length));
-    }
-    return result;
+    return Array.from({ length }, () => charset.charAt(randomInt(0, charset.length))).join('');
 };
 
 export const lambdaHandler = async (event) => {
@@ -59,17 +55,16 @@ export const lambdaHandler = async (event) => {
         }
 
         let finalAccountName;
-        const requestedAccountName = body.AccountName;
+        const requestedAccountName = body.AccountName?.trim();
 
-        if (requestedAccountName && requestedAccountName.trim()) {
-            const trimmedAccountName = requestedAccountName.trim();
-            if (trimmedAccountName.length < MIN_ACCOUNT_NAME_LENGTH || trimmedAccountName.length > MAX_ACCOUNT_NAME_LENGTH) {
+        if (requestedAccountName) {
+            if (requestedAccountName.length < MIN_ACCOUNT_NAME_LENGTH || requestedAccountName.length > MAX_ACCOUNT_NAME_LENGTH) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({ message: `AccountName must be between ${MIN_ACCOUNT_NAME_LENGTH} and ${MAX_ACCOUNT_NAME_LENGTH} characters.` }),
                 };
             }
-            finalAccountName = trimmedAccountName;
+            finalAccountName = requestedAccountName;
         } else {
             finalAccountName = generateRandomAccountName(RANDOM_ACCOUNT_NAME_LENGTH);
         }
@@ -144,19 +139,13 @@ export const lambdaHandler = async (event) => {
         };
     } catch (error) {
         // トランザクションが条件チェックの失敗によってキャンセルされたかを確認
-        if (error.name === 'TransactionCanceledException' && error.CancellationReasons) {
-            // CancellationReasons をループして、AccountName のユニーク制約違反を探す
-            const uniqueConstraintViolation = error.CancellationReasons.find(reason =>
-                reason.Code === 'ConditionalCheckFailed' &&
-                reason.Item?.UserId?.startsWith(ACCOUNT_NAME_UNIQUE_PREFIX)
-            );
-
-            if (uniqueConstraintViolation) {
-                return {
-                    statusCode: 409, // Conflict
-                    body: JSON.stringify({ message: "AccountName is already taken." }),
-                };
-            }
+        if (error.name === 'TransactionCanceledException' && error.CancellationReasons?.[0]?.Code === 'ConditionalCheckFailed') {
+            // The first transaction item is the uniqueness check, so if it fails,
+            // it means the AccountName is already taken.
+            return {
+                statusCode: 409, // Conflict
+                body: JSON.stringify({ message: "AccountName is already taken." }),
+            };
         }
         
         console.error("Error processing request:", error);
