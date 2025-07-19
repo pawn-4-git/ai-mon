@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, TransactWriteCommand } from "@aws-sdk/lib-dynamodb";
-import { randomUUID } from "crypto";
+import { randomUUID, randomInt } from "crypto";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -10,6 +10,9 @@ const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
 const USER_TTL_DAYS = 30;
 const SESSION_TTL_DAYS = 1;
+const MIN_ACCOUNT_NAME_LENGTH = 10;
+const MAX_ACCOUNT_NAME_LENGTH = 50;
+const ACCOUNT_NAME_UNIQUE_PREFIX = 'UNAME#';
 
 const calculateTtl = (baseDate, days) => {
     const ttlDate = new Date(baseDate);
@@ -21,7 +24,7 @@ const generateRandomAccountName = (length) => {
     const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
     let result = "";
     for (let i = 0; i < length; i++) {
-        result += charset.charAt(Math.floor(Math.random() * charset.length));
+        result += charset.charAt(randomInt(0, charset.length));
     }
     return result;
 };
@@ -59,10 +62,10 @@ export const lambdaHandler = async (event) => {
 
         if (requestedAccountName && requestedAccountName.trim()) {
             const trimmedAccountName = requestedAccountName.trim();
-            if (trimmedAccountName.length < 3 || trimmedAccountName.length > 50) {
+            if (trimmedAccountName.length < MIN_ACCOUNT_NAME_LENGTH || trimmedAccountName.length > MAX_ACCOUNT_NAME_LENGTH) {
                 return {
                     statusCode: 400,
-                    body: JSON.stringify({ message: "AccountName must be between 3 and 50 characters." }),
+                    body: JSON.stringify({ message: `AccountName must be between ${MIN_ACCOUNT_NAME_LENGTH} and ${MAX_ACCOUNT_NAME_LENGTH} characters.` }),
                 };
             }
             finalAccountName = trimmedAccountName;
@@ -95,7 +98,7 @@ export const lambdaHandler = async (event) => {
 
         // AccountNameの一意性を保証するためのアイテム
         const accountNameUniqueItem = {
-            UserId: `UNAME#${finalAccountName}`,
+            UserId: `${ACCOUNT_NAME_UNIQUE_PREFIX}${finalAccountName}`,
             // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
             ExpiresAt: userTtlTimestamp, 
         };
