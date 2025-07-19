@@ -38,20 +38,20 @@ jobs:
             echo "Unable to determine package manager"
             exit 1
           fi
-      - name: Setup Node
-        working-directory: ./frontend 
+      - name: Setup Node 
         uses: actions/setup-node@v4
+        working-directory: ./frontend
         with:
           node-version: "20"
           cache: ${{ steps.detect-package-manager.outputs.manager }}
       - name: Setup Pages
-        working-directory: ./frontend 
         uses: actions/configure-pages@v5
+        working-directory: ./frontend
         with:
           static_site_generator: next
       - name: Restore cache
-        working-directory: ./frontend 
         uses: actions/cache@v4
+        working-directory: ./frontend
         with:
           path: |
             .next/cache
