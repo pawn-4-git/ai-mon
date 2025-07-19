@@ -12,6 +12,7 @@ const USER_TTL_DAYS = 30;
 const SESSION_TTL_DAYS = 1;
 const MIN_ACCOUNT_NAME_LENGTH = 10;
 const MAX_ACCOUNT_NAME_LENGTH = 50;
+const RANDOM_ACCOUNT_NAME_LENGTH = 15;
 const ACCOUNT_NAME_UNIQUE_PREFIX = 'UNAME#';
 
 const calculateTtl = (baseDate, days) => {
@@ -21,7 +22,7 @@ const calculateTtl = (baseDate, days) => {
 };
 
 const generateRandomAccountName = (length) => {
-    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {
         result += charset.charAt(randomInt(0, charset.length));
@@ -70,7 +71,7 @@ export const lambdaHandler = async (event) => {
             }
             finalAccountName = trimmedAccountName;
         } else {
-            finalAccountName = generateRandomAccountName(15);
+            finalAccountName = generateRandomAccountName(RANDOM_ACCOUNT_NAME_LENGTH);
         }
 
         const now = new Date();
@@ -144,8 +145,13 @@ export const lambdaHandler = async (event) => {
     } catch (error) {
         // トランザクションが条件チェックの失敗によってキャンセルされたかを確認
         if (error.name === 'TransactionCanceledException' && error.CancellationReasons) {
-            // The first transaction item is the one that checks for AccountName uniqueness.
-            if (error.CancellationReasons[0]?.Code === 'ConditionalCheckFailed') {
+            // CancellationReasons をループして、AccountName のユニーク制約違反を探す
+            const uniqueConstraintViolation = error.CancellationReasons.find(reason =>
+                reason.Code === 'ConditionalCheckFailed' &&
+                reason.Item?.UserId?.startsWith(ACCOUNT_NAME_UNIQUE_PREFIX)
+            );
+
+            if (uniqueConstraintViolation) {
                 return {
                     statusCode: 409, // Conflict
                     body: JSON.stringify({ message: "AccountName is already taken." }),
