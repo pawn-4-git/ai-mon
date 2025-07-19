@@ -73,6 +73,7 @@ export const lambdaHandler = async (event) => {
         const now = new Date();
         const userId = randomUUID();
         const sessionId = randomUUID();
+        const sessionVersionId = randomUUID();
         
         const userTtlTimestamp = calculateTtl(now, USER_TTL_DAYS);
         const sessionTtlTimestamp = calculateTtl(now, SESSION_TTL_DAYS);
@@ -89,9 +90,10 @@ export const lambdaHandler = async (event) => {
             SessionId: sessionId,
             UserId: userId,
             ExpiresAt: sessionTtlTimestamp,
+            SessionVersionId: sessionVersionId,
         };
 
-        // AccountNameの一意性を保証��るためのアイテム
+        // AccountNameの一意性を保証するためのアイテム
         const accountNameUniqueItem = {
             UserId: `UNAME#${finalAccountName}`,
             // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
@@ -133,6 +135,7 @@ export const lambdaHandler = async (event) => {
                 message: "User registered and session created successfully.",
                 UserId: userId,
                 SessionId: sessionId,
+                SessionVersionId: sessionVersionId,
             }),
         };
     } catch (error) {
