@@ -911,7 +911,6 @@ Resources:
               - Via
               - X-Amz-Cf-Id
               - X-Amz-Cf-Locale
-              - X-Amz-Cf-Pop
               - X-Amz-Cf-Sdk
               - X-Forwarded-For
               - X-Forwarded-Proto
