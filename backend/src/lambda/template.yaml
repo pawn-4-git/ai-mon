@@ -75,6 +75,7 @@ Resources:
             Method: post
           CORS:
             AllowOrigin: "'http://localhost:3000'"
+            AllowMethods: "'POST,OPTIONS'"
   UsersLoginFunction:
     Type: AWS::Serverless::Function
     Properties:
