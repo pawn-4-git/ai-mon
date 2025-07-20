@@ -875,11 +875,8 @@ Resources:
               HTTPPort: 80
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
-              OriginSslProtocols:
-                - TLSv1.2
         DefaultCacheBehavior:
           TargetOriginId: AimonApiGatewayOrigin
-          PathPattern: "/Prod/*"
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods:
             - GET
