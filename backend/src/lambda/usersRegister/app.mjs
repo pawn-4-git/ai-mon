@@ -64,6 +64,19 @@ export const lambdaHandler = async (event) => {
                     body: JSON.stringify({ message: `AccountName must be between ${MIN_ACCOUNT_NAME_LENGTH} and ${MAX_ACCOUNT_NAME_LENGTH} characters.` }),
                 };
             }
+
+            // --- 追加するバリデーション ---
+            const hasAlphabet = /[a-zA-Z]/.test(requestedAccountName);
+            const hasNumber = /[0-9]/.test(requestedAccountName);
+
+            if (!hasAlphabet || !hasNumber) {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ message: "AccountName must contain at least one alphabet and one number." }),
+                };
+            }
+            // --- 追加するバリデーションここまで ---
+
             finalAccountName = requestedAccountName;
         } else {
             finalAccountName = generateRandomAccountName(RANDOM_ACCOUNT_NAME_LENGTH);
