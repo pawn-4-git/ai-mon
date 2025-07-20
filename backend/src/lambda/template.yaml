@@ -73,6 +73,8 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
+            # CORS設定を追加
+            RestApiId: !Ref MyApi
 
   UsersLoginFunction:
     Type: AWS::Serverless::Function
@@ -100,6 +102,7 @@ Resources:
           Properties:
             Path: /users/login
             Method: post
+            RestApiId: !Ref MyApi
 
   UsersLogoutFunction:
     Type: AWS::Serverless::Function
@@ -129,6 +132,7 @@ Resources:
           Properties:
             Path: /users/logout
             Method: post
+            RestApiId: !Ref MyApi
 
   UsersDeleteFunction:
     Type: AWS::Serverless::Function
@@ -158,6 +162,7 @@ Resources:
           Properties:
             Path: /users/{userId}
             Method: delete
+            RestApiId: !Ref MyApi
 
   QuizGroupsCreateFunction:
     Type: AWS::Serverless::Function
@@ -189,6 +194,7 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: post
+            RestApiId: !Ref MyApi
 
   QuizGroupsListFunction:
     Type: AWS::Serverless::Function
@@ -220,6 +226,7 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: get
+            RestApiId: !Ref MyApi
 
   QuizGroupsGetFunction:
     Type: AWS::Serverless::Function
@@ -251,6 +258,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: get
+            RestApiId: !Ref MyApi
 
   QuizGroupsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -282,6 +290,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: put
+            RestApiId: !Ref MyApi
 
   QuizGroupsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -313,6 +322,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: delete
+            RestApiId: !Ref MyApi
 
   QuestionsCreateFunction:
     Type: AWS::Serverless::Function
@@ -344,6 +354,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: post
+            RestApiId: !Ref MyApi
 
   QuestionsListFunction:
     Type: AWS::Serverless::Function
@@ -375,6 +386,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: get
+            RestApiId: !Ref MyApi
 
   QuestionsGetFunction:
     Type: AWS::Serverless::Function
@@ -406,6 +418,7 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: get
+            RestApiId: !Ref MyApi
 
   QuestionsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -437,6 +450,7 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: put
+            RestApiId: !Ref MyApi
 
   QuestionsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -468,6 +482,7 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: delete
+            RestApiId: !Ref MyApi
 
   AnswersSubmitFunction:
     Type: AWS::Serverless::Function
@@ -501,6 +516,7 @@ Resources:
           Properties:
             Path: /quizzes/{quizId}/answers
             Method: post
+            RestApiId: !Ref MyApi
 
   ResultsGetFunction:
     Type: AWS::Serverless::Function
@@ -532,6 +548,7 @@ Resources:
           Properties:
             Path: /quizzes/{quizId}/results
             Method: get
+            RestApiId: !Ref MyApi
 
   ScoreHistoryGetFunction:
     Type: AWS::Serverless::Function
@@ -563,6 +580,7 @@ Resources:
           Properties:
             Path: /users/{userId}/score-history
             Method: get
+            RestApiId: !Ref MyApi
 
   ScoresCreateFunction:
     Type: AWS::Serverless::Function
@@ -594,6 +612,7 @@ Resources:
           Properties:
             Path: /users/{userId}/scores
             Method: post
+            RestApiId: !Ref MyApi
 
   ScoresDeleteFunction:
     Type: AWS::Serverless::Function
@@ -625,6 +644,7 @@ Resources:
           Properties:
             Path: /scores/{scoreId}
             Method: delete
+            RestApiId: !Ref MyApi
 
   PerformanceAnalysisGetFunction:
     Type: AWS::Serverless::Function
@@ -656,6 +676,7 @@ Resources:
           Properties:
             Path: /users/{userId}/performance-analysis
             Method: get
+            RestApiId: !Ref MyApi
 
   ResourcesCreateFunction:
     Type: AWS::Serverless::Function
@@ -687,6 +708,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: post
+            RestApiId: !Ref MyApi
 
   ResourcesListFunction:
     Type: AWS::Serverless::Function
@@ -718,6 +740,7 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: get
+            RestApiId: !Ref MyApi
 
   ResourcesDeleteFunction:
     Type: AWS::Serverless::Function
@@ -749,6 +772,7 @@ Resources:
           Properties:
             Path: /resources/{resourceId}
             Method: delete
+            RestApiId: !Ref MyApi
 
   AiGenerateQuestionFunction:
     Type: AWS::Serverless::Function
@@ -780,6 +804,7 @@ Resources:
           Properties:
             Path: /ai/generate-question
             Method: post
+            RestApiId: !Ref MyApi
 
   AiGenerateChoicesFunction:
     Type: AWS::Serverless::Function
@@ -809,6 +834,7 @@ Resources:
           Properties:
             Path: /ai/generate-choices
             Method: post
+            RestApiId: !Ref MyApi
 
   UsersInactiveDeleteFunction:
     Type: AWS::Serverless::Function
@@ -838,6 +864,7 @@ Resources:
           Properties:
             Path: /users/inactive
             Method: delete
+            RestApiId: !Ref MyApi
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -860,3 +887,14 @@ Outputs:
   SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
     Value: !Ref SharedLogicLayer
+
+# API Gateway のリソース定義に CORS 設定を追加
+MyApi:
+  Type: AWS::Serverless::Api
+  Properties:
+    StageName: Prod
+    Cors:
+      AllowMethods: "POST,GET,OPTIONS,PUT,DELETE"
+      AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+      AllowOrigin: "http://localhost:3000,https://your-app.com"
+      # AllowCredentials: true # 必要に応じてコメント解除
