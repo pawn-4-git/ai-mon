@@ -73,6 +73,8 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
+            CORS:
+              AllowOrigin: "'localhost:3000'" # 全てのオリジンを許可。本番環境では具体的なオリジンを推奨
 
   UsersLoginFunction:
     Type: AWS::Serverless::Function
