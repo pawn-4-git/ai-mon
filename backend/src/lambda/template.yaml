@@ -865,6 +865,67 @@ Resources:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
 
+Resources:
+  AimonCloudfront:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - Id: !'AimonApiGatewayOrigin'
+            DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+            CustomOriginConfig:
+              HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+              OriginSslProtocols:
+                - TLSv1.2
+        DefaultCacheBehavior:
+          TargetOriginId: !'AimonApiGatewayOrigin'
+          PathPattern: "/Prod/*"
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - POST
+            - PATCH
+            - DELETE
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: 'true'
+            Cookies:
+              Forward: none
+            Headers:
+              - CloudFront-Forwarded-For
+              - CloudFront-Is-Desktop-Viewer
+              - CloudFront-Is-Mobile-Viewer
+              - CloudFront-Is-Smart-TV-Viewer
+              - CloudFront-Is-Tablet-Viewer
+              - CloudFront-Viewer-Country
+              - Accept
+              - Accept-Language
+              - Content-Language
+              - Content-Type
+              - Host
+              - Referer
+              - User-Agent
+              - Via
+              - X-Amz-Cf-Id
+              - X-Amz-Cf-Locale
+              - X-Amz-Cf-Pop
+              - X-Amz-Cf-Sdk
+              - X-Forwarded-For
+              - X-Forwarded-Proto
+              - X-Real-IP
+        Enabled: 'true'
+        DefaultRootObject: 'index.html'
+        HttpVersion: http2
+        PriceClass: PriceClass_All
+
 Outputs:
   ApiGatewayEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
@@ -872,3 +933,6 @@ Outputs:
   SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
     Value: !Ref SharedLogicLayer
+  AimonCloudfrontDomainName:
+    Description: "Domain name of the CloudFront distribution"
+    Value: !GetAtt AimonCloudfront.DomainName
