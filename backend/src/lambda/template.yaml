@@ -871,7 +871,7 @@ Resources:
     Properties:
       DistributionConfig:
         Origins:
-          - Id: !'AimonApiGatewayOrigin'
+          - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
             CustomOriginConfig:
               HTTPPort: 80
@@ -880,7 +880,7 @@ Resources:
               OriginSslProtocols:
                 - TLSv1.2
         DefaultCacheBehavior:
-          TargetOriginId: !'AimonApiGatewayOrigin'
+          TargetOriginId: AimonApiGatewayOrigin
           PathPattern: "/Prod/*"
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods:
