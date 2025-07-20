@@ -922,7 +922,6 @@ Resources:
               - X-Forwarded-Proto
               - X-Real-IP
         Enabled: true
-        DefaultRootObject: 'index.html'
         HttpVersion: http2
         PriceClass: PriceClass_All
 
