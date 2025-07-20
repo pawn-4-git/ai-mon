@@ -895,12 +895,6 @@ Resources:
             Cookies:
               Forward: none
             Headers:
-              - CloudFront-Forwarded-For
-              - CloudFront-Is-Desktop-Viewer
-              - CloudFront-Is-Mobile-Viewer
-              - CloudFront-Is-Smart-TV-Viewer
-              - CloudFront-Is-Tablet-Viewer
-              - CloudFront-Viewer-Country
               - Accept
               - Accept-Language
               - Content-Language
@@ -908,10 +902,6 @@ Resources:
               - Host
               - Referer
               - User-Agent
-              - Via
-              - X-Amz-Cf-Id
-              - X-Amz-Cf-Locale
-              - X-Amz-Cf-Sdk
               - X-Forwarded-For
               - X-Forwarded-Proto
               - X-Real-IP
