@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiClient, post } from '@/lib/apiClient'; // apiClientとpost関数をインポート
 
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
@@ -11,13 +12,26 @@ export default function LoginPage() {
     router.push('/quiz-list');
   };
 
-  // handleAnonymousCreation 関数をコンポーネント内に移動
-  const handleAnonymousCreation = () => {
-    // 匿名アカウント作成のロジックを実装
-    // 例: バックエンドAPIを叩く、またはローカルで仮のユーザー情報を生成するなど
-    console.log("Creating anonymous account...");
-    // 仮にログイン画面に遷移させる
-    router.push('/quiz-list');
+  // handleAnonymousCreation 関数をコンポーネント内に移動し、API呼び出しを追加
+  const handleAnonymousCreation = async () => {
+    try {
+      // /users/register エンドポイントにPOSTリクエストを送信
+      // ���名作成なので、リクエストボディは空、または { anonymous: true } など
+      const response = await post('/users/register', { anonymous: true }); // または {}
+
+      // 成功した場合の処理
+      console.log('Anonymous user created successfully:', response);
+      // 必要に応じて、作成されたユーザー情報でstateを更新したり、
+      // 別のページにリダイレクトしたりします。
+      // 例: router.push('/dashboard');
+      alert('匿名アカウントが作成されました！');
+      router.push('/quiz-list'); // 匿名作成後にクイズリストへ遷移させる例
+
+    } catch (error) {
+      // エラーハンドリング
+      console.error('Failed to create anonymous user:', error);
+      alert('匿名アカウントの作成に失敗しました。');
+    }
   };
 
   return (
@@ -45,7 +59,7 @@ export default function LoginPage() {
           <h2>ユーザー登録</h2>
           <div className="form-group">
             <label htmlFor="register-username">アカウント名:</label>
-            <input type="text" id="register-username" placeholder="8桁以上���英数字" />
+            <input type="text" id="register-username" placeholder="8桁以上の英数字" />
           </div>
           <button onClick={handleNavigation}>登録</button>
           {/* 匿名アカウント作成ボタンを追加 */}

@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 backend/src/nodejs/node_modules/
+.fontend/.env.local

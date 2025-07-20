@@ -3,8 +3,7 @@ name: Deploy Next.js App to GitHub Pages
 
 on:
   push:
-    branches:
-      - main # mainブランチへのプッシュでこのワークフローが実行されます
+    branches: [ main ] # mainブランチへのプッシュでこのワークフローが実行されます
 
 jobs:
   build-and-deploy:
@@ -35,6 +34,13 @@ jobs:
       - name: Build Next.js project
         run: npm run build
         working-directory: ./frontend # ★ Next.jsアプリのディレクトリを指定
+        env:
+          # GitHub Secrets から API ドメインを取得して環境変数として渡す
+          # secrets.API_DOMAIN は、リポジトリの Settings > Secrets and variables > Actions で設定したシークレット名に置き換えてください。
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.API_DOMAIN }}
+          # 他に必要なシークレットがあればここに追加します
+          # NEXT_PUBLIC_ANOTHER_KEY: ${{ secrets.ANOTHER_KEY }}
+          # DATABASE_URL: ${{ secrets.DATABASE_URL }} # サーバーサイドのみで使う場合
 
       - name: Upload artifact
         # Next.jsの静的エクスポートの出力は通常 'out' ディレクトリ
