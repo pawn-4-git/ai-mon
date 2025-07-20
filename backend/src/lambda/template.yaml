@@ -872,7 +872,7 @@ Resources:
       DistributionConfig:
         Origins:
           - Id: AimonApiGatewayOrigin
-            DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com
+            DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
@@ -935,3 +935,4 @@ Outputs:
   AimonCloudfrontDomainName:
     Description: "Domain name of the CloudFront distribution"
     Value: !GetAtt AimonCloudfront.DomainName
+
