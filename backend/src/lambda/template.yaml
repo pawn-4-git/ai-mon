@@ -904,7 +904,6 @@ Resources:
               - User-Agent
               - X-Forwarded-For
               - X-Forwarded-Proto
-              - X-Real-IP
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
