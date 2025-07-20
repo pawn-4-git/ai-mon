@@ -864,8 +864,6 @@ Resources:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
-
-Resources:
   AimonCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
