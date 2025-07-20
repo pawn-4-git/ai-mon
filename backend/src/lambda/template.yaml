@@ -73,7 +73,6 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
-            RestApiId: !Ref MyApi
 
   UsersLoginFunction:
     Type: AWS::Serverless::Function
@@ -882,18 +881,7 @@ Resources:
 Outputs:
   ApiGatewayEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${MyApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
   SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
     Value: !Ref SharedLogicLayer
-
-# API Gateway のリソース定義に CORS 設定を追加
-MyApi:
-  Type: AWS::Serverless::Api
-  Properties:
-    StageName: Prod
-    Cors:
-      AllowMethods: "POST,GET,OPTIONS,PUT,DELETE"
-      AllowHeaders: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
-      AllowOrigin: "http://localhost:3000,https://your-app.com" # ★ Next.jsアプリのURLに置き換えてください
-      # AllowCredentials: true # 必要に応じてコメント解除
