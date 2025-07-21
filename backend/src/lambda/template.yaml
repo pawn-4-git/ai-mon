@@ -875,13 +875,6 @@ Resources:
               HTTPPort: 80
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
-        Origins:
-          - Id: AimonApiGatewayOrigin
-            DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: https-only
           - Id: AimonContentsS3Origin
             DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
             CustomOriginConfig:
@@ -916,33 +909,28 @@ Resources:
               - User-Agent
               - X-Forwarded-For
               - X-Forwarded-Proto
-        # --- S3 Origin Cache Behavior ---
-        - CacheBehavior:
-            TargetOriginId: AimonContentsS3Origin
-            PathPattern: "/contents/*"
-            ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-            CachedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-            ForwardedValues:
-              QueryString: false
-              Cookies:
-                Forward: none
-              Headers:
-                - Referer
-                - User-Agent
-            MinTTL: 0
-            DefaultTTL: 86400
-            MaxTTL: 31536000
-            SmoothStreaming: false
-            DefaultRootObject: ""
-            Compress: true
-        # --- End S3 Origin Cache Behavior ---
+        CacheBehaviors:
+          - CacheBehavior:
+              TargetOriginId: AimonContentsS3Origin
+              PathPattern: "/contents/*"
+              ViewerProtocolPolicy: redirect-to-https
+              AllowedMethods:
+                - GET
+              CachedMethods:
+                - GET
+              ForwardedValues:
+                QueryString: false
+                Cookies:
+                  Forward: none
+                Headers:
+                  - Referer
+                  - User-Agent
+              MinTTL: 0
+              DefaultTTL: 86400
+              MaxTTL: 31536000
+              SmoothStreaming: false
+              DefaultRootObject: ""
+              Compress: true
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
