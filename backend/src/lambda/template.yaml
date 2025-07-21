@@ -932,7 +932,6 @@ Resources:
             DefaultTTL: 86400
             MaxTTL: 31536000
             SmoothStreaming: false
-            DefaultRootObject: ""
             Compress: true
         Enabled: true
         HttpVersion: http2
