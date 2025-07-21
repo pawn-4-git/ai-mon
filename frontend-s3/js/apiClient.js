@@ -10,10 +10,11 @@ import { API_BASE_URL as DEFAULT_API_BASE_URL } from './api_domain.ts';
  * APIリクエストを行うための汎用関数
  * @param endpoint - APIのエンドポイントパス (例: '/users', '/quizzes')
  * @param options - fetch APIに渡すオプション (method, headers, bodyなど)
+ * @param base_url - (オプション) APIのベースURL
  * @returns Promise<any> - APIからのレスポンスデータ
  */
-export async function apiClient(endpoint, options) {
-  const url = `${API_BASE_URL}${endpoint}`;
+export async function apiClient(endpoint, options, base_url = DEFAULT_API_BASE_URL) {
+  const url = `${base_url}${endpoint}`;
 
   const defaultHeaders = {
     'Content-Type': 'application/json',
@@ -55,14 +56,14 @@ export async function apiClient(endpoint, options) {
 }
 
 // よく使うメソッド用のヘルパー関数 (オプション)
-export const get = (endpoint, options) =>
-  apiClient(endpoint, { ...options, method: 'GET' });
+export const get = (endpoint, options, base_url) =>
+  apiClient(endpoint, { ...options, method: 'GET' }, base_url);
 
-export const post = (endpoint, body, options) =>
-  apiClient(endpoint, { ...options, method: 'POST', body });
+export const post = (endpoint, body, options, base_url) =>
+  apiClient(endpoint, { ...options, method: 'POST', body }, base_url);
 
-export const put = (endpoint, body, options) =>
-  apiClient(endpoint, { ...options, method: 'PUT', body });
+export const put = (endpoint, body, options, base_url) =>
+  apiClient(endpoint, { ...options, method: 'PUT', body }, base_url);
 
-export const del = (endpoint, options) =>
-  apiClient(endpoint, { ...options, method: 'DELETE' });
+export const del = (endpoint, options, base_url) =>
+  apiClient(endpoint, { ...options, method: 'DELETE' }, base_url);
