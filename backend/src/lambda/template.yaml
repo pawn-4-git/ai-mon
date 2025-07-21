@@ -910,27 +910,30 @@ Resources:
               - X-Forwarded-For
               - X-Forwarded-Proto
         CacheBehaviors:
-          - CacheBehavior:
-              TargetOriginId: AimonContentsS3Origin
-              PathPattern: "/contents/*"
-              ViewerProtocolPolicy: redirect-to-https
-              AllowedMethods:
-                - GET
-              CachedMethods:
-                - GET
-              ForwardedValues:
-                QueryString: false
-                Cookies:
-                  Forward: none
-                Headers:
-                  - Referer
-                  - User-Agent
-              MinTTL: 0
-              DefaultTTL: 86400
-              MaxTTL: 31536000
-              SmoothStreaming: false
-              DefaultRootObject: ""
-              Compress: true
+          - TargetOriginId: AimonContentsS3Origin
+            PathPattern: "/contents/*"
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+              Headers:
+                - Referer
+                - User-Agent
+            MinTTL: 0
+            DefaultTTL: 86400
+            MaxTTL: 31536000
+            SmoothStreaming: false
+            DefaultRootObject: ""
+            Compress: true
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
