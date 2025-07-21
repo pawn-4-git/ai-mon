@@ -899,7 +899,6 @@ Resources:
               - Accept-Language
               - Content-Language
               - Content-Type
-              - Host
               - Referer
               - User-Agent
               - X-Forwarded-For
