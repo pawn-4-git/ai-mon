@@ -6,7 +6,6 @@ import Script from 'next/script'; // Scriptコンポーネントをインポー�
 
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const router = useRouter();
 
   const handleNavigation = () => {
@@ -16,11 +15,11 @@ export default function LoginPage() {
   // handleAnonymousCreation 関数をコンポーネント内に移動し、API呼び出しを追加
   const handleAnonymousCreation = async () => {
     try {
-      // apiClient.jsによってグローバルスコープにapiClientが定義されていると仮定
       if (!(window as any).apiClient) {
+        // ユーザーに機能がまだ利用できないことを通知
+        alert('機能の準備中です。少し待ってからもう一度お試しください。');
         throw new Error('apiClient is not available');
       }
-      // /users/register エンドポイントにPOSTリクエストを送信
       const response = await (window as any).apiClient.post(
         '/users/register',
         { anonymous: true },
@@ -28,18 +27,18 @@ export default function LoginPage() {
         {} // options
       );
 
-      // 成功した場合の処理
       console.log('Anonymous user created successfully:', response);
-      // 必要に応じて、作成されたユーザー情報でstateを更新したり、
-      // 別のページにリダイレクトしたりします。
-      // 例: router.push('/dashboard');
       alert('匿名アカウントが作成されました！');
-      router.push('/quiz-list'); // 匿名作成後にクイズリストへ遷移させる例
+      router.push('/quiz-list');
 
     } catch (error) {
-      // エラーハンドリング
       console.error('Failed to create anonymous user:', error);
-      alert('匿名アカウントの作成に失敗しました。');
+      // ユーザーにエラーを通知するが、apiClientがない場合のアラートと重複しないように
+      if (String(error).includes('apiClient is not available')) {
+        // すでにアラートが表示されているので何もしない
+      } else {
+        alert('匿名アカウントの作成に失敗しました。');
+      }
     }
   };
 
@@ -48,7 +47,6 @@ export default function LoginPage() {
       <Script
         src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/contents/js/apiClient.js`}
         strategy="beforeInteractive"
-        onLoad={() => setIsScriptLoaded(true)}
       />
       <div className="login-page">
         <div className="container">
@@ -73,13 +71,13 @@ export default function LoginPage() {
           <div id="register-form" style={{ display: isLoginView ? 'none' : 'block' }}>
             <h2>ユーザー登録</h2>
             <div className="form-group">
-              <label htmlFor="register-username">���カウント名:</label>
+              <label htmlFor="register-username">アカウント名:</label>
               <input type="text" id="register-username" placeholder="8桁以上の英数字" />
             </div>
             <button onClick={handleNavigation}>登録</button>
-            {/* 匿名アカウント作成ボタンを追加 */}
-            <button onClick={handleAnonymousCreation} disabled={!isScriptLoaded}>
-              {isScriptLoaded ? '匿名でアカウント作成' : '準備中...'}
+            {/* 匿名アカウント作成ボタン */}
+            <button onClick={handleAnonymousCreation}>
+              匿名でアカウント作成
             </button>
             <p className="toggle-link" onClick={() => setIsLoginView(true)}>
               すでにアカウントをお持ちの方はこちら
