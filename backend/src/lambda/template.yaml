@@ -871,7 +871,6 @@ Resources:
         Origins:
           - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
-            OriginPath: /Prod
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
