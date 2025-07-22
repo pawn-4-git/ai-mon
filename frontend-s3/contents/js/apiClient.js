@@ -2,7 +2,7 @@
   'use strict';
 
   /**
-   * APIリクエストを行うための汎用関数
+   * リクエストを行うための汎用関数
    * @param {string} endpoint - APIのエンドポイントパス (例: '/users', '/quizzes')
    * @param {object} options - fetch APIに渡すオプション (method, headers, bodyなど)
    * @param {string} base_url - APIのベースURL
