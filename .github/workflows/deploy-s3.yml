@@ -33,9 +33,10 @@ jobs:
         run: |
           aws s3api put-bucket-policy --bucket ai-mon-contents-files --policy '{"Version": "2012-10-17", "Statement": [{"Sid": "AllowCloudFrontPublicRead", "Effect": "Allow", "Principal": {"AWS": "*"}, "Action": ["s3:GetObject"], "Resource": ["arn:aws:s3:::ai-mon-contents-files/*"]}]}' --region ap-northeast-1
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          # AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          # AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }}
+          role-to-assume: ${{secrets.AWS_S3_ROLE}}
 
       - name: Sync frontend-s3 directory to S3 bucket
         run: aws s3 sync ./frontend-s3/ s3://ai-mon-contents-files --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
