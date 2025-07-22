@@ -8,6 +8,9 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest # ジョブを実行するランナーを指定
+    permissions:
+      id-token: write # OIDC を使用するために必要
+      contents: read # コードをチェックアウトするために必要
 
     steps:
       - name: Checkout code
