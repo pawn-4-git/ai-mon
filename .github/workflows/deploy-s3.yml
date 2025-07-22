@@ -20,6 +20,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }} # 必要に応じてセッショントークンも指定
           aws-region: ap-northeast-1 # ここにバケットを作成したいAWSリージョンを指定してください (例: ap-northeast-1)
+          role-to-assume: ${{secrets.AWS_S3_ROLE}}
 
       - name: Create S3 bucket if it doesn't exist
         run: |
