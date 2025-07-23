@@ -888,35 +888,34 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: http-only
         CacheBehaviors:
-          TargetOriginId: AimonApiGatewayOrigin
-          PathPattern: "/Prod*"
-          ViewerProtocolPolicy: redirect-to-https
-          AllowedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
-            - PUT
-            - POST
-            - PATCH
-            - DELETE
-          CachedMethods:
-            - GET
-            - HEAD
-            - OPTIONS
-          ForwardedValues:
-            QueryString: true
-            Cookies:
-              Forward: none
-            Headers:
-              - Accept
-              - Accept-Language
-              - Content-Language
-              - Content-Type
-              - Referer
-              - User-Agent
-              - X-Forwarded-For
-              - X-Forwarded-Proto
-        CacheBehaviors:
+          - TargetOriginId: AimonApiGatewayOrigin
+            PathPattern: "/Prod*"
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: none
+              Headers:
+                - Accept
+                - Accept-Language
+                - Content-Language
+                - Content-Type
+                - Referer
+                - User-Agent
+                - X-Forwarded-For
+                - X-Forwarded-Proto
           - TargetOriginId: AimonContentsS3Origin
             PathPattern: "/contents/*"
             ViewerProtocolPolicy: redirect-to-https
@@ -941,28 +940,28 @@ Resources:
             SmoothStreaming: false
             Compress: true
         DefaultCacheBehavior:
-          - TargetOriginId: AimonContentsS3Origin
-            ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-            CachedMethods:
-              - GET
-              - HEAD
-              - OPTIONS
-            ForwardedValues:
-              QueryString: false
-              Cookies:
-                Forward: none
-              Headers:
-                - Referer
-                - User-Agent
-            MinTTL: 0
-            DefaultTTL: 86400
-            MaxTTL: 31536000
-            SmoothStreaming: false
-            Compress: true
+          TargetOriginId: AimonContentsS3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          CachedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: none
+            Headers:
+              - Referer
+              - User-Agent
+          MinTTL: 0
+          DefaultTTL: 86400
+          MaxTTL: 31536000
+          SmoothStreaming: false
+          Compress: true
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
