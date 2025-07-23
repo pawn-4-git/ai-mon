@@ -4,6 +4,20 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script'; // Scriptコンポーネントをインポート
 
+// apiClientをwindowオブジェクトのプロパティとして型定義
+declare global {
+  interface Window {
+    apiClient?: {
+      post: (
+        url: string,
+        body: Record<string, unknown>,
+        baseUrl: string | undefined,
+        options: Record<string, unknown>
+      ) => Promise<unknown>;
+    };
+  }
+}
+
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
@@ -15,12 +29,12 @@ export default function LoginPage() {
   // handleAnonymousCreation 関数をコンポーネント内に移動し、API呼び出しを追加
   const handleAnonymousCreation = async () => {
     try {
-      if (!(window as any).apiClient) {
+      if (!window.apiClient) {
         // ユーザーに機能がまだ利用できないことを通知
         alert('機能の準備中です。少し待ってからもう一度お試しください。');
         throw new Error('apiClient is not available');
       }
-      const response = await (window as any).apiClient.post(
+      const response = await window.apiClient.post(
         '/users/register',
         { anonymous: true },
         process.env.NEXT_PUBLIC_CLOUDFRONT_URL,
