@@ -887,7 +887,7 @@ Resources:
               HTTPPort: 80
               HTTPSPort: 443
               OriginProtocolPolicy: http-only
-        DefaultCacheBehavior:
+        CacheBehaviors:
           TargetOriginId: AimonApiGatewayOrigin
           PathPattern: "/Prod*"
           ViewerProtocolPolicy: redirect-to-https
@@ -940,7 +940,7 @@ Resources:
             MaxTTL: 31536000
             SmoothStreaming: false
             Compress: true
-        CacheBehaviors:
+        DefaultCacheBehavior:
           - TargetOriginId: AimonContentsS3Origin
             ViewerProtocolPolicy: redirect-to-https
             AllowedMethods:
