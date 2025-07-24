@@ -59,7 +59,7 @@ export default function LoginPage() {
   return (
     <>
       <Script
-        src={`${process.env.NEXT_PUBLIC_CLOUDFRONT_URL}/contents/js/apiClient.js`}
+        src={`/contents/js/apiClient.js`}
         strategy="beforeInteractive"
       />
       <div className="login-page">
@@ -67,7 +67,7 @@ export default function LoginPage() {
           <div className="header">
             <h1>あいもん</h1>
           </div>
-          
+
           {/* Login Form */}
           <div id="login-form" style={{ display: isLoginView ? 'block' : 'none' }}>
             <h2>ログイン</h2>
