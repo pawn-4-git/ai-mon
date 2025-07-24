@@ -16,33 +16,24 @@ const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
 
 console.log(`Updating script references in ${targetDir} with timestamp: ${timestamp}`);
 
-fs.readdir(targetDir, (err, files) => {
-  if (err) {
-    console.error('Error reading directory:', err);
-    return;
-  }
+try {
+  const files = fs.readdirSync(targetDir);
 
   files.forEach(file => {
     if (path.extname(file) === '.html') {
       const filePath = path.join(targetDir, file);
-      fs.readFile(filePath, 'utf8', (err, content) => {
-        if (err) {
-          console.error(`Error reading file ${file}:`, err);
-          return;
-        }
+      const content = fs.readFileSync(filePath, 'utf8');
 
-        const regex = new RegExp(`(<script\\s+src="[^"]*\\/${targetFile})(\\?ver=[^"]*)?(">\\s*<\\/script>)`, 'g');
-        if (regex.test(content)) {
-          const newContent = content.replace(regex, `$1?ver=${timestamp}$3`);
-          fs.writeFile(filePath, newContent, 'utf8', (err) => {
-            if (err) {
-              console.error(`Error writing file ${file}:`, err);
-            } else {
-              console.log(`Updated ${file}`);
-            }
-          });
-        }
-      });
+      const regex = new RegExp(`(<script\s+src="[^"]*\/${targetFile})(\?ver=[^"]*)?(">\s*<\/script>)`, 'g');
+      const newContent = content.replace(regex, `$1?ver=${timestamp}$3`);
+
+      if (newContent !== content) {
+        fs.writeFileSync(filePath, newContent, 'utf8');
+        console.log(`Updated ${file}`);
+      }
     }
   });
-});
+} catch (err) {
+  console.error('Error processing files:', err);
+  process.exit(1); // Exit with an error code for CI/CD pipelines
+}
