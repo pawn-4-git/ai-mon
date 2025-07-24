@@ -34,13 +34,7 @@ export default function LoginPage() {
         throw new Error('apiClient is not available');
       }
 
-      const baseUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_URL;
-      if (!baseUrl) {
-        alert('設定が読み込めませんでした。管理者にお問い合わせください。');
-        throw new Error('NEXT_PUBLIC_CLOUDFRONT_URL is not defined');
-      }
-
-      const endpoint = `${baseUrl}/users/register`;
+      const endpoint = '/Prod/users/register';
       const response = await window.apiClient.post(
         endpoint,
         { anonymous: true },
