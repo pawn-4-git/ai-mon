@@ -8,12 +8,11 @@ import Script from 'next/script'; // Scriptコンポーネントをインポー�
 declare global {
   interface Window {
     apiClient?: {
-      post: (
-        url: string,
-        body: Record<string, unknown>,
-        baseUrl: string | undefined,
-        options: Record<string, unknown>
-      ) => Promise<unknown>;
+      request: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      get: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      post: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      put: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      del: (endpoint: string, options?: RequestInit) => Promise<unknown>;
     };
   }
 }
@@ -26,7 +25,7 @@ export default function LoginPage() {
     router.push('/quiz-list');
   };
 
-  // handleAnonymousCreation 関数をコンポーネント内に移動し、API呼び出しを追加
+  // handleAnonymousCreation 関数をコンポーネント内���移動し、API呼び出しを追加
   const handleAnonymousCreation = async () => {
     try {
       if (!window.apiClient) {
@@ -34,10 +33,17 @@ export default function LoginPage() {
         alert('機能の準備中です。少し待ってからもう一度お試しください。');
         throw new Error('apiClient is not available');
       }
+
+      const baseUrl = process.env.NEXT_PUBLIC_CLOUDFRONT_URL;
+      if (!baseUrl) {
+        alert('設定が読み込めませんでした。管理者にお問い合わせください。');
+        throw new Error('NEXT_PUBLIC_CLOUDFRONT_URL is not defined');
+      }
+
+      const endpoint = `${baseUrl}/users/register`;
       const response = await window.apiClient.post(
-        '/users/register',
+        endpoint,
         { anonymous: true },
-        process.env.NEXT_PUBLIC_CLOUDFRONT_URL,
         {} // options
       );
 
@@ -47,8 +53,8 @@ export default function LoginPage() {
 
     } catch (error) {
       console.error('Failed to create anonymous user:', error);
-      // ユーザーにエラーを通知するが、apiClientがない場合のアラートと重複しないように
-      if (String(error).includes('apiClient is not available')) {
+      // ユーザーにエラーを通知するが、apiClientがない場��のアラートと重複しないように
+      if (String(error).includes('apiClient is not available') || String(error).includes('not defined')) {
         // すでにアラートが表示されているので何もしない
       } else {
         alert('匿名アカウントの作成に失敗しました。');
