@@ -75,4 +75,4 @@ jobs:
           # role-to-assume: ${{secrets.AWS_S3_ROLE}}
 
       - name: Sync frontend-s3 directory to S3 bucket
-        run: aws s3 sync ./frontend/out s3://ai-mon-app --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
+        run: aws s3 sync ./frontend/out s3://ai-mon-app/ai-mon/ --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
