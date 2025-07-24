@@ -17,7 +17,7 @@ try {
       const filePath = path.join(targetDir, file);
       const content = fs.readFileSync(filePath, 'utf8');
 
-      const regex = new RegExp(`(<script\s+src="[^"]*\/${targetFile})(\?ver=[^"]*)?(">\s*<\/script>)`, 'g');
+      const regex = new RegExp(`(<script\\s+src="[^"]*\\/${targetFile})(\\?ver=[^"]*)?(">\\s*<\\/script>)`, 'g');
       const newContent = content.replace(regex, `$1?ver=${timestamp}$3`);
 
       if (newContent !== content) {
