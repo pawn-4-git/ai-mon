@@ -73,19 +73,6 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
-          CORS:
-            # --- 変更点 ---
-            # 既存のオリジンに加えて、ローカル開発環境のオリジンも追加
-            AllowOrigin: "'*'" # 開発中の一時的な許可。本番では絶対に避けるべき。
-            # 複数のローカルポートで開発する可能性がある場合は、カンマ区切りで追加
-            # 例: "'http://localhost:3000,http://localhost:5000,https://your-deployed-app.com'"
-            # または一時的に開発中のみワイルドカードを許可 (非推奨)
-            # AllowOrigin: "'*'" # 開発中の一時的な許可。本番では絶対に避けるべき。
-            # --- ここまで ---
-            AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            AllowMethods: "'POST,OPTIONS'" # OPTIONSメソッドは必須
-            MaxAge: "300"
-            AllowCredentials: false # AllowOriginが'*'の場合はfalse
   UsersLoginFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -918,6 +905,29 @@ Resources:
                 - X-Forwarded-Proto
           - TargetOriginId: AimonContentsS3Origin
             PathPattern: "/contents/*"
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+              Headers:
+                - Referer
+                - User-Agent
+            MinTTL: 0
+            DefaultTTL: 86400
+            MaxTTL: 31536000
+            SmoothStreaming: false
+            Compress: true
+          - TargetOriginId: AimonAppS3Origin
+            PathPattern: "/ai-mon/*"
             ViewerProtocolPolicy: redirect-to-https
             AllowedMethods:
               - GET
