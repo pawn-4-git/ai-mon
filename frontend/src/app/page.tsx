@@ -8,11 +8,11 @@ import Script from 'next/script'; // Scriptコンポーネントをインポー�
 declare global {
   interface Window {
     apiClient?: {
-      request: (endpoint: string, options?: RequestInit) => Promise<any>;
-      get: (endpoint: string, options?: RequestInit) => Promise<any>;
-      post: (endpoint: string, body: any, options?: RequestInit) => Promise<any>;
-      put: (endpoint: string, body: any, options?: RequestInit) => Promise<any>;
-      del: (endpoint: string, options?: RequestInit) => Promise<any>;
+      request: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      get: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      post: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      put: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      del: (endpoint: string, options?: RequestInit) => Promise<unknown>;
     };
   }
 }
