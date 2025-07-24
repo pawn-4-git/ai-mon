@@ -939,6 +939,29 @@ Resources:
             MaxTTL: 31536000
             SmoothStreaming: false
             Compress: true
+          - TargetOriginId: AimonAppS3Origin
+            PathPattern: "/ai-mon/*"
+            ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            ForwardedValues:
+              QueryString: false
+              Cookies:
+                Forward: none
+              Headers:
+                - Referer
+                - User-Agent
+            MinTTL: 0
+            DefaultTTL: 86400
+            MaxTTL: 31536000
+            SmoothStreaming: false
+            Compress: true
         DefaultCacheBehavior:
           TargetOriginId: AimonAppS3Origin
           ViewerProtocolPolicy: redirect-to-https
