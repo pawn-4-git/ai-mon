@@ -35,7 +35,7 @@ export default function LoginPage() {
         throw new Error('apiClient is not available');
       }
       const response = await window.apiClient.post(
-        '/users/register',
+        '/Prod/users/register',
         { anonymous: true },
         process.env.NEXT_PUBLIC_CLOUDFRONT_URL,
         {} // options

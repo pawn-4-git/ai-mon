@@ -42,6 +42,9 @@ jobs:
           # NEXT_PUBLIC_ANOTHER_KEY: ${{ secrets.ANOTHER_KEY }}
           # DATABASE_URL: ${{ secrets.DATABASE_URL }} # サーバーサイドのみで使う場合
 
+      - name: Add timestamp to apiClient.js
+        run: node scripts/add-timestamp.js
+
       - name: Upload artifact
         # Next.jsの静的エクスポートの出力は通常 'out' ディレクトリ
         uses: actions/upload-pages-artifact@v3

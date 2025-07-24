@@ -5,14 +5,10 @@
    * リクエストを行うための汎用関数
    * @param {string} endpoint - APIのエンドポイントパス (例: '/users', '/quizzes')
    * @param {object} options - fetch APIに渡すオプション (method, headers, bodyなど)
-   * @param {string} base_url - APIのベースURL
    * @returns {Promise<any>} - APIからのレスポンスデータ
    */
-  async function apiClient(endpoint, options, base_url) {
-    if (!base_url) {
-      throw new Error('API base URL is required.');
-    }
-    const url = `${base_url}${endpoint}`;
+  async function apiClient(endpoint, options) {
+    const url = endpoint;
 
     const defaultHeaders = {
       'Content-Type': 'application/json',
@@ -48,17 +44,17 @@
   }
 
   // ヘルパー関数
-  const get = (endpoint, options, base_url) =>
-    apiClient(endpoint, { ...options, method: 'GET' }, base_url);
+  const get = (endpoint, options) =>
+    apiClient(endpoint, { ...options, method: 'GET' });
 
-  const post = (endpoint, body, base_url, options) =>
-    apiClient(endpoint, { ...options, method: 'POST', body }, base_url);
+  const post = (endpoint, body, options) =>
+    apiClient(endpoint, { ...options, method: 'POST', body });
 
-  const put = (endpoint, body, base_url, options) =>
-    apiClient(endpoint, { ...options, method: 'PUT', body }, base_url);
+  const put = (endpoint, body, options) =>
+    apiClient(endpoint, { ...options, method: 'PUT', body });
 
-  const del = (endpoint, options, base_url) =>
-    apiClient(endpoint, { ...options, method: 'DELETE' }, base_url);
+  const del = (endpoint, options) =>
+    apiClient(endpoint, { ...options, method: 'DELETE' });
 
   // windowオブジェクトにapiClientを公開
   window.apiClient = {
