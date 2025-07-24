@@ -877,8 +877,6 @@ Resources:
               OriginProtocolPolicy: https-only
           - Id: AimonContentsS3Origin
             DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
-            OriginAccessControlId: 'ai-mon-contents-files.s3.ap-northeast-1.amazonaws.com'
-            S3OriginConfig: {}
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
