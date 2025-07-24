@@ -79,3 +79,12 @@ jobs:
 
       - name: Sync frontend-s3 directory to S3 bucket
         run: aws s3 sync ./frontend/out s3://ai-mon-app/ai-mon/ --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
+
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        env:
+          # CLOUDFRONT_DISTRIBUTION_ID は、リポジトリの Settings > Secrets and variables > Actions で設定してください
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          # AWS_SESSION_TOKEN: ${{ secrets.AWS_SESSION_TOKEN }} # 必要に応じて
+          role-to-assume: ${{secrets.AWS_S3_ROLE}}
