@@ -940,7 +940,7 @@ Resources:
             SmoothStreaming: false
             Compress: true
         DefaultCacheBehavior:
-          TargetOriginId: AimonContentsS3Origin
+          TargetOriginId: AimonAppS3Origin
           ViewerProtocolPolicy: redirect-to-https
           AllowedMethods:
             - GET
