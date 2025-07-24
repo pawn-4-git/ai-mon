@@ -851,6 +851,15 @@ Resources:
       ResourceGroupName:
         Ref: ApplicationResourceGroup
       AutoConfigurationEnabled: 'true'
+  AimonOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub 'AimonOAC-${AWS::StackName}'
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
   AimonCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -864,16 +873,14 @@ Resources:
               OriginProtocolPolicy: https-only
           - Id: AimonContentsS3Origin
             DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: http-only
+            OriginAccessControlId: !GetAtt AimonOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
           - Id: AimonAppS3Origin
             DomainName: !Sub 'ai-mon-app.s3.amazonaws.com'
-            CustomOriginConfig:
-              HTTPPort: 80
-              HTTPSPort: 443
-              OriginProtocolPolicy: http-only
+            OriginAccessControlId: !GetAtt AimonOAC.Id
+            S3OriginConfig:
+              OriginAccessIdentity: ''
         CacheBehaviors:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod*"
