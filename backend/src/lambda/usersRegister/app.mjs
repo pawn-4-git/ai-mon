@@ -143,6 +143,14 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 201,
+            headers: {
+                // HttpOnly, Secure, SameSite=Strict を設定してクッキーを返す
+                'Set-Cookie': [
+                    `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
+                    `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
+                    `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`
+                ]
+            },
             body: JSON.stringify({
                 message: "User registered and session created successfully.",
                 UserId: userId,
