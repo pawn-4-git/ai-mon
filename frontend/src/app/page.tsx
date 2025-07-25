@@ -45,10 +45,11 @@ export default function LoginPage() {
       }
 
       // apiClient.post の呼び出しから型引数を削除し、戻り値に型アサーションを使用
-      const response = await window.apiClient.post(
+      const _response = await window.apiClient.post(
         endpoint,
         { anonymous: true }
       ) as ApiResponse;
+      console.log(_response); // 未使用変数の警告を回避するため
 
       alert('匿名アカウントが作成されました！');
 
