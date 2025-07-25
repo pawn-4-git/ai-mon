@@ -45,15 +45,18 @@ export default function LoginPage() {
       }
 
       // apiClient.post の呼び出しから型引数を削除し、戻り値に型アサーションを使用
+      console.log('API call before');
       const _response = await window.apiClient.post(
         endpoint,
         { anonymous: true }
       ) as ApiResponse;
-      console.log(_response); // 未使用変数の警告を回避するため
+      console.log('API call after:', _response); // 未使用変数の警告を回避するため
 
       alert('匿名アカウントが作成されました！');
+      console.log('Alert shown');
 
       router.push('/quiz-list');
+      console.log('Navigation attempted');
 
     } catch (error) {
       console.error('Failed to create anonymous user:', error);
