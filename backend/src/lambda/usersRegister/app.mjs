@@ -148,6 +148,7 @@ export const lambdaHandler = async (event) => {
                 UserId: userId,
                 SessionId: sessionId,
                 SessionVersionId: sessionVersionId,
+                AccountName: finalAccountName,
             }),
         };
     } catch (error) {
