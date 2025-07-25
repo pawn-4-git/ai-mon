@@ -50,17 +50,7 @@ export default function LoginPage() {
         { anonymous: true }
       ) as ApiResponse;
 
-      // response が ApiResponse 型であることを確認してからプロパティにアクセス
-      const { AccountName, SessionId, SessionVersionId } = response;
-
-      console.log('Anonymous user created successfully:', response);
       alert('匿名アカウントが作成されました！');
-
-      // --- クッキーに保存する処理を追加 ---
-      document.cookie = `username=${AccountName}; path=/; max-age=86400`;
-      document.cookie = `sessionId=${SessionId}; path=/; max-age=86400`;
-      document.cookie = `sessionVersionId=${SessionVersionId}; path=/; max-age=86400`;
-      // --- クッキー保存処理ここまで ---
 
       router.push('/quiz-list');
 
