@@ -43,6 +43,15 @@ export default function LoginPage() {
 
       console.log('Anonymous user created successfully:', response);
       alert('匿名アカウントが作成されました！');
+
+      // --- クッキーに保存する処理を追加 ---
+      const { AccountName, SessionId, SessionVersionId } = response;
+
+      document.cookie = `username=${AccountName}; path=/; max-age=86400`;
+      document.cookie = `sessionId=${SessionId}; path=/; max-age=86400`;
+      document.cookie = `sessionVersionId=${SessionVersionId}; path=/; max-age=86400`;
+      // --- クッキー保存処理ここまで ---
+
       router.push('/quiz-list');
 
     } catch (error) {
