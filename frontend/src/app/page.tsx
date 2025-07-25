@@ -35,18 +35,28 @@ export default function LoginPage() {
       }
 
       const endpoint = '/Prod/users/register';
+      // レスポンスの型を明示的に定義
+      interface ApiResponse {
+        message: string;
+        UserId: string;
+        SessionId: string;
+        SessionVersionId: string;
+        AccountName: string;
+      }
+
+      // apiClient.post の呼び出しから型引数を削除し、戻り値に型アサーションを使用
       const response = await window.apiClient.post(
         endpoint,
-        { anonymous: true },
-        {} // options
-      );
+        { anonymous: true }
+      ) as ApiResponse;
+
+      // response が ApiResponse 型であることを確認してからプロパティにアクセス
+      const { AccountName, SessionId, SessionVersionId } = response;
 
       console.log('Anonymous user created successfully:', response);
       alert('匿名アカウントが作成されました！');
 
       // --- クッキーに保存する処理を追加 ---
-      const { AccountName, SessionId, SessionVersionId } = response;
-
       document.cookie = `username=${AccountName}; path=/; max-age=86400`;
       document.cookie = `sessionId=${SessionId}; path=/; max-age=86400`;
       document.cookie = `sessionVersionId=${SessionVersionId}; path=/; max-age=86400`;
