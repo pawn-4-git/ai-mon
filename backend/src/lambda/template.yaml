@@ -979,6 +979,11 @@ Resources:
           MaxTTL: 31536000
           SmoothStreaming: false
           Compress: true
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponsePagePath: /ai-mon/index.html
+            ResponseCode: 200
+            ErrorCachingMinTTL: 0
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
