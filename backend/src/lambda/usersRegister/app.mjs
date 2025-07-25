@@ -75,7 +75,7 @@ export const lambdaHandler = async (event) => {
                     body: JSON.stringify({ message: "AccountName must contain at least one alphabet and one number." }),
                 };
             }
-            // --- 追加するバリデーションここまで ---
+            // --- 追加するバリデーション�����こまで ---
 
             finalAccountName = requestedAccountName;
         } else {
@@ -108,7 +108,7 @@ export const lambdaHandler = async (event) => {
         // AccountNameの一意性を保証するためのアイテム
         const accountNameUniqueItem = {
             UserId: `${ACCOUNT_NAME_UNIQUE_PREFIX}${finalAccountName}`,
-            // このアイテムのTTLも設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
+            // このアイテムのTTL��設��しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
             ExpiresAt: userTtlTimestamp, 
         };
 
@@ -143,11 +143,15 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 201,
-            "cookies": [
-                `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
-                `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
-                `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`
-            ],
+            headers: {
+                "Content-Type": "application/json",
+                // HttpOnly, Secure, SameSite=Strict を設定してクッキーを返す
+                "Set-Cookie": [
+                    `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
+                    `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`,
+                    `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`
+                ]
+            },
             body: JSON.stringify({
                 message: "User registered and session created successfully.",
                 UserId: userId,
@@ -155,6 +159,7 @@ export const lambdaHandler = async (event) => {
                 SessionVersionId: sessionVersionId,
                 AccountName: finalAccountName,
             }),
+            // isBase64Encoded: false // 必要に応じて残すか削除
         };
     } catch (error) {
         // トランザクションが条件チェックの失敗によってキャンセルされたかを確認
