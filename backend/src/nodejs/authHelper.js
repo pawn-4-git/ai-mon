@@ -7,6 +7,7 @@ const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
+const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
 const getCookieValue = (cookieHeader, cookieName) => {
     if (!cookieHeader) return undefined;
