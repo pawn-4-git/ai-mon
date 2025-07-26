@@ -57,7 +57,7 @@ export const lambdaHandler = async (event) => {
         const queryUserCommand = new QueryCommand({
             TableName: USERS_TABLE_NAME,
             IndexName: "AccountNameIndex", // Specify the GSI name
-            KeyConditionExpression: "accountName = :accName", // Use accountName as the key condition
+            KeyConditionExpression: "AccountName = :accName", // Use accountName as the key condition
             ExpressionAttributeValues: {
                 ":accName": accountName, // Use the provided accountName
             },
