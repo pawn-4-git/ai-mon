@@ -58,7 +58,7 @@ export const lambdaHandler = async (event) => {
         const queryUserCommand = new QueryCommand({
             TableName: USERS_TABLE_NAME,
             IndexName: "AccountNameIndex", // Specify the GSI name
-            KeyConditionExpression: "accountName = :accName", // Use accountName as the key condition
+            KeyConditionExpression: "AccountName = :accName", // Use accountName as the key condition
             ExpressionAttributeValues: {
                 ":accName": accountName, // Use the provided accountName
             },
@@ -86,11 +86,11 @@ export const lambdaHandler = async (event) => {
         const userId = userItem.UserId; // Assuming UserId is projected or part of the item
 
         if (!userId) {
-             console.error(`UserId not found in the user item for accountName: ${accountName}`);
-             return {
-                 statusCode: 500,
-                 body: JSON.stringify({ message: "Internal server error: User ID not found." }),
-             };
+            console.error(`UserId not found in the user item for accountName: ${accountName}`);
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ message: "Internal server error: User ID not found." }),
+            };
         }
 
         // --- Session Creation ---
