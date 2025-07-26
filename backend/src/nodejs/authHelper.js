@@ -8,25 +8,21 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
+const getCookieValue = (cookieHeader, cookieName) => {
+    if (!cookieHeader) return undefined;
+    const match = cookieHeader.match(new RegExp(`(?:^|;\s*)${cookieName}=([^;]*)`));
+    return match ? match[1] : undefined;
+};
+
 export const validateSession = async (event) => {
     if (!SESSIONS_TABLE_NAME) {
         throw new Error("SESSIONS_TABLE_NAME environment variable is not set.");
     }
 
     const cookieHeader = event.headers?.cookie;
-    let sessionId;
-    let sessionVersionId;
+    const sessionId = getCookieValue(cookieHeader, 'sessionId');
+    const sessionVersionId = getCookieValue(cookieHeader, 'sessionVersionId');
 
-    if (cookieHeader) {
-        const sessionIdMatch = cookieHeader.match(/(?:^|;\s*)sessionid=([^;]*)/);
-        if (sessionIdMatch) {
-            sessionId = sessionIdMatch[1];
-        }
-        const sessionVersionIdMatch = cookieHeader.match(/(?:^|;\s*)sessionVersionId=([^;]*)/);
-        if (sessionVersionIdMatch) {
-            sessionVersionId = sessionVersionIdMatch[1];
-        }
-    }
 
     if (!sessionId) {
         return {
@@ -73,7 +69,7 @@ export const validateSession = async (event) => {
         await updateUserTtl(session.UserId);
 
         const newSessionVersionId = randomUUID();
-        const newExpiresAt = Math.floor(Date.now() / 1000) + 86400; // 1 day from now
+        const newExpiresAt = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 1 day from now
         const updateCommand = new UpdateCommand({
             TableName: SESSIONS_TABLE_NAME,
             Key: {
