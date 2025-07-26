@@ -21,6 +21,8 @@ export const validateSession = async (event) => {
     }
 
     const cookieHeader = event.headers?.cookie || event.headers?.Cookie;
+
+    console.log(cookieHeader);
     const sessionId = getCookieValue(cookieHeader, 'sessionId');
     const sessionVersionId = getCookieValue(cookieHeader, 'sessionVersionId');
 
