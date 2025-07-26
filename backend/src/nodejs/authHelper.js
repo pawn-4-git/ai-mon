@@ -10,8 +10,11 @@ const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
 const getCookieValue = (cookieHeader, cookieName) => {
+    console.log(cookieHeader); // 追加したログ
+    console.log(cookieName);
     if (!cookieHeader) return undefined;
     const match = cookieHeader.match(new RegExp(`(?:^|;\s*)${cookieName}=([^;]*)`));
+    console.log(match[1]);
     return match ? match[1] : undefined;
 };
 
