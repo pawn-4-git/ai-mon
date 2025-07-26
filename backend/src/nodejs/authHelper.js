@@ -13,7 +13,7 @@ const getCookieValue = (cookieHeader, cookieName) => {
     console.log(cookieHeader); // 追加したログ
     console.log(cookieName);
     if (!cookieHeader) return undefined;
-    const match = cookieHeader.match(new RegExp(`(?:^|;\s*)${cookieName}=([^;]*)`));
+    const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]*)`));
     console.log(match[1]);
     return match ? match[1] : undefined;
 };
