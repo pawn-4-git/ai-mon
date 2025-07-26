@@ -900,7 +900,7 @@ Resources:
             ForwardedValues:
               QueryString: true
               Cookies:
-                Forward: none
+                Forward: all
               Headers:
                 - Accept
                 - Accept-Language

@@ -86,7 +86,7 @@ export const lambdaHandler = async (event) => {
         const userId = randomUUID();
         const sessionId = randomUUID();
         const sessionVersionId = randomUUID();
-        
+
         const userTtlTimestamp = calculateTtl(now, USER_TTL_DAYS);
         const sessionTtlTimestamp = calculateTtl(now, SESSION_TTL_DAYS);
 
@@ -109,7 +109,7 @@ export const lambdaHandler = async (event) => {
         const accountNameUniqueItem = {
             UserId: `${ACCOUNT_NAME_UNIQUE_PREFIX}${finalAccountName}`,
             // このアイテム��TTL��設��しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
-            ExpiresAt: userTtlTimestamp, 
+            ExpiresAt: userTtlTimestamp,
         };
 
         const transactCommand = new TransactWriteCommand({
@@ -143,10 +143,14 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 201,
-            headers: {
-                "Content-Type": "application/json",
-                // HttpOnly, Secure, SameSite=Strict を設定してクッキーを返す
-                "Set-Cookie": `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400; sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400; sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; path=/; max-age=86400`
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
             },
             body: JSON.stringify({
                 message: "User registered and session created successfully.",
@@ -167,7 +171,7 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "AccountName is already taken." }),
             };
         }
-        
+
         console.error("Error processing request:", error);
         return {
             statusCode: 500,

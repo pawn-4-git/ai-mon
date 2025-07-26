@@ -36,13 +36,7 @@ export default function LoginPage() {
 
       const endpoint = '/Prod/users/register';
       // レスポンスの型を明示的に定義
-      interface ApiResponse {
-        message: string;
-        UserId: string;
-        SessionId: string;
-        SessionVersionId: string;
-        AccountName: string;
-      }
+      
 
       // apiClient.post の呼び出しから型引数を削除し、戻り値に型アサーションを使用
       await window.apiClient.post(
