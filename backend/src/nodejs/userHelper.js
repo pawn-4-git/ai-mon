@@ -31,7 +31,7 @@ export const updateUserTtl = async (userId) => { // ttlTimestamp パラメータ
     const command = new UpdateCommand({
         TableName: USERS_TABLE_NAME,
         Key: {
-            userId: userId, // プライマリキーに合わせて変更してください
+            UserId: userId, // プライマリキーに合わせて変更してください
         },
         UpdateExpression: "SET ExpiresAt = :expiresAt, LastLoginAt = :lastLoginAt", // ExpiresAtとLastLoginAtを更新
         ExpressionAttributeValues: {
