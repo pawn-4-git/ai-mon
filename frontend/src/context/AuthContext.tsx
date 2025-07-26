@@ -44,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!window.apiClient) {
       console.error('apiClient is not available on window object.');
       // フォールバックとして、またはエラーとして処理
-      setUser(null); // 仮のログアウト処理
       return;
     }
     try {
