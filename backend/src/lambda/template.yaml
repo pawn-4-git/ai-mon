@@ -108,9 +108,7 @@ Resources:
       CodeUri: usersLogout/
       Handler: app.lambdaHandler
       Policies:
-        - DynamoDBReadPolicy:
-            TableName: !Ref SessionsTableName
-        - DynamoDBWritePolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref SessionsTableName
         - DynamoDBWritePolicy:
             TableName: !Ref UsersTableName
