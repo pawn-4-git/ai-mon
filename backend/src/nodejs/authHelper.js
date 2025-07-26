@@ -20,7 +20,7 @@ export const validateSession = async (event) => {
         throw new Error("SESSIONS_TABLE_NAME environment variable is not set.");
     }
 
-    const cookieHeader = event.headers?.cookie;
+    const cookieHeader = event.headers?.cookie || event.headers?.Cookie;
     const sessionId = getCookieValue(cookieHeader, 'sessionId');
     const sessionVersionId = getCookieValue(cookieHeader, 'sessionVersionId');
 
