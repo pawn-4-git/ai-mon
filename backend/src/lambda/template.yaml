@@ -900,7 +900,11 @@ Resources:
             ForwardedValues:
               QueryString: true
               Cookies:
-                Forward: all
+                Forward: whitelist
+                WhitelistedNames:
+                  - username
+                  - sessionId
+                  - sessionVersionId
               Headers:
                 - Accept
                 - Accept-Language
@@ -998,4 +1002,3 @@ Outputs:
   AimonCloudfrontDomainName:
     Description: "Domain name of the CloudFront distribution"
     Value: !GetAtt AimonCloudfront.DomainName
-
