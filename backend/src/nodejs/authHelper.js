@@ -57,7 +57,6 @@ export const validateSession = async (event) => {
         const session = response.Item;
 
         if (session.SessionVersionId !== sessionVersionId) {
-            console.log("CookiesessionVersionId:" + sessionVersionId + " dynamodbsessionVersionId:" + session.SessionVersionId)
             return {
                 statusCode: 401,
                 body: JSON.stringify({ message: "Session version mismatch." }),
