@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
+import { updateUserTtl } from '../../nodejs/userHelper'; // Import updateUserTtl
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -112,13 +113,13 @@ export const lambdaHandler = async (event) => {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
                 // Set-Cookieを配列として指定する
                 "Set-Cookie": [
-                    `username=${accountName}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
                 ]
             },
             body: JSON.stringify({
-                message: "Login successful."
+                message: "Login successful.",
+                AccountName: accountName
             }),
         };
     } catch (error) {

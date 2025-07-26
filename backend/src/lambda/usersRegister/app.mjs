@@ -75,7 +75,7 @@ export const lambdaHandler = async (event) => {
                     body: JSON.stringify({ message: "AccountName must contain at least one alphabet and one number." }),
                 };
             }
-            // --- 追加するバリデーション�������こまで ---
+            // --- 追加するバリデーションここまで ---
 
             finalAccountName = requestedAccountName;
         } else {
@@ -108,7 +108,7 @@ export const lambdaHandler = async (event) => {
         // AccountNameの一意性を保証するためのアイテム
         const accountNameUniqueItem = {
             UserId: `${ACCOUNT_NAME_UNIQUE_PREFIX}${finalAccountName}`,
-            // このアイテム��TTL��設��しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
+            // このアイテムTTLを設定しておくと、将来的にユーザー削除機能などを実装する際に役立ちます
             ExpiresAt: userTtlTimestamp,
         };
 
@@ -147,16 +147,12 @@ export const lambdaHandler = async (event) => {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
                 // Set-Cookieを配列として指定する
                 "Set-Cookie": [
-                    `username=${finalAccountName}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
                 ]
             },
             body: JSON.stringify({
                 message: "User registered and session created successfully.",
-                UserId: userId,
-                SessionId: sessionId,
-                SessionVersionId: sessionVersionId,
                 AccountName: finalAccountName,
             }),
             // isBase64Encoded: false // 必要に応じて残すか削除
