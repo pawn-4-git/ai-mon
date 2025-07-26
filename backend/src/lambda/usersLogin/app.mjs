@@ -9,7 +9,6 @@ const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
 const SESSION_TTL_DAYS = 1;
-// ACCOUNT_NAME_UNIQUE_PREFIX is no longer needed for the query itself, but might be relevant for the UserId in the session table.
 
 const calculateTtl = (baseDate, days) => {
     const ttlDate = new Date(baseDate);
@@ -58,7 +57,7 @@ export const lambdaHandler = async (event) => {
         const queryUserCommand = new QueryCommand({
             TableName: USERS_TABLE_NAME,
             IndexName: "AccountNameIndex", // Specify the GSI name
-            KeyConditionExpression: "AccountName = :accName", // Use accountName as the key condition
+            KeyConditionExpression: "accountName = :accName", // Use accountName as the key condition
             ExpressionAttributeValues: {
                 ":accName": accountName, // Use the provided accountName
             },
@@ -75,14 +74,7 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        // Assuming the first item is the correct user and it contains the actual UserId
         const userItem = userQueryResult.Items[0];
-        // We need the UserId to create the session. Assuming userItem.UserId exists.
-        // If UserId is not directly available in the item returned by the GSI query,
-        // you might need to adjust this part based on what the GSI returns.
-        // For example, if the GSI only returns accountName and a different identifier,
-        // you might need another query to UsersTable using the primary key to get the UserId.
-        // However, typically, GSI projection includes the primary key attributes, so UserId should be available.
         const userId = userItem.UserId; // Assuming UserId is projected or part of the item
 
         if (!userId) {
@@ -96,15 +88,15 @@ export const lambdaHandler = async (event) => {
         // --- Session Creation ---
         const now = new Date();
         const sessionId = randomUUID();
+        const sessionVersionId = randomUUID(); // Generate sessionVersionId
         const sessionTtlTimestamp = calculateTtl(now, SESSION_TTL_DAYS);
 
         const sessionItem = {
-            SessionId: sessionId, // Assuming SessionId is the partition key for SessionsTable
-            UserId: userId,       // Assuming UserId is a sort key or attribute in SessionsTable
-            CreatedAt: now.toISOString(), // Store as ISO string for better readability and compatibility
-            ExpiresAt: sessionTtlTimestamp, // Unix timestamp in seconds
-            // Add any other attributes required by SessionsTable schema
-            // e.g., SessionVersionId: randomUUID(),
+            SessionId: sessionId,
+            UserId: userId,
+            CreatedAt: now.toISOString(),
+            ExpiresAt: sessionTtlTimestamp,
+            SessionVersionId: sessionVersionId, // Add SessionVersionId to the item
         };
 
         const putSessionCommand = new PutCommand({
@@ -114,20 +106,23 @@ export const lambdaHandler = async (event) => {
 
         await docClient.send(putSessionCommand);
 
-        console.log(`Session created for UserId: ${userId}, SessionId: ${sessionId}`);
-
         return {
             statusCode: 200,
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `username=${accountName}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionId=${sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
+            },
             body: JSON.stringify({
-                message: "Login successful.",
-                UserId: userId,
-                SessionId: sessionId,
-                // Include other relevant session details if needed
+                message: "Login successful."
             }),
         };
     } catch (error) {
         console.error("Error processing login request:", error);
-        // Provide a more specific error message if possible, but avoid leaking sensitive info
         return {
             statusCode: 500,
             body: JSON.stringify({ message: "Internal server error during login process." }),
