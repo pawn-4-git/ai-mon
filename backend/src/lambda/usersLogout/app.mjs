@@ -31,8 +31,18 @@ export const lambdaHandler = async (event) => {
 
         await docClient.send(deleteCommand);
 
+        const responseHeaders = {
+            "Set-Cookie": [
+                `username=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`,
+                `sessionId=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`,
+                `sessionVersionId=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax`
+            ],
+            "Content-Type": "application/json",
+        };
+
         return {
             statusCode: 200,
+            multiValueHeaders: responseHeaders,
             body: JSON.stringify({
                 message: "Logout successful.",
             }),
