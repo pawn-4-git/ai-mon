@@ -41,18 +41,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = async () => {
-    try {
-      const res = await fetch(`/Prod/users/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    if (!window.apiClient) {
+      console.error('apiClient is not available on window object.');
+      // フォールバックとして、またはエラーとして処理
+      setUser(null); // 仮のログアウト処理
+      return;
+    }
 
-      if (!res.ok) {
-        // レスポンスがOKでない場合はエラーをスローします
-        throw new Error('Logout failed');
-      }
+    try {
+      // apiClientを使用してログアウトAPIを呼び出す
+      await window.apiClient.post('/Prod/users/logout', undefined);
 
       // サーバーでのログアウトが成功したら、クライアントの状態を更新します
       setUser(null);
