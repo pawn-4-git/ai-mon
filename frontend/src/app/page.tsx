@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Script from 'next/script'; // Scriptコンポーネントをインポート
+import Script from 'next/script';
 
-// apiClientをwindowオブジェクトのプロパティとして型定義
 declare global {
   interface Window {
     apiClient?: {
@@ -21,38 +20,63 @@ export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
 
+  const loginUsernameRef = useRef<HTMLInputElement>(null);
+  const registerUsernameRef = useRef<HTMLInputElement>(null);
+
+  const handleLogin = async () => {
+    if (!window.apiClient) {
+      alert('API���ライアントが利用できません。ページを再読み込みしてください。');
+      return;
+    }
+
+    const accountName = loginUsernameRef.current?.value.trim();
+
+    if (!accountName) {
+      alert('アカウント名を入力してください。');
+      return;
+    }
+
+    try {
+      // リクエストボディをJSON形式に変更
+      const requestBody = { accountName: accountName };
+      const response = await window.apiClient.post('/Prod/users/login', requestBody);
+      const loginResult = response as { message: string; UserId: string; SessionId: string };
+
+      if (loginResult && loginResult.message === 'Login successful.') {
+        alert('ログインに成功しました！');
+        router.push('/quiz-list');
+      } else {
+        alert(loginResult?.message || 'ログインに失敗しました。');
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+      alert('ログイン中にエラーが発生しました。');
+    }
+  };
+
   const handleNavigation = () => {
     router.push('/quiz-list');
   };
 
-  // handleAnonymousCreation 関数をコンポーネント内���移動し、API呼び出しを追加
   const handleAnonymousCreation = async () => {
     try {
       if (!window.apiClient) {
-        // ユーザーに機能がまだ利用できないことを通知
         alert('機能の準備中です。少し待ってからもう一度お試しください。');
         throw new Error('apiClient is not available');
       }
 
       const endpoint = '/Prod/users/register';
-      // レスポンスの型を明示的に定義
-      
-
-      // apiClient.post の呼び出しから型引数を削除し、戻り値に型アサーションを使用
       await window.apiClient.post(
         endpoint,
         { anonymous: true }
       );
 
       alert('匿名アカウントが作成されました！');
-
       router.push('/quiz-list');
 
     } catch (error) {
       console.error('Failed to create anonymous user:', error);
-      // ユーザーにエラーを通知するが、apiClientがない場��のアラートと重複しないように
       if (String(error).includes('apiClient is not available') || String(error).includes('not defined')) {
-        // すでにアラートが表示されているので何もしない
       } else {
         alert('匿名アカウントの作成に失敗しました。');
       }
@@ -71,28 +95,25 @@ export default function LoginPage() {
             <h1>あいもん</h1>
           </div>
 
-          {/* Login Form */}
           <div id="login-form" style={{ display: isLoginView ? 'block' : 'none' }}>
             <h2>ログイン</h2>
             <div className="form-group">
               <label htmlFor="login-username">アカウント名:</label>
-              <input type="text" id="login-username" placeholder="8桁以上の英数字" />
+              <input type="text" id="login-username" placeholder="8桁以上の英数字" ref={loginUsernameRef} />
             </div>
-            <button onClick={handleNavigation}>ログイン</button>
+            <button onClick={handleLogin}>ログイン</button>
             <p className="toggle-link" onClick={() => setIsLoginView(false)}>
               アカウントをお持ちでない方はこちら
             </p>
           </div>
 
-          {/* Register Form */}
           <div id="register-form" style={{ display: isLoginView ? 'none' : 'block' }}>
             <h2>ユーザー登録</h2>
             <div className="form-group">
               <label htmlFor="register-username">アカウント名:</label>
-              <input type="text" id="register-username" placeholder="8桁以上の英数字" />
+              <input type="text" id="register-username" placeholder="8桁以上の英数字" ref={registerUsernameRef} />
             </div>
             <button onClick={handleNavigation}>登録</button>
-            {/* 匿名アカウント作成ボタン */}
             <button onClick={handleAnonymousCreation}>
               匿名でアカウント作成
             </button>
