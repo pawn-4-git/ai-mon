@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { authUser } from '../../nodejs/authHelper.js';
+import { authUser } from '/out/authHelper.js';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -13,7 +13,7 @@ const parseCookies = (cookieHeader) => {
     if (cookieHeader) {
         cookieHeader.split(';').forEach(cookie => {
             const parts = cookie.match(/(.*?)=(.*)$/)
-            if(parts) {
+            if (parts) {
                 cookies[parts[1].trim()] = (parts[2] || '').trim();
             }
         });
