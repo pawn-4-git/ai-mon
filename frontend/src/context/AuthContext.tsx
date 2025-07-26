@@ -40,8 +40,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return true;
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    try {
+      const res = await fetch(`/Prod/users/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!res.ok) {
+        // レスポンスがOKでない場合はエラーをスローします
+        throw new Error('Logout failed');
+      }
+
+      // サーバーでのログアウトが成功したら、クライアントの状態を更新します
+      setUser(null);
+
+    } catch (error) {
+      console.error('Logout error:', error);
+      // ここでUIにエラーメッセージを表示するなどの処理を追加することもできます
+    }
   };
 
   return (
