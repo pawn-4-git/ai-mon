@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { authUser } from '/out/authHelper.js';
+import { validateSession } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -31,7 +31,7 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
-        const authResult = await authUser(event.headers);
+        const authResult = await validateSession(event);
         if (authResult.statusCode !== 200) {
             return authResult;
         }
