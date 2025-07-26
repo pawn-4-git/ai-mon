@@ -100,6 +100,33 @@ Resources:
             Path: /users/login
             Method: post
 
+  UsersGetFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: usersGet/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UsersGetEvent:
+          Type: Api
+          Properties:
+            Path: /users/get
+            Method: get
+
   UsersLogoutFunction:
     Type: AWS::Serverless::Function
     Properties:
