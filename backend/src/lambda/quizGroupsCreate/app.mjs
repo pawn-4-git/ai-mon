@@ -24,10 +24,10 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
-        if (!isAdmin(authResult.userId)) {
+        if (!(await isAdmin(authResult.userId))) {
             return {
-                statusCode: 401,
-                body: JSON.stringify({ message: "Unauthorized: Missing session credentials." }),
+                statusCode: 403, // 401 Unauthorized から 403 Forbidden に変更する方がより適切
+                body: JSON.stringify({ message: "Forbidden: You do not have permission to perform this action." }),
             };
         }
 
