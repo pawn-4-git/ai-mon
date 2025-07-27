@@ -9,6 +9,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
+const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
 /**
  * ユーザーの有効期限 (TTL) と最終ログイン時刻を更新する関数
@@ -59,7 +60,7 @@ export const updateSessionTtl = async (sessionId) => {
     }
 
     const newSessionVersionId = randomUUID();
-    const newExpiresAt = Math.floor(Date.now() / 1000) + (24 * 60 * 60); // 1 day from now
+    const newExpiresAt = Math.floor(Date.now() / 1000) + ONE_DAY_IN_SECONDS; // 1 day from now
 
     const command = new UpdateCommand({
         TableName: SESSIONS_TABLE_NAME,
