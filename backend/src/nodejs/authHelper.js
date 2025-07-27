@@ -63,7 +63,7 @@ export const validateSession = async (event) => {
             };
         }
         return {
-            statusCode: 200,
+            isValid: true,
             userId: session.UserId,
             newSessionVersionId: sessionVersionId,
         };
