@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import { useAuth } from '@/context/AuthContext'; // useAuth をインポート
 
 declare global {
   interface Window {
@@ -19,13 +20,14 @@ declare global {
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
+  const auth = useAuth(); // AuthContext を使用
 
   const loginUsernameRef = useRef<HTMLInputElement>(null);
   const registerUsernameRef = useRef<HTMLInputElement>(null);
 
   const handleLogin = async () => {
     if (!window.apiClient) {
-      alert('API���ライアントが利用できません。ページを再読み込みしてください。');
+      alert('APIクライアントが利用できません。ページを再読み込みしてください。');
       return;
     }
 
@@ -37,16 +39,15 @@ export default function LoginPage() {
     }
 
     try {
-      // リクエストボディをJSON形式に変更
       const requestBody = { accountName: accountName };
-      const response = await window.apiClient.post('/Prod/users/login', requestBody);
-      const loginResult = response as { message: string; UserId: string; SessionId: string };
+      const response = await window.apiClient.post('/Prod/users/login', requestBody) as { data: { AccountName: string, message: string } };
 
-      if (loginResult && loginResult.message === 'Login successful.') {
+      if (response.data && response.data.AccountName) {
+        auth.login(response.data.AccountName); // AuthContext の状態を更新
         alert('ログインに成功しました！');
         router.push('/quiz-list');
       } else {
-        alert(loginResult?.message || 'ログインに失敗しました。');
+        alert(response.data?.message || 'ログインに失敗しました。');
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -66,13 +67,18 @@ export default function LoginPage() {
       }
 
       const endpoint = '/Prod/users/register';
-      await window.apiClient.post(
+      const response = await window.apiClient.post(
         endpoint,
         { anonymous: true }
-      );
+      ) as { data: { AccountName: string } };
 
-      alert('匿名アカウントが作成されました！');
-      router.push('/quiz-list');
+      if (response.data && response.data.AccountName) {
+        auth.login(response.data.AccountName); // AuthContext の状態を更新
+        alert('匿名アカウントが作成されました！');
+        router.push('/quiz-list');
+      } else {
+        alert('匿名アカウントの作成に失敗しました。');
+      }
 
     } catch (error) {
       console.error('Failed to create anonymous user:', error);
