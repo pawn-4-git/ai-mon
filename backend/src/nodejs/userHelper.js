@@ -2,11 +2,14 @@
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { randomUUID } from "crypto";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
-const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME; // 環境変数からテーブル名を取得
+const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
+const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
+const ONE_DAY_IN_SECONDS = 24 * 60 * 60;
 
 /**
  * ユーザーの有効期限 (TTL) と最終ログイン時刻を更新する関数
@@ -14,40 +17,69 @@ const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME; // 環境変数からテ�
  * @param {string} userId - 更新対象のユーザーID
  * @returns {Promise<void>}
  */
-export const updateUserTtl = async (userId) => { // ttlTimestamp パラメータを削除
+export const updateUserTtl = async (userId) => {
     if (!USERS_TABLE_NAME) {
         throw new Error("USERS_TABLE_NAME environment variable is not set.");
     }
 
-    // 現在時刻を取得
     const now = new Date();
-    // 最終ログイン時刻をISO 8601形式で取得
     const lastLoginAt = now.toISOString();
-
-    // 1ヶ月後のTTLを計算
     const oneMonthLater = new Date(now.setMonth(now.getMonth() + 1));
-    const ttlTimestamp = Math.floor(oneMonthLater.getTime() / 1000); // 秒単位のUNIXタイムスタンプ
+    const ttlTimestamp = Math.floor(oneMonthLater.getTime() / 1000);
 
     const command = new UpdateCommand({
         TableName: USERS_TABLE_NAME,
         Key: {
-            UserId: userId, // プライマリキーに合わせて変更してください
+            UserId: userId,
         },
-        UpdateExpression: "SET ExpiresAt = :expiresAt, LastLoginAt = :lastLoginAt", // ExpiresAtとLastLoginAtを更新
+        UpdateExpression: "SET ExpiresAt = :expiresAt, LastLoginAt = :lastLoginAt",
         ExpressionAttributeValues: {
             ":expiresAt": ttlTimestamp,
-            ":lastLoginAt": lastLoginAt, // 最終ログイ���時刻を設定
+            ":lastLoginAt": lastLoginAt,
         },
-        ReturnValues: "UPDATED_NEW", // 更新後の属性を返す
+        ReturnValues: "UPDATED_NEW",
     });
 
     try {
-        const response = await docClient.send(command);
-        console.log(`User TTL updated to ${ttlTimestamp} and LastLoginAt updated to ${lastLoginAt} for userId: ${userId}`, response);
+        await docClient.send(command);
+        console.log(`User TTL and LastLoginAt updated for userId: ${userId}`);
     } catch (error) {
         console.error(`Error updating user TTL and LastLoginAt for userId: ${userId}`, error);
         throw error;
     }
 };
 
-// 他のユーザー関連ヘルパー関数があればここに追加
+/**
+ * セッションの有効期限 (TTL) とセッションバージョンIDを更新する関数
+ * @param {string} sessionId - 更新対象のセッションID
+ * @returns {Promise<string>} - 新しいセッションバージョンID
+ */
+export const updateSessionTtl = async (sessionId) => {
+    if (!SESSIONS_TABLE_NAME) {
+        throw new Error("SESSIONS_TABLE_NAME environment variable is not set.");
+    }
+
+    const newSessionVersionId = randomUUID();
+    const newExpiresAt = Math.floor(Date.now() / 1000) + ONE_DAY_IN_SECONDS; // 1 day from now
+
+    const command = new UpdateCommand({
+        TableName: SESSIONS_TABLE_NAME,
+        Key: {
+            SessionId: sessionId,
+        },
+        UpdateExpression: "set SessionVersionId = :v, ExpiresAt = :e",
+        ExpressionAttributeValues: {
+            ":v": newSessionVersionId,
+            ":e": newExpiresAt,
+        },
+    });
+
+    try {
+        await docClient.send(command);
+        console.log(`Session TTL and Version updated for sessionId: ${sessionId}`);
+        return newSessionVersionId;
+    } catch (error) {
+        console.error(`Error updating session for sessionId: ${sessionId}`, error);
+        throw error;
+    }
+};
