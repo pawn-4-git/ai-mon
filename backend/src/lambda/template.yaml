@@ -37,6 +37,10 @@ Parameters:
     Type: String
     Description: The name of the DynamoDB table for questions.
     Default: QuestionsTable
+  AimonSecretName:
+    Type: String
+    Description: The name of the secret containing application configurations.
+    Default: ai-mon-secret
 
 Resources:
   SharedLogicLayer:
@@ -199,6 +203,8 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuizGroupsTableName
+        - SecretsManagerReadPolicy:
+            SecretName: !Ref AimonSecretName
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName

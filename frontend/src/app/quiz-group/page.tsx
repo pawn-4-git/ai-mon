@@ -53,7 +53,7 @@ export default function QuizGroupPage() {
       return;
     }
     if (!window.apiClient) {
-      alert('APIクライアントの準備ができていません。');
+      alert('APIクライアントの準備ができていませ��。');
       return;
     }
 
@@ -63,9 +63,16 @@ export default function QuizGroupPage() {
         questionCount,
         timeLimitMinutes,
       };
-      await window.apiClient.post('/Prod/quiz-groups', body);
-      alert('新しい問題グループが作成されました！');
-      router.push('/quiz-list');
+      // レスポンスを受け取るように変更
+      const response = await window.apiClient.post('/Prod/quiz-groups', body) as { GroupId: string };
+      
+      if (response && response.GroupId) {
+        alert('新しい問題グループが作成されました！');
+        // create-quiz に GroupId を渡して遷移
+        router.push(`/create-quiz?groupId=${response.GroupId}`);
+      } else {
+        throw new Error("GroupId was not returned from the API.");
+      }
     } catch (error) {
       console.error('Failed to create quiz group:', error);
       alert('問題グループの作成に失敗しました。');
