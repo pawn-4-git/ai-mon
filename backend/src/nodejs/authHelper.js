@@ -1,16 +1,67 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
 
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
+const dbClient = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(dbClient);
+const secretsClient = new SecretsManagerClient({});
 
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
+
+// 管理者IDをキャッシュするための変数
+let cachedAdminUserId = null;
 
 const getCookieValue = (cookieHeader, cookieName) => {
     if (!cookieHeader) return undefined;
     const match = cookieHeader.match(new RegExp(`${cookieName}=([^;]*)`));
     return match ? match[1] : undefined;
 };
+
+/**
+ * 指定されたuserIdが管理者であるかどうかを判定します。
+ * 管理者IDはAWS Secrets Managerから取得し、キャッシュします。
+ * @param {string} userId - チェック対象���ユーザーID
+ * @returns {Promise<boolean>} - 管理者の場合はtrue、それ以外はfalse
+ */
+export const isAdmin = async (userId) => {
+    if (!userId) {
+        return false;
+    }
+
+    // キャッシュがあればそれを使用
+    if (cachedAdminUserId) {
+        return userId === cachedAdminUserId;
+    }
+
+    const secretName = "ai-mon-secret";
+    const secretKey = "ai-mon-manager-user_id";
+
+    const command = new GetSecretValueCommand({ SecretId: secretName });
+
+    try {
+        const data = await secretsClient.send(command);
+        if (data.SecretString) {
+            const secret = JSON.parse(data.SecretString);
+            const adminId = secret[secretKey];
+
+            if (!adminId) {
+                console.error(`Error: Secret key "${secretKey}" not found in secret "${secretName}".`);
+                return false;
+            }
+
+            // 取得したIDをキャッシュ
+            cachedAdminUserId = adminId;
+            return userId === cachedAdminUserId;
+        }
+    } catch (error) {
+        console.error(`Error fetching secret "${secretName}":`, error);
+        // エラーが発生した場合は、安全のために管理者ではないと判断
+        return false;
+    }
+
+    return false;
+};
+
 
 export const validateSession = async (event) => {
     if (!SESSIONS_TABLE_NAME) {
