@@ -33,7 +33,11 @@ export const isAdmin = async (userId) => {
         return userId === cachedAdminUserId;
     }
 
-    const secretName = "ai-mon-secret";
+    const secretName = process.env.AIMON_SECRET_NAME;
+    if (!secretName) {
+        console.error("Error: AIMON_SECRET_NAME environment variable is not set.");
+        return false;
+    }
     const secretKey = "ai-mon-manager-user_id";
 
     const command = new GetSecretValueCommand({ SecretId: secretName });

@@ -203,8 +203,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuizGroupsTableName
-        - SecretsManagerReadPolicy:
-            SecretName: !Ref AimonSecretName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -213,6 +216,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsCreateEvent:
           Type: Api
