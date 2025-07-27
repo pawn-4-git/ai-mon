@@ -1,7 +1,8 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { validateSession } from "/opt/nodejs/authHelper.js";
+import { validateSession } from "/opt/authHelper.js";
+import { updateUserTtl, updateSessionTtl } from "/opt/userHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -42,7 +43,7 @@ export const lambdaHandler = async (event) => {
         }
 
         const { name, questionCount, timeLimitMinutes } = body;
-        
+
         if (!name || !questionCount || !timeLimitMinutes) {
             return {
                 statusCode: 400,
@@ -68,6 +69,9 @@ export const lambdaHandler = async (event) => {
         });
 
         await docClient.send(putCommand);
+
+        await updateUserTtl(authResult.userId);
+        await updateSessionTtl(authResult.sessionId);
 
         return {
             statusCode: 201,
