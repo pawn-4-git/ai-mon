@@ -162,9 +162,11 @@ Resources:
       CodeUri: usersDelete/
       Handler: app.lambdaHandler
       Policies:
-        - DynamoDBCrudPolicy:
+        - DynamoDBReadPolicy:
             TableName: !Ref SessionsTableName
-        - DynamoDBCrudPolicy:
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
             TableName: !Ref UsersTableName
       Environment:
         Variables:
