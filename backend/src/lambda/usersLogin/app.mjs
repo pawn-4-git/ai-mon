@@ -95,7 +95,6 @@ export const lambdaHandler = async (event) => {
         const sessionItem = {
             SessionId: sessionId,
             UserId: userId,
-            CreatedAt: now.toISOString(),
             ExpiresAt: sessionTtlTimestamp,
             SessionVersionId: sessionVersionId, // Add SessionVersionId to the item
         };

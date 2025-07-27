@@ -65,7 +65,7 @@ export const validateSession = async (event) => {
         return {
             isValid: true,
             userId: session.UserId,
-            sessionId: session.sessionId,
+            sessionId: session.SessionId,
             sessionVersionId: session.SessionVersionId,
         };
 
