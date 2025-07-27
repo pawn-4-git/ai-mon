@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { validateSession } from "/opt/authHelper.js";
+import { validateSession, isAdmin } from "/opt/authHelper.js";
 import { updateUserTtl, updateSessionTtl } from "/opt/userHelper.js";
 
 const client = new DynamoDBClient({});
@@ -22,6 +22,13 @@ export const lambdaHandler = async (event) => {
         const authResult = await validateSession(event);
         if (!authResult.isValid) {
             return authResult;
+        }
+
+        if (!isAdmin(authResult.userId)) {
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ message: "Unauthorized: Missing session credentials." }),
+            };
         }
 
         if (!event.body) {
