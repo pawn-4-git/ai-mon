@@ -8,19 +8,6 @@ const docClient = DynamoDBDocumentClient.from(client);
 const USERS_TABLE_NAME = process.env.USERS_TABLE_NAME;
 const SESSIONS_TABLE_NAME = process.env.SESSIONS_TABLE_NAME;
 
-const parseCookies = (cookieHeader) => {
-    const cookies = {};
-    if (cookieHeader) {
-        cookieHeader.split(';').forEach(cookie => {
-            const parts = cookie.match(/(.*?)=(.*)$/)
-            if (parts) {
-                cookies[parts[1].trim()] = (parts[2] || '').trim();
-            }
-        });
-    }
-    return cookies;
-};
-
 export const lambdaHandler = async (event) => {
     if (!USERS_TABLE_NAME || !SESSIONS_TABLE_NAME) {
         console.error("Table name environment variables are not set.");
@@ -32,7 +19,7 @@ export const lambdaHandler = async (event) => {
 
     try {
         const authResult = await validateSession(event);
-        if (authResult.isValid) {
+        if (!authResult.isValid) {
             return authResult;
         }
         const userId = authResult.userId;
@@ -58,8 +45,8 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 200,
-            headers: {
-                "Content-Type": "application/json"
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
             },
             body: JSON.stringify({
                 AccountName: accountName
