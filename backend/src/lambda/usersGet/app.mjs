@@ -32,7 +32,7 @@ export const lambdaHandler = async (event) => {
 
     try {
         const authResult = await validateSession(event);
-        if (authResult.statusCode !== 200) {
+        if (authResult.isValid) {
             return authResult;
         }
         const userId = authResult.userId;
