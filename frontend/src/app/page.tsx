@@ -40,14 +40,15 @@ export default function LoginPage() {
 
     try {
       const requestBody = { accountName: accountName };
-      const response = await window.apiClient.post('/Prod/users/login', requestBody) as { data: { AccountName: string, message: string } };
+      // 型アサーションから .data を削除
+      const response = await window.apiClient.post('/Prod/users/login', requestBody) as { AccountName: string, message: string };
 
-      if (response.data && response.data.AccountName) {
-        auth.login(response.data.AccountName); // AuthContext の状態を更新
+      if (response && response.AccountName) {
+        auth.login(response.AccountName); // AuthContext の状態を更新
         alert('ログインに成功しました！');
         router.push('/quiz-list');
       } else {
-        alert(response.data?.message || 'ログインに失敗しました。');
+        alert(response?.message || 'ログインに失敗しました。');
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -67,13 +68,14 @@ export default function LoginPage() {
       }
 
       const endpoint = '/Prod/users/register';
+      // 型アサーションから .data を削除
       const response = await window.apiClient.post(
         endpoint,
         { anonymous: true }
-      ) as { data: { AccountName: string } };
+      ) as { AccountName: string };
 
-      if (response.data && response.data.AccountName) {
-        auth.login(response.data.AccountName); // AuthContext の状態を更新
+      if (response && response.AccountName) {
+        auth.login(response.AccountName); // AuthContext の状態を更新
         alert('匿名アカウントが作成されました！');
         router.push('/quiz-list');
       } else {
@@ -109,7 +111,7 @@ export default function LoginPage() {
             </div>
             <button onClick={handleLogin}>ログイン</button>
             <p className="toggle-link" onClick={() => setIsLoginView(false)}>
-              アカウントをお持ちでない方はこちら
+              アカウントをお持ちでない方はこち��
             </p>
           </div>
 

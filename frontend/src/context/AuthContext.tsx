@@ -21,12 +21,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchAccountName = useCallback(async () => {
     if (!window.apiClient) return;
     try {
-      const response = await window.apiClient.get('/Prod/users/get') as { data: { AccountName: string } };
-      if (response.data && response.data.AccountName) {
-        setAccountName(response.data.AccountName);
+      // 型アサーションから .data を削除
+      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string };
+      if (response && response.AccountName) {
+        setAccountName(response.AccountName);
         // setUser state might be stale here, so we check against the response
-        if (!user || user.username !== response.data.AccountName) {
-          setUser({ id: '1', username: response.data.AccountName, email: '' });
+        if (!user || user.username !== response.AccountName) {
+          setUser({ id: '1', username: response.AccountName, email: '' });
         }
       }
     } catch (error) {
