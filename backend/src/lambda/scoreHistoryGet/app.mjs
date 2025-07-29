@@ -17,7 +17,7 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
-        const authResult = await validateSession(event);
+        const authResult = await validateSession(event, false);
         if (!authResult.isValid) {
             return authResult;
         }

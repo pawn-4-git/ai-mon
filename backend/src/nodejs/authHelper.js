@@ -72,7 +72,7 @@ export const isAdmin = async (userId) => {
 };
 
 
-export const validateSession = async (event) => {
+export const validateSession = async (event, skipDBCheck = false) => {
     if (!SESSIONS_TABLE_NAME) {
         return {
             statusCode: 500,
@@ -88,6 +88,15 @@ export const validateSession = async (event) => {
         return {
             statusCode: 401,
             body: JSON.stringify({ message: "Unauthorized: Missing session credentials." }),
+        };
+    }
+
+    if (skipDBCheck) {
+        return {
+            isValid: true,
+            userId: null, // DBをチェックしないためUserIdは取得できない
+            sessionId: sessionId,
+            sessionVersionId: sessionVersionId,
         };
     }
 

@@ -17,7 +17,7 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
-        const authResult = await validateSession(event);
+        const authResult = await validateSession(event, false);
         if (!authResult.isValid) {
             return authResult;
         }
@@ -67,7 +67,7 @@ export const lambdaHandler = async (event) => {
         const sortedScores = scores.sort((a, b) => new Date(a.SubmittedAt || a.CreatedAt) - new Date(b.SubmittedAt || b.CreatedAt));
         const recentScores = sortedScores.slice(-5);
         const olderScores = sortedScores.slice(0, -5);
-        
+
         let improvement = 0;
         if (olderScores.length > 0 && recentScores.length > 0) {
             const recentAvg = recentScores.reduce((sum, s) => sum + s.Score, 0) / recentScores.length;
