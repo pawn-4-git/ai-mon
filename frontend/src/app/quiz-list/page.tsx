@@ -3,7 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import { API_BASE_URL } from '@/lib/api_domain';
+// import { API_BASE_URL } from '@/lib/api_domain'; // API_BASE_URL は使用されていないため削除
+import Script from 'next/script'; // Script をインポート
+
+// apiClient の型定義を追加
+declare global {
+  interface Window {
+    apiClient?: {
+      request: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      // get メソッドの戻り値を Promise<unknown> に変更
+      get: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      post: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      put: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      del: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+    };
+  }
+}
 
 interface ApiQuizGroup {
   id: string;
@@ -28,13 +43,19 @@ export default function QuizListPage() {
   useEffect(() => {
     const fetchQuizGroups = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/quiz-groups`);
-        if (!response.ok) {
-          throw new Error('問題グループの取得に失敗しました。');
+        // apiClient.js の呼び出しを修正
+        if (!window.apiClient) {
+          setError('APIクライアントが利用できません。ページを再読み込みしてください。');
+          setLoading(false);
+          return;
         }
-        const data: ApiQuizGroup[] = await response.json();
+
+        // apiClient.js の get は直接データを返す想定
+        const data = await window.apiClient.get(`/Prod/quiz-groups`);
+
         // APIから返されるデータにstatusとstatusTextがないため、ダミーのデータを追加します。
-        const formattedData = data.map((group) => ({
+        // data を ApiQuizGroup[] にキャスト
+        const formattedData = (data as ApiQuizGroup[]).map((group) => ({
           ...group,
           questionCount: group.questions ? group.questions.length : 0,
           status: 'not-taken', // 仮のステータス
@@ -42,6 +63,7 @@ export default function QuizListPage() {
         }));
         setQuizGroups(formattedData);
       } catch (err) {
+        console.error('Error fetching quiz groups:', err);
         setError(err instanceof Error ? err.message : '不明なエラーが発生しました。');
       } finally {
         setLoading(false);
@@ -64,13 +86,13 @@ export default function QuizListPage() {
 
   const getStatusTextClass = (status: string) => {
     switch (status) {
-        case 'not-taken':
-          return 'not-taken-text';
-        case 'updated':
-          return 'updated-text';
-        default:
-          return '';
-      }
+      case 'not-taken':
+        return 'not-taken-text';
+      case 'updated':
+        return 'updated-text';
+      default:
+        return '';
+    }
   }
 
   if (loading) {
@@ -122,6 +144,11 @@ export default function QuizListPage() {
           新しい問題グループを作成
         </button>
       </div>
+      {/* apiClient.js を Script コンポーネントで読み込む */}
+      <Script
+        src={`/contents/js/apiClient.js`} // apiClient.js のパスを指定
+        strategy="beforeInteractive"
+      />
     </div>
   );
 }
