@@ -12,6 +12,19 @@ interface QuizGroup {
   timeLimitMinutes: number;
 }
 
+// APIから返される個々のクイズグループの型
+interface ApiQuizGroup {
+  GroupId: string;
+  Name: string;
+  QuestionCount: number;
+  TimeLimitMinutes: number;
+}
+
+// APIレスポンス全体の型
+interface QuizGroupsApiResponse {
+  groups: ApiQuizGroup[];
+}
+
 export default function QuizGroupPage() {
   const router = useRouter();
   const [quizGroups, setQuizGroups] = useState<QuizGroup[]>([]);
@@ -20,14 +33,35 @@ export default function QuizGroupPage() {
   const [questionCount, setQuestionCount] = useState<number>(10);
   const [timeLimitMinutes, setTimeLimitMinutes] = useState<number>(15);
 
-  // 既存のクイズグループをAPIから取得する代わりにモックデータを使用
+  // APIからクイズグループを取得
   useEffect(() => {
-    const fetchedGroups: QuizGroup[] = [
-      { id: 'math', name: '��学', questionCount: 10, timeLimitMinutes: 5 },
-      { id: 'history', name: '歴史', questionCount: 20, timeLimitMinutes: 10 },
-      { id: 'science', name: '科学', questionCount: 15, timeLimitMinutes: 7 },
-    ];
-    setQuizGroups(fetchedGroups);
+    const fetchQuizGroups = async () => {
+      if (!window.apiClient) {
+        alert('APIクライアントの準備ができていません。');
+        return;
+      }
+      try {
+        // APIからクイズグループのリストを取得
+        const response = (await window.apiClient.get(
+          '/Prod/quiz-groups',
+        )) as QuizGroupsApiResponse;
+        if (response && response.groups) {
+          // APIのレスポンスをフロントエンドの型にマッピング
+          const fetchedGroups: QuizGroup[] = response.groups.map(group => ({
+            id: group.GroupId,
+            name: group.Name,
+            questionCount: group.QuestionCount,
+            timeLimitMinutes: group.TimeLimitMinutes,
+          }));
+          setQuizGroups(fetchedGroups);
+        }
+      } catch (error) {
+        console.error('Failed to fetch quiz groups:', error);
+        alert('問題グループの取得に失敗しました。');
+      }
+    };
+
+    fetchQuizGroups();
   }, []);
 
   // グループ選択が変更されたときの処理
@@ -65,7 +99,7 @@ export default function QuizGroupPage() {
       };
       // レスポンスを受け取るように変更
       const response = await window.apiClient.post('/Prod/quiz-groups', body) as { GroupId: string };
-      
+
       if (response && response.GroupId) {
         alert('新しい問題グループが作成されました！');
         // create-quiz に GroupId を渡して遷移
@@ -137,7 +171,7 @@ export default function QuizGroupPage() {
             ))}
             <option value="new">（新規作成）</option>
           </select>
-          
+
           {selectedQuizGroup === 'new' && (
             <input
               type="text"
@@ -150,7 +184,7 @@ export default function QuizGroupPage() {
             />
           )}
         </div>
-        
+
         <div className="form-group">
           <label htmlFor="number-of-questions">問題数:</label>
           <input
@@ -176,7 +210,7 @@ export default function QuizGroupPage() {
             disabled={!selectedQuizGroup} // グループが選択されるまで無効
           />
         </div>
-        
+
         <div className="button-group">
           {renderButton()}
           <button onClick={handleBack}>戻る</button>
