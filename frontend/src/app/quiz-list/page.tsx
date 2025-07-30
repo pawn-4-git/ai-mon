@@ -53,18 +53,33 @@ export default function QuizListPage() {
         // apiClient.js の get は直接データを返す想定
         const data = await window.apiClient.get(`/Prod/quiz-groups`);
 
+        console.log(data);
+
+
         // APIから返されるデータにstatusとstatusTextがないため、ダミーのデータを追加します。
-        // data を ApiQuizGroup[] にキャスト
-        const formattedData = (data as ApiQuizGroup[]).map((group) => ({
-          ...group,
-          questionCount: group.questions ? group.questions.length : 0,
-          status: 'not-taken', // 仮のステータス
-          statusText: '未受験', // 仮のステータス文言
-        }));
-        setQuizGroups(formattedData);
+        // data が期待通りの形式（{ message: string, groups: ApiQuizGroup[] }）であることを確認
+        // data が存在し、かつ 'groups' プロパティを持ち、それが配列であることをより厳密にチェック
+        if (data && typeof data === 'object' && 'groups' in data && Array.isArray(data.groups)) {
+          const formattedData = (data.groups as ApiQuizGroup[]).map((group) => ({
+            ...group,
+            questionCount: group.questions ? group.questions.length : 0,
+            status: 'not-taken', // 仮のステータス
+            statusText: '未受験', // 仮のステータス文言
+          }));
+          setQuizGroups(formattedData);
+        } else {
+          // data が期待通りでない場合の処理
+          setError('APIから予期しない形式のデータが返されました。');
+          console.error('Unexpected data format:', data);
+        }
       } catch (err) {
         console.error('Error fetching quiz groups:', err);
-        setError(err instanceof Error ? err.message : '不明なエラーが発生しました。');
+        // エラーメッセージをより具体的に表示
+        if (err instanceof Error) {
+          setError(`クイズグループの取得に失敗しました: ${err.message}`);
+        } else {
+          setError('クイズグループの取得中に不明なエラーが発生しました。');
+        }
       } finally {
         setLoading(false);
       }
