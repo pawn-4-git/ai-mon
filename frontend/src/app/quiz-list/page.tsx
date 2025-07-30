@@ -20,18 +20,30 @@ declare global {
   }
 }
 
-interface ApiQuizGroup {
-  id: string;
-  name: string;
-  questions?: unknown[];
-}
-
+// フロントエンドで期待するデータ構造
 interface QuizGroup {
   id: string;
   name: string;
   questionCount: number;
   status: string;
   statusText: string;
+  timeLimitMinutes?: number; // TimeLimitMinutes を追加
+}
+
+// Lambda から返されるデータ構造（仮定）
+interface LambdaQuizGroup {
+  GroupId: string;
+  Name: string;
+  QuestionCount: number;
+  TimeLimitMinutes: number;
+  CreatedAt: string;
+  CreatedBy: string;
+}
+
+// APIレスポンス全体の型定義
+interface ApiResponse {
+  message?: string;
+  groups?: LambdaQuizGroup[]; // LambdaQuizGroup の配列を期待
 }
 
 export default function QuizListPage() {
@@ -55,14 +67,17 @@ export default function QuizListPage() {
 
         console.log(data);
 
+        // data を ApiResponse 型として型アサーション
+        const apiResponse = data as ApiResponse;
 
-        // APIから返されるデータにstatusとstatusTextがないため、ダミーのデータを追加します。
-        // data が期待通りの形式（{ message: string, groups: ApiQuizGroup[] }）であることを確認
-        // data が存在し、かつ 'groups' プロパティを持ち、それが配列であることをより厳密にチェック
-        if (data && typeof data === 'object' && 'groups' in data && Array.isArray(data.groups)) {
-          const formattedData = (data.groups as ApiQuizGroup[]).map((group) => ({
-            ...group,
-            questionCount: group.questions ? group.questions.length : 0,
+        // apiResponse.groups が存在し、配列であることをチェック
+        if (apiResponse && apiResponse.groups && Array.isArray(apiResponse.groups)) {
+          // Lambda から返されたデータをフロントエンドの QuizGroup 型に変換
+          const formattedData = (apiResponse.groups as LambdaQuizGroup[]).map((group) => ({
+            id: group.GroupId,
+            name: group.Name,
+            questionCount: group.QuestionCount,
+            timeLimitMinutes: group.TimeLimitMinutes, // TimeLimitMinutes をマッピング
             status: 'not-taken', // 仮のステータス
             statusText: '未受験', // 仮のステータス文言
           }));
@@ -139,7 +154,7 @@ export default function QuizListPage() {
       <Header />
 
       <div className="container">
-        <h2>問題グループ一覧</h2>
+        <h2>問題グルー��一覧</h2>
         <ul className="quiz-group-list">
           {quizGroups.map((group) => (
             <li key={group.id} className={`quiz-group-item ${getStatusClass(group.status)}`}>
