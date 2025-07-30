@@ -1,4 +1,4 @@
-import { validateSession } from "/opt/nodejs/authHelper.js";
+import { validateSession } from "/opt/authHelper.js";
 
 export const lambdaHandler = async (event) => {
     try {
