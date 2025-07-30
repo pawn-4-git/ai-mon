@@ -28,7 +28,7 @@ export default function QuizListPage() {
   useEffect(() => {
     const fetchQuizGroups = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/quiz-groups`);
+        const response = await fetch(`/Prod/quiz-groups`);
         if (!response.ok) {
           throw new Error('問題グループの取得に失敗しました。');
         }
@@ -64,13 +64,13 @@ export default function QuizListPage() {
 
   const getStatusTextClass = (status: string) => {
     switch (status) {
-        case 'not-taken':
-          return 'not-taken-text';
-        case 'updated':
-          return 'updated-text';
-        default:
-          return '';
-      }
+      case 'not-taken':
+        return 'not-taken-text';
+      case 'updated':
+        return 'updated-text';
+      default:
+        return '';
+    }
   }
 
   if (loading) {
