@@ -96,6 +96,8 @@
     - `SelectedChoice`: ユーザーが選択した解答
     - `IsCorrect`: 正解かどうか (Boolean)
 - `SubmittedAt`: 解答提出日時
+- `StartedAt`: 試験開始日時 (ISO 8601形式)
+- `ExpiresAt`: 試験の期限日時 (ISO 8601形式)
 
 **グローバルセカンダリインデックス (GSI):**
 - **IndexName:** `UserIdIndex`
@@ -111,7 +113,7 @@
 
 **属性:**
 - `ResourceId`: 一意のリソースID (UUIDなど)
-- `GroupId`: ���連する問題グループのID (GSIのPKになります)
+- `GroupId`: 関連する問題グループのID (GSIのPKになります)
 - `URL`: リソースのURL
 - `Title`: タイトル
 - `ImgSrc`: 画像URL
