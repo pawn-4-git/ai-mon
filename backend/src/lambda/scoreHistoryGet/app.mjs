@@ -30,7 +30,7 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "User ID is required." }),
             };
         }
-        const sessionResult = await updateSessionTtl(authResult.sessionId);
+        const newSessionVersionId = await updateSessionTtl(authResult.sessionId);
 
         const queryCommand = new QueryCommand({
             TableName: SCORES_TABLE_NAME,
@@ -51,7 +51,7 @@ export const lambdaHandler = async (event) => {
                 // Set-Cookieを配列として指定する
                 "Set-Cookie": [
                     `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
-                    `sessionVersionId=${sessionResult.sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    `sessionVersionId=${newSessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
                 ]
             },
             body: JSON.stringify({
