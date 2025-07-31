@@ -77,7 +77,7 @@ export default function LoginPage() {
       if (response && response.AccountName) {
         auth.login(response.AccountName); // AuthContext の状態を更新
         alert('匿名アカウントが作成されました！');
-        router.push('/quiz-list.html');
+        router.push('/quiz-list');
       } else {
         alert('匿名アカウントの作成に失敗しました。');
       }
