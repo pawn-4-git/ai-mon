@@ -129,7 +129,7 @@ export default function QuizListPage() {
             );
 
             let status = 'not-taken';
-            let statusText = '未���験';
+            let statusText = '未受験';
 
             if (latestScore) {
               if (latestScore.SubmittedAt) {

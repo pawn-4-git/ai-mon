@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
-import { updateUserTtl } from '../../nodejs/userHelper'; // Import updateUserTtl
+import { updateUserTtl } from '/opt/userHelper'; // Import updateUserTtl
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
