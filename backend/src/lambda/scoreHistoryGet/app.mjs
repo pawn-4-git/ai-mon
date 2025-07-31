@@ -1,7 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
-import { updateSession } from "/opt/userHelper.js";
+import { updateSessionTtl } from "/opt/userHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -50,7 +50,7 @@ export const lambdaHandler = async (event) => {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
                 // Set-Cookieを配列として指定する
                 "Set-Cookie": [
-                    `sessionId=${sessionResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionVersionId=${sessionResult.sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
                 ]
             },
