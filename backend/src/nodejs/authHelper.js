@@ -28,9 +28,6 @@ export const isAdmin = async (userId) => {
         return false;
     }
 
-    console.log('1:' + userId);
-    console.log('2:' + cachedAdminUserId);
-
     // キャッシュがあればそれを使用
     if (cachedAdminUserId) {
         return userId === cachedAdminUserId;
@@ -58,8 +55,6 @@ export const isAdmin = async (userId) => {
 
             // 取得したIDをキャッシュ
             cachedAdminUserId = adminId;
-            console.log('3:' + userId);
-            console.log('4:' + cachedAdminUserId);
             return userId === cachedAdminUserId;
         }
     } catch (error) {

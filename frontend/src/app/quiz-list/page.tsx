@@ -28,6 +28,13 @@ interface QuizGroup {
   timeLimitMinutes?: number;
 }
 
+// Lambda から返されるユーザーデータ構造（仮定）
+interface UserData {
+  id: string;
+  isAdmin?: boolean; // isAdmin はオプショナルにするか、必ず存在するように定義する
+  // 他のユーザー関連プロパティがあればここに追加
+}
+
 // Lambda から返されるデータ構造（仮定）
 interface LambdaQuizGroup {
   GroupId: string;
@@ -48,6 +55,7 @@ export default function QuizListPage() {
   const router = useRouter();
   const { user } = useAuth(); // AuthContext から user を取得
   const [quizGroups, setQuizGroups] = useState<QuizGroup[]>([]);
+  const [isAdminUser, setIsAdminUser] = useState<boolean>(false); // State for isAdmin flag
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,12 +69,25 @@ export default function QuizListPage() {
 
       if (!user) {
         // ユーザー情報がまだ読み込まれていない場合は待機
-        // AuthContextがユーザー情報を取得するのを待つ
+        // AuthContextがユーザー情報を取得す��のを待つ
         return;
       }
 
       try {
-        // ScoreHistory データを取得するロジック
+        // Fetch user data to check isAdmin status
+        // apiClient.get の戻り値に型アサーションを適用
+        const userData = await window.apiClient.get(`/Prod/users/${user.id}`) as UserData;
+
+        // Check for isAdmin property
+        // isAdmin が存在し、かつ boolean 型であるかを確認
+        if (userData && typeof userData.isAdmin === 'boolean') {
+          setIsAdminUser(userData.isAdmin);
+        } else {
+          // isAdmin プロパティが存在しない、または boolean 型でない場合のデフォルト値
+          setIsAdminUser(false);
+        }
+
+        // ScoreHistory データを取得するロジ��ク
         interface ScoreHistory {
           QuizSessionId: string;
           UserId: string;
@@ -113,12 +134,14 @@ export default function QuizListPage() {
             );
 
             let status = 'not-taken';
-            let statusText = '未受験';
+            let statusText = '未���験';
 
             if (latestScore) {
               if (latestScore.SubmittedAt) {
                 status = 'completed';
-                statusText = '完了';
+                const submittedDate = new Date(latestScore.SubmittedAt);
+                const formattedDate = `${submittedDate.getFullYear()}/${(submittedDate.getMonth() + 1).toString().padStart(2, '0')}/${submittedDate.getDate().toString().padStart(2, '0')}`;
+                statusText = `最終受験: ${formattedDate}`;
               } else if (latestScore.StartedAt) {
                 status = 'in-progress';
                 statusText = '進行中';
@@ -224,14 +247,18 @@ export default function QuizListPage() {
               <span className={`group-status ${getStatusTextClass(group.status)}`}>{group.statusText}</span>
               <div className="action-buttons">
                 <button onClick={() => router.push('/quiz-play')}>テスト開始</button>
-                <button className="edit-button" onClick={() => router.push(`/create-quiz?id=${group.id}`)}>編集</button>
+                {isAdminUser && (
+                  <button className="edit-button" onClick={() => router.push(`/create-quiz?id=${group.id}`)}>編集</button>
+                )}
               </div>
             </li>
           ))}
         </ul>
-        <button className="add-button" onClick={() => router.push('/create-quiz')}>
-          新しい問題グループを作成
-        </button>
+        {isAdminUser && (
+          <button className="add-button" onClick={() => router.push('/create-quiz')}>
+            新しい問題グループを作成
+          </button>
+        )}
       </div>
       {/* apiClient.js を Script コンポーネントで読み込む */}
       <Script
