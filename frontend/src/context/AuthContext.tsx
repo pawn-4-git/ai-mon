@@ -22,12 +22,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!window.apiClient) return;
     try {
       // 型アサーションから .data を削除
-      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string };
-      if (response && response.AccountName) {
+      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string };
+      if (response && response.AccountName && response.UserId) {
         setAccountName(response.AccountName);
         // setUser state might be stale here, so we check against the response
-        if (!user || user.username !== response.AccountName) {
-          setUser({ id: '1', username: response.AccountName, email: '' });
+        if (!user || user.username !== response.AccountName || user.id !== response.UserId) {
+          setUser({ id: response.UserId, username: response.AccountName, email: '' });
         }
       }
     } catch (error) {
@@ -44,7 +44,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (newAccountName: string) => {
     setAccountName(newAccountName);
-    setUser({ id: '1', username: newAccountName, email: '' });
+    // After login, we don't have the userId immediately.
+    // The useEffect will trigger fetchAccountName which will fetch the user info.
+    // We can set a temporary user state, or null. Let's set it to null.
+    setUser(null);
+    fetchAccountName();
   };
 
   const logout = async () => {
