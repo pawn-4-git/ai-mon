@@ -28,12 +28,7 @@ interface QuizGroup {
   timeLimitMinutes?: number;
 }
 
-// Lambda から返されるユーザーデータ構造（仮定）
-interface UserData {
-  id: string;
-  isAdmin?: boolean; // isAdmin はオプショナルにするか、必ず存在するように定義する
-  // 他のユーザー関連プロパティがあればここに追加
-}
+
 
 // Lambda から返されるデータ構造（仮定）
 interface LambdaQuizGroup {
