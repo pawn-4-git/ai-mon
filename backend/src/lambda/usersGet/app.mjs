@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { validateSession } from "/opt/authHelper.js";
+import { validateSession, isAdmin } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -23,6 +23,9 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
         const userId = authResult.userId;
+
+        // --- Check if user is admin ---
+        const isAdminUser = await isAdmin(userId); // isAdmin を呼び出す
 
         // --- User Lookup ---
         const getUserCommand = new GetCommand({
@@ -50,7 +53,8 @@ export const lambdaHandler = async (event) => {
             },
             body: JSON.stringify({
                 AccountName: accountName,
-                UserId: userId
+                UserId: userId,
+                isAdmin: isAdminUser // 管理者判定結果を追加
             }),
         };
     } catch (error) {
