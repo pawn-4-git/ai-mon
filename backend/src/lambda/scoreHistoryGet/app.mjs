@@ -50,7 +50,7 @@ export const lambdaHandler = async (event) => {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
                 // Set-Cookieを配列として指定する
                 "Set-Cookie": [
-                    `sessionId=${sessionResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
                     `sessionVersionId=${sessionResult.sessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
                 ]
             },
