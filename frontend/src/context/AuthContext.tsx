@@ -19,6 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // For restoring session on page load
   const fetchAccountName = useCallback(async () => {
+    if (accountName && user?.id) {
+      return;
+    }
     if (!window.apiClient) return;
     try {
       // 型アサーションから .data を削除
@@ -36,7 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAccountName(null);
       setUser(null);
     }
-  }, [user]);
+  }, [user, accountName]);
 
   useEffect(() => {
     fetchAccountName();
