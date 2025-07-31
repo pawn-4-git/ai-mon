@@ -76,7 +76,7 @@ export default function QuizListPage() {
       try {
         // Fetch user data to check isAdmin status
         // apiClient.get の戻り値に型アサーションを適用
-        const userData = await window.apiClient.get(`/Prod/users/${user.id}`) as UserData;
+        const userData = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string, isAdmin: boolean };
 
         // Check for isAdmin property
         // isAdmin が存在し、かつ boolean 型であるかを確認
