@@ -49,7 +49,8 @@ export const lambdaHandler = async (event) => {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
             },
             body: JSON.stringify({
-                AccountName: accountName
+                AccountName: accountName,
+                UserId: userId
             }),
         };
     } catch (error) {
