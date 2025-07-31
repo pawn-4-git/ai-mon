@@ -30,7 +30,7 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "User ID is required." }),
             };
         }
-        const sessionResult = await updateSession(authResult.sessionId);
+        const sessionResult = await updateSessionTtl(authResult.sessionId);
 
         const queryCommand = new QueryCommand({
             TableName: SCORES_TABLE_NAME,
