@@ -19,7 +19,6 @@ declare global {
   }
 }
 
-// フロントエンドで期待するデータ構造
 interface QuizGroup {
   id: string;
   name: string;
