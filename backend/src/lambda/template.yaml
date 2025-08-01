@@ -124,6 +124,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         UsersGetEvent:
           Type: Api
