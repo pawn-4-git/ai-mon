@@ -1,14 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Script from 'next/script';
 import Header from '@/components/Header';
 import { Quiz, QuizGroup } from '@/types/index';
-
-// Removed unused mockQuizzes array from this file.
-// The mockQuiz constant in data/mockData.ts is now the source of truth.
 
 declare global {
     interface Window {
@@ -22,7 +19,7 @@ declare global {
     }
 }
 
-export default function CreateQuizPage() {
+function CreateQuizContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [creationMethod, setCreationMethod] = useState('manual');
@@ -32,35 +29,33 @@ export default function CreateQuizPage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [quizzes] = useState<Quiz[]>([]);
-    // Updated selectedQuiz state to use the Quiz type directly and match the id type (string)
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productLinks, setProductLinks] = useState([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
+    const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
-    useEffect(() => {
-        const fetchQuizGroups = async () => {
-            if (!window.apiClient) {
-                console.error('API client is not loaded yet.');
-                return;
+    const fetchQuizGroups = useCallback(async () => {
+        if (!window.apiClient) {
+            console.error('API client is not loaded yet.');
+            return;
+        }
+        try {
+            const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
+            const groupId = searchParams.get('id');
+            if (groupId) {
+                const foundGroup = groups.find(group => group.id === groupId);
+                setCurrentGroup(foundGroup || null);
             }
-            try {
-                const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
-                const groupId = searchParams.get('id');
-                if (groupId) {
-                    const foundGroup = groups.find(group => group.id === groupId);
-                    setCurrentGroup(foundGroup || null);
-                }
-            } catch (error) {
-                console.error(error);
-                // You might want to show an error message to the user here.
-            }
-        };
-
-        // apiClient.jsがロードされてからfetchQuizGroupsを実行
-        if (window.apiClient) {
-            fetchQuizGroups();
+        } catch (error) {
+            console.error(error);
         }
     }, [searchParams]);
+
+    useEffect(() => {
+        if (apiClientLoaded) {
+            fetchQuizGroups();
+        }
+    }, [apiClientLoaded, fetchQuizGroups]);
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -80,36 +75,15 @@ export default function CreateQuizPage() {
     };
 
     useEffect(() => {
-        // Add one product link field by default
         addProductLinkField();
     }, [addProductLinkField]);
-
 
     return (
         <>
             <Script
                 src="/contents/js/apiClient.js"
                 strategy="beforeInteractive"
-                onLoad={() => {
-                    // apiClientがロードされたことを確認し、データを取得する
-                    const fetchQuizGroups = async () => {
-                        if (!window.apiClient) {
-                            console.error('API client is not loaded yet.');
-                            return;
-                        }
-                        try {
-                            const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
-                            const groupId = searchParams.get('id');
-                            if (groupId) {
-                                const foundGroup = groups.find(group => group.id === groupId);
-                                setCurrentGroup(foundGroup || null);
-                            }
-                        } catch (error) {
-                            console.error(error);
-                        }
-                    };
-                    fetchQuizGroups();
-                }}
+                onLoad={() => setApiClientLoaded(true)}
             />
             <div className="create-quiz-page">
                 <Header />
@@ -272,5 +246,13 @@ export default function CreateQuizPage() {
                 </div>
             </div>
         </>
+    );
+}
+
+export default function CreateQuizPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <CreateQuizContent />
+        </Suspense>
     );
 }
