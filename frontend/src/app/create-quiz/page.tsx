@@ -32,7 +32,6 @@ function CreateQuizContent() {
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productLinks, setProductLinks] = useState([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
-    const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
     const fetchQuizGroups = useCallback(async () => {
         if (!window.apiClient) {
@@ -50,12 +49,6 @@ function CreateQuizContent() {
             console.error(error);
         }
     }, [searchParams]);
-
-    useEffect(() => {
-        if (apiClientLoaded) {
-            fetchQuizGroups();
-        }
-    }, [apiClientLoaded, fetchQuizGroups]);
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -83,7 +76,7 @@ function CreateQuizContent() {
             <Script
                 src="/contents/js/apiClient.js"
                 strategy="beforeInteractive"
-                onLoad={() => setApiClientLoaded(true)}
+                onLoad={fetchQuizGroups}
             />
             <div className="create-quiz-page">
                 <Header />
@@ -256,3 +249,4 @@ export default function CreateQuizPage() {
         </Suspense>
     );
 }
+
