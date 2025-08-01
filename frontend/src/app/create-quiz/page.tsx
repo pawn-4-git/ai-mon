@@ -32,23 +32,30 @@ function CreateQuizContent() {
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productLinks, setProductLinks] = useState([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
+    const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
-    const fetchQuizGroups = useCallback(async () => {
-        if (!window.apiClient) {
-            console.error('API client is not loaded yet.');
-            return;
-        }
-        try {
-            const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
-            const groupId = searchParams.get('id');
-            if (groupId) {
-                const foundGroup = groups.find(group => group.id === groupId);
-                setCurrentGroup(foundGroup || null);
+    useEffect(() => {
+        const fetchQuizGroups = async () => {
+            if (!window.apiClient) {
+                console.error('API client is not loaded yet.');
+                return;
             }
-        } catch (error) {
-            console.error(error);
+            try {
+                const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
+                const groupId = searchParams.get('id');
+                if (groupId) {
+                    const foundGroup = groups.find(group => group.id === groupId);
+                    setCurrentGroup(foundGroup || null);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        if (apiClientLoaded) {
+            fetchQuizGroups();
         }
-    }, [searchParams]);
+    }, [apiClientLoaded, searchParams]);
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -67,16 +74,14 @@ function CreateQuizContent() {
         setProductLinks(newProductLinks);
     };
 
-    useEffect(() => {
-        addProductLinkField();
-    }, [addProductLinkField]);
+    
 
     return (
         <>
             <Script
                 src="/contents/js/apiClient.js"
                 strategy="beforeInteractive"
-                onLoad={fetchQuizGroups}
+                onLoad={() => setApiClientLoaded(true)}
             />
             <div className="create-quiz-page">
                 <Header />
@@ -153,7 +158,7 @@ function CreateQuizContent() {
                                     <label>正解の選択肢:</label>
                                     <input type="text" id="generated-correct-choice" defaultValue="（自動生成された正解）" />
                                 </div>
-                                <button onClick={() => { setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個生成</button>
+                                <button onClick={() => { setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個���成</button>
                                 {showAutoDummyChoices && (
                                     <div className="dummy-choices-auto">
                                         <h3>生成されたダミー選択肢 (3つ選択):</h3>
@@ -249,4 +254,5 @@ export default function CreateQuizPage() {
         </Suspense>
     );
 }
+
 
