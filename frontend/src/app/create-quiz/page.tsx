@@ -32,7 +32,6 @@ function CreateQuizContent() {
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productLinks, setProductLinks] = useState<object[]>([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
-    const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
     const fetchQuizGroups = useCallback(async () => {
         if (!window.apiClient) {
@@ -50,12 +49,6 @@ function CreateQuizContent() {
             console.error(error);
         }
     }, [searchParams]);
-
-    useEffect(() => {
-        if (apiClientLoaded) {
-            fetchQuizGroups();
-        }
-    }, [apiClientLoaded, fetchQuizGroups]);
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -75,20 +68,17 @@ function CreateQuizContent() {
     };
 
     useEffect(() => {
-        // 初期表示時に商品リンクのフィールドを1つ追加
         if (productLinks.length === 0) {
             addProductLinkField();
         }
     }, [addProductLinkField, productLinks.length]);
-
-    
 
     return (
         <>
             <Script
                 src="/contents/js/apiClient.js"
                 strategy="beforeInteractive"
-                onLoad={() => setApiClientLoaded(true)}
+                onLoad={fetchQuizGroups}
             />
             <div className="create-quiz-page">
                 <Header />
