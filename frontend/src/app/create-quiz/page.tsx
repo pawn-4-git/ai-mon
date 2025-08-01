@@ -30,32 +30,32 @@ function CreateQuizContent() {
 
     const [quizzes] = useState<Quiz[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-    const [productLinks, setProductLinks] = useState([{}]);
+    const [productLinks, setProductLinks] = useState<{}[]>([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
     const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
-    useEffect(() => {
-        const fetchQuizGroups = async () => {
-            if (!window.apiClient) {
-                console.error('API client is not loaded yet.');
-                return;
+    const fetchQuizGroups = useCallback(async () => {
+        if (!window.apiClient) {
+            console.error('API client is not loaded yet.');
+            return;
+        }
+        try {
+            const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
+            const groupId = searchParams.get('id');
+            if (groupId) {
+                const foundGroup = groups.find(group => group.id === groupId);
+                setCurrentGroup(foundGroup || null);
             }
-            try {
-                const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
-                const groupId = searchParams.get('id');
-                if (groupId) {
-                    const foundGroup = groups.find(group => group.id === groupId);
-                    setCurrentGroup(foundGroup || null);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        };
+        } catch (error) {
+            console.error(error);
+        }
+    }, [searchParams]);
 
+    useEffect(() => {
         if (apiClientLoaded) {
             fetchQuizGroups();
         }
-    }, [apiClientLoaded, searchParams]);
+    }, [apiClientLoaded, fetchQuizGroups]);
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -73,6 +73,13 @@ function CreateQuizContent() {
         const newProductLinks = productLinks.filter((_, i) => i !== index);
         setProductLinks(newProductLinks);
     };
+
+    useEffect(() => {
+        // 初期表示時に商品リンクのフィールドを1つ追加
+        if (productLinks.length === 0) {
+            addProductLinkField();
+        }
+    }, [addProductLinkField, productLinks.length]);
 
     
 
