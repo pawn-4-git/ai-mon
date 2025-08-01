@@ -30,7 +30,7 @@ function CreateQuizContent() {
 
     const [quizzes] = useState<Quiz[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-    const [productLinks, setProductLinks] = useState<{}[]>([{}]);
+    const [productLinks, setProductLinks] = useState<object[]>([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
     const [apiClientLoaded, setApiClientLoaded] = useState(false);
 
