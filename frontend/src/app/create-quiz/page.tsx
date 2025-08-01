@@ -19,6 +19,20 @@ declare global {
     }
 }
 
+interface LambdaQuizGroup {
+    GroupId: string;
+    Name: string;
+    QuestionCount: number;
+    TimeLimitMinutes: number;
+    CreatedAt: string;
+    CreatedBy: string;
+}
+
+interface ApiResponse {
+    message?: string;
+    groups?: LambdaQuizGroup[];
+}
+
 function CreateQuizContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -39,11 +53,23 @@ function CreateQuizContent() {
             return;
         }
         try {
-            const groups = await window.apiClient.get('/Prod/quiz-groups') as QuizGroup[];
-            const groupId = searchParams.get('id');
-            if (groupId) {
-                const foundGroup = groups.find(group => group.id === groupId);
-                setCurrentGroup(foundGroup || null);
+            const data = await window.apiClient.get('/Prod/quiz-groups') as ApiResponse;
+            if (data && data.groups && Array.isArray(data.groups)) {
+                const formattedGroups: QuizGroup[] = data.groups.map((group: LambdaQuizGroup) => ({
+                    id: group.GroupId,
+                    name: group.Name,
+                    questionCount: group.QuestionCount,
+                    timeLimit: group.TimeLimitMinutes,
+                    status: 'not-taken', // statusはAPIレスポンスにないのでデフォルト値を設定
+                }));
+
+                const groupId = searchParams.get('id');
+                if (groupId) {
+                    const foundGroup = formattedGroups.find(group => group.id === groupId);
+                    setCurrentGroup(foundGroup || null);
+                }
+            } else {
+                console.error('Unexpected data format:', data);
             }
         } catch (error) {
             console.error(error);
