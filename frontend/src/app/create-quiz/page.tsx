@@ -177,6 +177,13 @@ function CreateQuizContent() {
     };
 
     useEffect(() => {
+        const groupName = searchParams.get('name');
+        if (groupName) {
+            setQuizTitle(decodeURIComponent(groupName));
+        }
+    }, [searchParams]);
+
+    useEffect(() => {
         if (productLinks.length === 0) {
             addProductLinkField();
         }
