@@ -200,7 +200,7 @@ function CreateQuizContent() {
                         <input type="text" id="quiz-title" placeholder="例: 日本史の基礎" value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} />
                     </div>
 
-                    <p>現在のグループ: <span id="current-group">{currentGroup ? currentGroup.name : '未設定'}</span></p>
+                    <p>現在のグループ: <span id="current-group">{currentGroup ? `${currentGroup.name} (ID: ${currentGroup.id})` : '未設定'}</span></p>
                     <div className="form-group">
                         <Link href="/quiz-group">問題グループを設定</Link>
                     </div>
@@ -287,32 +287,32 @@ function CreateQuizContent() {
                             </div>
                         </div>
                     )}
-                     <div className="product-links-section" style={{ marginTop: '30px' }}>
-                    <h3>関連商品リンク (最大10個)</h3>
-                    <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品��、商品リンクを入力してください。</p>
-                    <div id="product-links-container">
-                        {productLinks.map((link, index) => (
-                            <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                                <h4>商品リンク {index + 1}</h4>
-                                <div className="form-group">
-                                    <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
-                                    <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
+                    <div className="product-links-section" style={{ marginTop: '30px' }}>
+                        <h3>関連商品リンク (最大10個)</h3>
+                        <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品��、商品リンクを入力してください。</p>
+                        <div id="product-links-container">
+                            {productLinks.map((link, index) => (
+                                <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                                    <h4>商品リンク {index + 1}</h4>
+                                    <div className="form-group">
+                                        <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
+                                        <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor={`product-name-${index}`}>商品名:</label>
+                                        <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
+                                    </div>
+                                    <div className="form-group">
+                                        <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
+                                        <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
+                                    </div>
+                                    <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
                                 </div>
-                                <div className="form-group">
-                                    <label htmlFor={`product-name-${index}`}>商品名:</label>
-                                    <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
-                                    <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
-                                </div>
-                                <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                        <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
+                        <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
                     </div>
-                    <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
-                    <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
-                </div>
                 </div>
             </div>
         </>

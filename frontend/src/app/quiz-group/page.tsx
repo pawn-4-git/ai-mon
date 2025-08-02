@@ -130,7 +130,7 @@ export default function QuizGroupPage() {
       };
       await window.apiClient.put(`/Prod/quiz-groups/${selectedQuizGroup}`, body);
       alert('問題グループの設定を更新しました！');
-      router.push('/quiz-list');
+      router.push(`/create-quiz?id=${selectedQuizGroup}`);
     } catch (error) {
       console.error('Failed to update quiz group:', error);
       alert('問題グループの更新に失敗しました。');
