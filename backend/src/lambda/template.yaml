@@ -308,6 +308,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuizGroupsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -340,6 +345,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuizGroupsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -372,6 +382,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuestionsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -466,6 +481,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuestionsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -498,6 +518,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuestionsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -718,6 +743,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref ResourcesTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -781,6 +811,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref ResourcesTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -813,6 +848,11 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref QuestionsTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -843,6 +883,11 @@ Resources:
             TableName: !Ref SessionsTableName
         - DynamoDBWritePolicy:
             TableName: !Ref UsersTableName
+        - Statement:
+          - Effect: Allow
+            Action:
+              - secretsmanager:GetSecretValue
+            Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
