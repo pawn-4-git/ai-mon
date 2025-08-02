@@ -857,7 +857,8 @@ Resources:
           - Effect: Allow
             Action:
               - bedrock:InvokeModel
-            Resource: "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
+            Resource:
+              - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -898,7 +899,8 @@ Resources:
           - Effect: Allow
             Action:
               - bedrock:InvokeModel
-            Resource: "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
+            Resource:
+              - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
