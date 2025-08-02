@@ -38,8 +38,6 @@ function CreateQuizContent() {
     const searchParams = useSearchParams();
     const [creationMethod, setCreationMethod] = useState('manual');
     const [showDummyChoices, setShowDummyChoices] = useState(false);
-    const [showAutoDummyChoices, setAutoShowDummyChoices] = useState<boolean>(false);
-    const [showGeneratedQuiz, setShowGeneratedQuiz] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const [quizzes] = useState<Quiz[]>([]);
