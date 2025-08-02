@@ -316,6 +316,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsUpdateEvent:
           Type: Api
@@ -347,6 +348,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsDeleteEvent:
           Type: Api
@@ -378,6 +380,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsCreateEvent:
           Type: Api
@@ -471,6 +474,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsUpdateEvent:
           Type: Api
@@ -502,6 +506,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsDeleteEvent:
           Type: Api
@@ -721,6 +726,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         ResourcesCreateEvent:
           Type: Api
@@ -783,6 +789,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         ResourcesDeleteEvent:
           Type: Api
@@ -814,6 +821,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         AiGenerateQuestionEvent:
           Type: Api
@@ -843,6 +851,7 @@ Resources:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+          AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         AiGenerateChoicesEvent:
           Type: Api
