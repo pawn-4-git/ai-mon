@@ -177,9 +177,13 @@ function CreateQuizContent() {
     };
 
     useEffect(() => {
-        const groupName = searchParams.get('name');
-        if (groupName) {
-            setQuizTitle(decodeURIComponent(groupName));
+        const groupIdFromUrl = searchParams.get('id');
+        const groupNameFromUrl = searchParams.get('name');
+        if (groupIdFromUrl) {
+            setQuizTitle(decodeURIComponent(groupNameFromUrl || ''));
+            setCurrentGroup(prevGroup =>
+                prevGroup ? { ...prevGroup, id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || '') } : { id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || ''), questionCount: 0, timeLimit: 0, status: 'not-taken' } 
+            );
         }
     }, [searchParams]);
 
