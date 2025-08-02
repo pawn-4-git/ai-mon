@@ -853,6 +853,11 @@ Resources:
             Action:
               - secretsmanager:GetSecretValue
             Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
+        - Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource: "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -876,6 +881,7 @@ Resources:
         - !Ref SharedLogicLayer
       CodeUri: aiGenerateChoices/
       Handler: app.lambdaHandler
+      Timeout: 30
       Policies:
         - DynamoDBReadPolicy:
             TableName: !Ref SessionsTableName
@@ -888,6 +894,11 @@ Resources:
             Action:
               - secretsmanager:GetSecretValue
             Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${AimonSecretName}-*"
+        - Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+            Resource: "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:foundation-model/*"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
