@@ -1,10 +1,19 @@
 import { validateSession } from "/opt/authHelper.js";
+import { isAdmin } from "/opt/authHelper.js";
 
 export const lambdaHandler = async (event) => {
     try {
         const authResult = await validateSession(event);
         if (!authResult.isValid) {
             return authResult;
+        }
+
+        // Check if the user is an administrator
+        if (!await isAdmin(authResult.user)) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ message: "Only administrators can perform this action." }),
+            };
         }
 
         if (!event.body) {
