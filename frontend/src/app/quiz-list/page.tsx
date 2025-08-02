@@ -243,7 +243,7 @@ export default function QuizListPage() {
               <div className="action-buttons">
                 <button onClick={() => router.push('/quiz-play')}>テスト開始</button>
                 {isAdminUser && (
-                  <button className="edit-button" onClick={() => router.push(`/create-quiz?id=${group.id}`)}>編集</button>
+                  <button className="edit-button" onClick={() => router.push(`/create-quiz?id=${group.id}&name=${encodeURIComponent(group.name)}`)}>編集</button>
                 )}
               </div>
             </li>
