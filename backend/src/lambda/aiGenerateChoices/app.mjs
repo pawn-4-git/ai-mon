@@ -9,7 +9,7 @@ export const lambdaHandler = async (event) => {
         }
 
         // Check if the user is an administrator
-        if (!await isAdmin(authResult.user)) {
+        if (!await isAdmin(authResult.userId)) {
             return {
                 statusCode: 403,
                 body: JSON.stringify({ message: "Only administrators can perform this action." }),
@@ -35,7 +35,7 @@ export const lambdaHandler = async (event) => {
         }
 
         const { correctChoice, questionContext } = body;
-        
+
         if (!correctChoice || !questionContext) {
             return {
                 statusCode: 400,
