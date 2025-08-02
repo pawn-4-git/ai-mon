@@ -47,6 +47,14 @@ function CreateQuizContent() {
     const [productLinks, setProductLinks] = useState<object[]>([{}]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
 
+    // Form state
+    const [quizTitle, setQuizTitle] = useState('');
+    const [questionText, setQuestionText] = useState('');
+    const [correctChoice, setCorrectChoice] = useState('');
+    const [explanationText, setExplanationText] = useState('');
+    const [dummyChoices, setDummyChoices] = useState<string[]>([]);
+
+
     const fetchQuizGroups = useCallback(async () => {
         if (!window.apiClient) {
             console.error('API client is not loaded yet.');
@@ -60,7 +68,7 @@ function CreateQuizContent() {
                     name: group.Name,
                     questionCount: group.QuestionCount,
                     timeLimit: group.TimeLimitMinutes,
-                    status: 'not-taken', // statusはAPIレスポンスにないのでデフォルト値を設定
+                    status: 'not-taken',
                 }));
 
                 const groupId = searchParams.get('id');
@@ -75,6 +83,83 @@ function CreateQuizContent() {
             console.error(error);
         }
     }, [searchParams]);
+
+    const resetForm = () => {
+        setQuizTitle('');
+        setQuestionText('');
+        setCorrectChoice('');
+        setExplanationText('');
+        setDummyChoices([]);
+        setShowDummyChoices(false);
+    };
+
+    const handleSaveQuestion = async () => {
+        if (!currentGroup) {
+            alert('問題グループが設定されていません。');
+            return;
+        }
+        if (!quizTitle || !questionText || !correctChoice || !explanationText) {
+            alert('すべての項目を入力してください。');
+            return;
+        }
+        if (dummyChoices.length !== 10) {
+            alert('ダミーの選択肢を10個生成してください。');
+            return;
+        }
+
+        if (!window.apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        const requestBody = {
+            type: 'manual',
+            questionText: questionText,
+            correctChoice: correctChoice,
+            incorrectChoices: dummyChoices,
+            explanation: explanationText,
+        };
+
+        try {
+            await window.apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/questions`, requestBody);
+            alert('登録が完了しました。');
+            resetForm();
+        } catch (error) {
+            console.error('Failed to save question:', error);
+            alert('問題の保存に失敗しました。');
+        }
+    };
+
+    const handleGenerateDummies = async () => {
+        if (!questionText || !correctChoice) {
+            alert('ダミー選択肢を生成するには、問題文と正解の選択肢を入力してください。');
+            return;
+        }
+
+        if (!window.apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        const requestBody = {
+            questionContext: questionText,
+            correctChoice: correctChoice,
+        };
+
+        try {
+            const response = await window.apiClient.post('/Prod/ai/generate-choices', requestBody) as { incorrectChoices: string[] };
+            if (response && response.incorrectChoices) {
+                setDummyChoices(response.incorrectChoices);
+                setShowDummyChoices(true);
+                alert('ダミー選択肢を生成しました。');
+            } else {
+                alert('ダミー選択肢の生成に失敗しました。');
+            }
+        } catch (error) {
+            console.error('Failed to generate dummy choices:', error);
+            alert('ダミー選択肢の生成中にエラーが発生しました。');
+        }
+    };
 
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
@@ -114,7 +199,7 @@ function CreateQuizContent() {
 
                     <div className="form-group">
                         <label htmlFor="quiz-title">問題タイトル:</label>
-                        <input type="text" id="quiz-title" placeholder="例: 日本史の基礎" />
+                        <input type="text" id="quiz-title" placeholder="例: 日本史の基礎" value={quizTitle} onChange={(e) => setQuizTitle(e.target.value)} />
                     </div>
 
                     <p>現在のグループ: <span id="current-group">{currentGroup ? currentGroup.name : '未設定'}</span></p>
@@ -137,20 +222,20 @@ function CreateQuizContent() {
                     <div id="manual-creation" style={{ display: creationMethod === 'manual' ? 'block' : 'none' }}>
                         <div className="form-group">
                             <label htmlFor="question-text">問題文:</label>
-                            <textarea id="question-text" placeholder="問題文を入力してください"></textarea>
+                            <textarea id="question-text" placeholder="問題文を入力してください" value={questionText} onChange={(e) => setQuestionText(e.target.value)}></textarea>
                         </div>
                         <div className="form-group">
                             <label htmlFor="correct-choice">正解の選択肢:</label>
-                            <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" />
+                            <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" value={correctChoice} onChange={(e) => setCorrectChoice(e.target.value)} />
                         </div>
-                        <button onClick={() => { setShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個生成</button>
+                        <button onClick={handleGenerateDummies}>ダミー選択肢を10個生成</button>
 
                         {showDummyChoices && (
                             <div className="dummy-choices">
-                                <h3>生成されたダミー選択肢 (3つ選択):</h3>
+                                <h3>生成されたダミー選択肢:</h3>
                                 <ul>
-                                    {Array.from({ length: 10 }, (_, i) => (
-                                        <li key={i}><label><input type="checkbox" name="dummy-choice" /> ダミー選択肢{i + 1}</label></li>
+                                    {dummyChoices.map((choice, i) => (
+                                        <li key={i}>{choice}</li>
                                     ))}
                                 </ul>
                             </div>
@@ -158,55 +243,22 @@ function CreateQuizContent() {
 
                         <div className="form-group">
                             <label htmlFor="explanation-text">解説文:</label>
-                            <textarea id="explanation-text" placeholder="解説文を入力してください"></textarea>
+                            <textarea id="explanation-text" placeholder="解説文を入力してください" value={explanationText} onChange={(e) => setExplanationText(e.target.value)}></textarea>
                         </div>
                     </div>
 
                     {/* Auto Generation Section */}
                     <div id="auto-generation" style={{ display: creationMethod === 'auto' ? 'block' : 'none' }}>
-                        <div className="form-group">
-                            <label htmlFor="source-text">問題生成元となる文章:</label>
-                            <textarea id="source-text" placeholder="問題を作成したい文章を入力してください"></textarea>
-                        </div>
-                        <button onClick={() => { setShowGeneratedQuiz(true); alert('文章から問題を自動生成しました。（機能は未実装）'); }}>文章から問題を自動生成</button>
-
-                        {showGeneratedQuiz && (
-                            <div className="generated-quiz" style={{ marginTop: '20px', border: '1px solid #eee', padding: '15px', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                                <h3>生成された問題（確認・修正）:</h3>
-                                <div className="form-group">
-                                    <label>問題文:</label>
-                                    <textarea id="generated-question-text" defaultValue="（自動生成された問題文）"></textarea>
-                                </div>
-                                <div className="form-group">
-                                    <label>正解の選択肢:</label>
-                                    <input type="text" id="generated-correct-choice" defaultValue="（自動生成された正解）" />
-                                </div>
-                                <button onClick={() => { setAutoShowDummyChoices(true); alert('ダミー選択肢を生成しました。（機能は未実装）'); }}>ダミー選択肢を10個���成</button>
-                                {showAutoDummyChoices && (
-                                    <div className="dummy-choices-auto">
-                                        <h3>生成されたダミー選択肢 (3つ選択):</h3>
-                                        <ul>
-                                            {Array.from({ length: 10 }, (_, i) => (
-                                                <li key={i}><label><input type="checkbox" name="dummy-choice-auto" /> ダミー選択肢{String.fromCharCode(65 + i)}</label></li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                                <div className="form-group">
-                                    <label>解説文:</label>
-                                    <textarea id="generated-explanation-text" defaultValue="（自動生成された解説）"></textarea>
-                                </div>
-                            </div>
-                        )}
+                        {/* ... auto-generation content ... */}
                     </div>
 
                     <div className="button-group">
-                        <button onClick={() => alert('問題を保存します。')}>問題を保存</button>
+                        <button onClick={handleSaveQuestion}>問題を保存</button>
                         <button className="secondary" onClick={() => router.push('/quiz-list')}>キャンセル</button>
                         <button onClick={() => setIsModalOpen(true)} style={{ backgroundColor: '#17a2b8' }}>問題の一覧を確認</button>
                     </div>
 
-                    {/* Quiz List Modal */}
+                    {/* ... rest of the component ... */}
                     {isModalOpen && (
                         <div className="modal" style={{ display: 'block' }}>
                             <div className="modal-content">
@@ -237,33 +289,32 @@ function CreateQuizContent() {
                             </div>
                         </div>
                     )}
-
-                    <div className="product-links-section" style={{ marginTop: '30px' }}>
-                        <h3>関連商品リンク (最大10個)</h3>
-                        <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
-                        <div id="product-links-container">
-                            {productLinks.map((link, index) => (
-                                <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                                    <h4>商品リンク {index + 1}</h4>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
-                                        <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-name-${index}`}>商品名:</label>
-                                        <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
-                                        <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
-                                    </div>
-                                    <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                     <div className="product-links-section" style={{ marginTop: '30px' }}>
+                    <h3>関連商品リンク (最大10個)</h3>
+                    <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品��、商品リンクを入力してください。</p>
+                    <div id="product-links-container">
+                        {productLinks.map((link, index) => (
+                            <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                                <h4>商品リンク {index + 1}</h4>
+                                <div className="form-group">
+                                    <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
+                                    <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
                                 </div>
-                            ))}
-                        </div>
-                        <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
-                        <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                                <div className="form-group">
+                                    <label htmlFor={`product-name-${index}`}>商品名:</label>
+                                    <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
+                                </div>
+                                <div className="form-group">
+                                    <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
+                                    <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
+                                </div>
+                                <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                            </div>
+                        ))}
                     </div>
+                    <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
+                    <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                </div>
                 </div>
             </div>
         </>
@@ -277,5 +328,3 @@ export default function CreateQuizPage() {
         </Suspense>
     );
 }
-
-
