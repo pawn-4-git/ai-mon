@@ -69,9 +69,12 @@
     *   パスパラメータ: `quizId` (グループIDまたはテストセッションIDなど)
     *   リクエストボディ: `{ "userId": "ユーザーID", "answers": [{ "questionId": "問題ID", "selectedChoice": "選択肢" }], "status": "completed" | "in-progress" }`
     *   レスポンス: 解答結果、正解率など
-*   **`GET /quizzes/:quizId/results`**: クイズ結果取得
-    *   パスパラメータ: `quizId`
-    *   レスポンス: 各問題の解答状況、正解、解説など
+*   **`GET /results/{quizSessionId}`**: クイズ結果取得
+    *   パスパラメータ: `quizSessionId`
+    *   クエリパラメータ (任意): `questionNumber` (問題番号)
+    *   レスポンス: 
+        *   `questionNumber`指定なし: 各問題の解答状況、正解、解説などを含むクイズセッション全体の詳細。
+        *   `questionNumber`指定あり: 指定された問題に関する情報（問題文、選択肢、ユーザーの解答）。
 *   **`GET /score`**: ユーザーの成績履歴取得
     *   パスパラメータ: `userId`
     *   レスポンス: 成績記録のリスト
