@@ -206,6 +206,10 @@ function CreateQuizContent() {
         }
     };
 
+    const handleDeleteChoice = (indexToDelete: number) => {
+        setDummyChoices(prevChoices => prevChoices.filter((_, index) => index !== indexToDelete));
+    };
+
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
     };
@@ -290,7 +294,10 @@ function CreateQuizContent() {
                                 <h3>生成されたダミー選択肢:</h3>
                                 <ul>
                                     {dummyChoices.map((choice, i) => (
-                                        <li key={i}>{choice}</li>
+                                        <li key={i}>
+                                            {choice}
+                                            <button onClick={() => handleDeleteChoice(i)} style={{ marginLeft: '10px', cursor: 'pointer', color: 'red', border: 'none', background: 'none' }}>×</button>
+                                        </li>
                                     ))}
                                 </ul>
                             </div>
