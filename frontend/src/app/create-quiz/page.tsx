@@ -52,6 +52,8 @@ function CreateQuizContent() {
     const [quizzes] = useState<Quiz[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productResources, setProductResources] = useState<Partial<ProductResource>[]>([]);
+    const [isLoadingResources, setIsLoadingResources] = useState(false);
+    const [resourceError, setResourceError] = useState<string | null>(null);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
 
     // Form state
@@ -93,6 +95,8 @@ function CreateQuizContent() {
 
     const fetchResources = useCallback(async (groupId: string) => {
         if (!window.apiClient) return;
+        setIsLoadingResources(true);
+        setResourceError(null);
         try {
             const data = await window.apiClient.get(`/Prod/quiz-groups/${groupId}/resources`) as ApiResponse;
             if (data && data.resources) {
@@ -100,6 +104,9 @@ function CreateQuizContent() {
             }
         } catch (error) {
             console.error('Failed to fetch resources:', error);
+            setResourceError('関連商品の読み込みに失敗しました。');
+        } finally {
+            setIsLoadingResources(false);
         }
     }, []);
 
@@ -439,28 +446,47 @@ function CreateQuizContent() {
                     <div className="product-links-section" style={{ marginTop: '30px' }}>
                         <h3>関連商品リンク (最大10個)</h3>
                         <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
-                        <div id="product-links-container">
-                            {productResources.map((resource, index) => (
-                                <div key={resource.ResourceId || index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
-                                    <h4>商品リンク {index + 1}</h4>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
-                                        <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" value={resource.ImageUrl || ''} onChange={(e) => handleResourceChange(index, 'ImageUrl', e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-name-${index}`}>商品名:</label>
-                                        <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" value={resource.ProductName || ''} onChange={(e) => handleResourceChange(index, 'ProductName', e.target.value)} />
-                                    </div>
-                                    <div className="form-group">
-                                        <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
-                                        <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" value={resource.ProductUrl || ''} onChange={(e) => handleResourceChange(index, 'ProductUrl', e.target.value)} />
-                                    </div>
-                                    <button onClick={() => removeProductResourceField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                        
+                        {isLoadingResources && <p>関連商品を読み込み中...</p>}
+                        {resourceError && <p style={{ color: 'red' }}>{resourceError}</p>}
+
+                        {!isLoadingResources && !resourceError && (
+                            <>
+                                <div id="product-links-container">
+                                    {productResources.map((resource, index) => (
+                                        <div key={resource.ResourceId || index} className="product-link-item" style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                                            {resource.ImageUrl && (
+                                                <a href={resource.ProductUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ marginRight: '15px' }}>
+                                                    <img src={resource.ImageUrl} alt={resource.ProductName || '商品画像'} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                </a>
+                                            )}
+                                            <div style={{ flex: 1 }}>
+                                                <h4>
+                                                    <a href={resource.ProductUrl || '#'} target="_blank" rel="noopener noreferrer">
+                                                        商品リンク {index + 1}: {resource.ProductName || '(名称未設定)'}
+                                                    </a>
+                                                </h4>
+                                                <div className="form-group">
+                                                    <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
+                                                    <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" value={resource.ImageUrl || ''} onChange={(e) => handleResourceChange(index, 'ImageUrl', e.target.value)} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor={`product-name-${index}`}>商品名:</label>
+                                                    <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" value={resource.ProductName || ''} onChange={(e) => handleResourceChange(index, 'ProductName', e.target.value)} />
+                                                </div>
+                                                <div className="form-group">
+                                                    <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
+                                                    <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" value={resource.ProductUrl || ''} onChange={(e) => handleResourceChange(index, 'ProductUrl', e.target.value)} />
+                                                </div>
+                                                <button onClick={() => removeProductResourceField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                        <button onClick={addProductResourceField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
-                        <button onClick={handleSaveResources} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                                <button onClick={addProductResourceField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
+                                <button onClick={handleSaveResources} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
