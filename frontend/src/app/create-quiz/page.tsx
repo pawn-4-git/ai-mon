@@ -98,9 +98,30 @@ function CreateQuizContent() {
         setIsLoadingResources(true);
         setResourceError(null);
         try {
+            // The raw response from the backend API
+            interface ApiResource {
+                ResourceId: string;
+                GroupId: string;
+                Title: string;
+                URL: string;
+                ImgSrc?: string;
+            }
+            interface ApiResponse {
+                resources?: ApiResource[];
+            }
+
             const data = await window.apiClient.get(`/Prod/quiz-groups/${groupId}/resources`) as ApiResponse;
+            
             if (data && data.resources) {
-                setProductResources(data.resources);
+                // Map the API response to the frontend's ProductResource type
+                const formattedResources: ProductResource[] = data.resources.map(res => ({
+                    ResourceId: res.ResourceId,
+                    GroupId: res.GroupId,
+                    ProductName: res.Title,
+                    ProductUrl: res.URL,
+                    ImageUrl: res.ImgSrc || '',
+                }));
+                setProductResources(formattedResources);
             }
         } catch (error) {
             console.error('Failed to fetch resources:', error);
