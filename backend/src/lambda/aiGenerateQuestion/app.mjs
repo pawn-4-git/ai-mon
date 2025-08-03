@@ -77,6 +77,7 @@ export const lambdaHandler = async (event) => {
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationPrompt = `以下の文章から、重要な情報に基づいた問題、その正解、そして解説を生成してください。
+        問題は１問とします。
 
         文章:
         """
@@ -90,7 +91,7 @@ export const lambdaHandler = async (event) => {
           "explanation": "問題の解説"
         }
 
-        もし、与えられ���文章から明確な問題と正解を生成できない場合は、"error" という文字列だ���を含むJSONを返してください。
+        もし、与えられた文章から明確な問題と正解を生成できない場合は、"error" という文字列を含むJSONを返してください。
         例:
         {
           "error": "問題を生成できませんでした。"
@@ -160,7 +161,6 @@ export const lambdaHandler = async (event) => {
             statusCode: 201,
             body: JSON.stringify({
                 message: "Question generated successfully.",
-                QuestionId: questionId,
                 questionText: questionText,
                 correctChoice: correctChoice,
                 incorrectChoices: incorrectChoices,
