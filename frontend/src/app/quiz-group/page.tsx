@@ -102,8 +102,8 @@ export default function QuizGroupPage() {
 
       if (response && response.GroupId) {
         alert('新しい問題グループが作成されました！');
-        // create-quiz に GroupId を渡して遷移
-        router.push(`/create-quiz?groupId=${response.GroupId}`);
+        // create-quiz に GroupId と Name を渡して遷移
+        router.push(`/create-quiz?id=${response.GroupId}&name=${encodeURIComponent(newGroupName)}`);
       } else {
         throw new Error("GroupId was not returned from the API.");
       }
@@ -123,6 +123,12 @@ export default function QuizGroupPage() {
       return;
     }
 
+    const selectedGroup = quizGroups.find(g => g.id === selectedQuizGroup);
+    if (!selectedGroup) {
+      alert('選択されたグループ情報が見つかりません。');
+      return;
+    }
+
     try {
       const body = {
         questionCount,
@@ -130,7 +136,7 @@ export default function QuizGroupPage() {
       };
       await window.apiClient.put(`/Prod/quiz-groups/${selectedQuizGroup}`, body);
       alert('問題グループの設定を更新しました！');
-      router.push(`/create-quiz?id=${selectedQuizGroup}`);
+      router.push(`/create-quiz?id=${selectedQuizGroup}&name=${encodeURIComponent(selectedGroup.name)}`);
     } catch (error) {
       console.error('Failed to update quiz group:', error);
       alert('問題グループの更新に失敗しました。');
