@@ -29,7 +29,7 @@ const invokeBedrock = async (prompt, systemPrompt) => {
 
     const bedrockResponse = await bedrockClient.send(command);
     const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
-    return responseBody.output.message.content[0].text;
+    return responseBody.output?.message?.content?.[0]?.text;
 };
 
 
@@ -90,7 +90,7 @@ export const lambdaHandler = async (event) => {
           "explanation": "問題の解説"
         }
 
-        もし、与えられた文章から明確な問題と正解を生成できない場合は、"error" という文字列だ���を含むJSONを返してください。
+        もし、与えられ���文章から明確な問題と正解を生成できない場合は、"error" という文字列だ���を含むJSONを返してください。
         例:
         {
           "error": "問題を生成できませんでした。"
@@ -99,11 +99,16 @@ export const lambdaHandler = async (event) => {
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
         const generatedQuestionJSON = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);
 
+        if (!generatedQuestionJSON) {
+            console.error("Bedrock did not return a valid question JSON.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
+        }
+
         let generatedData;
         try {
             generatedData = JSON.parse(generatedQuestionJSON);
         } catch (e) {
-            console.error("Failed to parse Bedrock response for question generation:", e);
+            console.error("Failed to parse Bedrock response for question generation:", e, "Response:", generatedQuestionJSON);
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to parse AI response." }) };
         }
 
@@ -129,10 +134,17 @@ export const lambdaHandler = async (event) => {
         正解の選択肢に人名がある場合は、人名を変更した選択肢を作ってください。
         正解の選択肢に地名がある場合は、地名を変更した選択肢を作ってください。
         不正解の先頭に数値をつける必要はありません。
+        選択肢の先頭に数値や記号は不要です。
         `;
 
         const choiceGenerationSystemPrompt = "あなたはクイズを制作する製作者です。";
         const generatedChoicesText = await invokeBedrock(choiceGenerationPrompt, choiceGenerationSystemPrompt);
+
+        if (!generatedChoicesText) {
+            console.error("Bedrock did not return valid text for choices.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for choice generation." }) };
+        }
+
         const incorrectChoices = generatedChoicesText.split('\n').map(line => line.trim()).filter(line => line !== '');
 
         // Ensure we have exactly 10 incorrect choices
