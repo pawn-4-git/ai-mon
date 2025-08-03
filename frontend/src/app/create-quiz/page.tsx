@@ -31,6 +31,15 @@ interface LambdaQuizGroup {
 interface ApiResponse {
     message?: string;
     groups?: LambdaQuizGroup[];
+    resources?: ProductResource[];
+}
+
+interface ProductResource {
+    ResourceId: string;
+    GroupId: string;
+    ImageUrl: string;
+    ProductName: string;
+    ProductUrl: string;
 }
 
 function CreateQuizContent() {
@@ -42,7 +51,7 @@ function CreateQuizContent() {
 
     const [quizzes] = useState<Quiz[]>([]);
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
-    const [productLinks, setProductLinks] = useState<object[]>([{}]);
+    const [productResources, setProductResources] = useState<Partial<ProductResource>[]>([]);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
 
     // Form state
@@ -52,7 +61,6 @@ function CreateQuizContent() {
     const [explanationText, setExplanationText] = useState('');
     const [dummyChoices, setDummyChoices] = useState<string[]>([]);
     const [sourceText, setSourceText] = useState('');
-
 
     const fetchQuizGroups = useCallback(async () => {
         if (!window.apiClient) {
@@ -83,6 +91,34 @@ function CreateQuizContent() {
         }
     }, [searchParams]);
 
+    const fetchResources = useCallback(async (groupId: string) => {
+        if (!window.apiClient) return;
+        try {
+            const data = await window.apiClient.get(`/Prod/quiz-groups/${groupId}/resources`) as ApiResponse;
+            if (data && data.resources) {
+                setProductResources(data.resources);
+            }
+        } catch (error) {
+            console.error('Failed to fetch resources:', error);
+        }
+    }, []);
+
+    useEffect(() => {
+        const groupId = searchParams.get('id');
+        const groupName = searchParams.get('name');
+        if (groupId) {
+            setCurrentGroup({
+                id: groupId,
+                name: decodeURIComponent(groupName || ''),
+                questionCount: 0, // This might need to be fetched or passed as well
+                timeLimit: 0,   // Same as above
+                status: 'not-taken'
+            });
+            fetchResources(groupId);
+        }
+    }, [searchParams, fetchResources]);
+
+
     const resetForm = () => {
         setQuizTitle('');
         setQuestionText('');
@@ -102,8 +138,8 @@ function CreateQuizContent() {
             alert('すべての項目を入力してください。');
             return;
         }
-        if (dummyChoices.length !== 10) {
-            alert('ダミーの選択肢を10個生成してください。');
+        if (dummyChoices.length < 1) {
+            alert('ダミーの選択肢を1つ以上生成してください。');
             return;
         }
 
@@ -114,6 +150,7 @@ function CreateQuizContent() {
 
         const requestBody = {
             type: 'manual',
+            title: quizTitle,
             questionText: questionText,
             correctChoice: correctChoice,
             incorrectChoices: dummyChoices,
@@ -214,34 +251,79 @@ function CreateQuizContent() {
         setCreationMethod(e.target.value);
     };
 
-    const addProductLinkField = useCallback(() => {
-        if (productLinks.length < 10) {
-            setProductLinks([...productLinks, {}]);
+    const handleResourceChange = (index: number, field: keyof ProductResource, value: string) => {
+        const newResources = [...productResources];
+        const resourceToUpdate = { ...newResources[index], [field]: value };
+        newResources[index] = resourceToUpdate;
+        setProductResources(newResources);
+    };
+
+    const addProductResourceField = () => {
+        if (productResources.length < 10) {
+            setProductResources([...productResources, { ResourceId: `new-${Date.now()}`, GroupId: currentGroup?.id || '', ImageUrl: '', ProductName: '', ProductUrl: '' }]);
         } else {
             alert('追加できる商品リンクは最大10個までです。');
         }
-    }, [productLinks]);
-
-    const removeProductLinkField = (index: number) => {
-        const newProductLinks = productLinks.filter((_, i) => i !== index);
-        setProductLinks(newProductLinks);
     };
 
-    useEffect(() => {
-        const groupIdFromUrl = searchParams.get('id');
-        const groupNameFromUrl = searchParams.get('name');
-        if (groupIdFromUrl) {
-            setCurrentGroup(prevGroup =>
-                prevGroup ? { ...prevGroup, id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || '') } : { id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || ''), questionCount: 0, timeLimit: 0, status: 'not-taken' }
-            );
+    const removeProductResourceField = async (index: number) => {
+        if (!window.apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
         }
-    }, [searchParams]);
 
-    useEffect(() => {
-        if (productLinks.length === 0) {
-            addProductLinkField();
+        const resourceToDelete = productResources[index];
+        
+        // Only call API if the resource exists in the database (i.e., has a real ResourceId)
+        if (resourceToDelete.ResourceId && !resourceToDelete.ResourceId.startsWith('new-')) {
+            try {
+                await window.apiClient.del(`/Prod/resources/${resourceToDelete.ResourceId}`);
+                alert('商品リンクを削除しました。');
+            } catch (error) {
+                console.error('Failed to delete resource:', error);
+                alert('商品リンクの削除に失敗しました。');
+                return; // Stop execution if API call fails
+            }
         }
-    }, [addProductLinkField, productLinks.length]);
+
+        const newResources = productResources.filter((_, i) => i !== index);
+        setProductResources(newResources);
+    };
+
+    const handleSaveResources = async () => {
+        if (!currentGroup) {
+            alert('問題グループが設定されていません。');
+            return;
+        }
+        if (!window.apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        const newResources = productResources.filter(r => r.ResourceId && r.ResourceId.startsWith('new-'));
+
+        if (newResources.length === 0) {
+            alert('保存する新しい商品リンクがありません。');
+            return;
+        }
+
+        try {
+            for (const resource of newResources) {
+                const payload = {
+                    title: resource.ProductName,
+                    url: resource.ProductUrl,
+                    imgSrc: resource.ImageUrl,
+                };
+                await window.apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/resources`, payload);
+            }
+            alert('新しい商品リンクを保存しました。');
+            fetchResources(currentGroup.id); // Refresh the list to get new ResourceIds
+        } catch (error) {
+            console.error('Failed to save new resources:', error);
+            alert('商品リンクの保存に失敗しました。');
+        }
+    };
+
 
     return (
         <>
@@ -287,7 +369,7 @@ function CreateQuizContent() {
                             <label htmlFor="correct-choice">正解の選択肢:</label>
                             <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" value={correctChoice} onChange={(e) => setCorrectChoice(e.target.value)} />
                         </div>
-                        <button onClick={handleGenerateDummies}>ダミー選択肢を10個生成</button>
+                        <button onClick={handleGenerateDummies}>ダミー選択肢を10���生成</button>
 
                         {showDummyChoices && (
                             <div className="dummy-choices">
@@ -315,7 +397,7 @@ function CreateQuizContent() {
                             <label htmlFor="source-text">生成元の文章:</label>
                             <textarea id="source-text" placeholder="問題生成の元となる文章を入力してください" value={sourceText} onChange={(e) => setSourceText(e.target.value)}></textarea>
                         </div>
-                        <button onClick={handleGenerateQuestion}>問��を自動生成</button>
+                        <button onClick={handleGenerateQuestion}>問題を自動生成</button>
                     </div>
 
                     <div className="button-group">
@@ -324,7 +406,6 @@ function CreateQuizContent() {
                         <button onClick={() => setIsModalOpen(true)} style={{ backgroundColor: '#17a2b8' }}>問題の一覧を確認</button>
                     </div>
 
-                    {/* ... rest of the component ... */}
                     {isModalOpen && (
                         <div className="modal" style={{ display: 'block' }}>
                             <div className="modal-content">
@@ -359,27 +440,27 @@ function CreateQuizContent() {
                         <h3>関連商品リンク (最大10個)</h3>
                         <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
                         <div id="product-links-container">
-                            {productLinks.map((link, index) => (
-                                <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
+                            {productResources.map((resource, index) => (
+                                <div key={resource.ResourceId || index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
                                     <h4>商品リンク {index + 1}</h4>
                                     <div className="form-group">
                                         <label htmlFor={`product-image-url-${index}`}>画像URL:</label>
-                                        <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" />
+                                        <input type="text" id={`product-image-url-${index}`} placeholder="例: https://example.com/image.jpg" value={resource.ImageUrl || ''} onChange={(e) => handleResourceChange(index, 'ImageUrl', e.target.value)} />
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor={`product-name-${index}`}>商品名:</label>
-                                        <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" />
+                                        <input type="text" id={`product-name-${index}`} placeholder="例: 商品A" value={resource.ProductName || ''} onChange={(e) => handleResourceChange(index, 'ProductName', e.target.value)} />
                                     </div>
                                     <div className="form-group">
                                         <label htmlFor={`product-link-url-${index}`}>商品リンクURL:</label>
-                                        <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" />
+                                        <input type="text" id={`product-link-url-${index}`} placeholder="例: https://example.com/product/A" value={resource.ProductUrl || ''} onChange={(e) => handleResourceChange(index, 'ProductUrl', e.target.value)} />
                                     </div>
-                                    <button onClick={() => removeProductLinkField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
+                                    <button onClick={() => removeProductResourceField(index)} style={{ backgroundColor: '#dc3545', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', marginTop: '10px' }}>削除</button>
                                 </div>
                             ))}
                         </div>
-                        <button onClick={addProductLinkField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
-                        <button onClick={() => alert('商品リンクを保存します。（機能は未実装）')} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
+                        <button onClick={addProductResourceField} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを追加</button>
+                        <button onClick={handleSaveResources} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>商品リンクを保存</button>
                     </div>
                 </div>
             </div>
