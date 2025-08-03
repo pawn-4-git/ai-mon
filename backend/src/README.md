@@ -72,7 +72,7 @@
 *   **`GET /quizzes/:quizId/results`**: クイズ結果取得
     *   パスパラメータ: `quizId`
     *   レスポンス: 各問題の解答状況、正解、解説など
-*   **`GET /users/:userId/score-history`**: ユーザーの成績履歴取得
+*   **`GET /score`**: ユーザーの成績履歴取得
     *   パスパラメータ: `userId`
     *   レスポンス: 成績記録のリスト
 *   **`POST /users/:userId/scores`**: 成績記録保存

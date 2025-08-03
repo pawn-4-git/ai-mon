@@ -99,7 +99,7 @@ export default function QuizListPage() {
 
         // 正しいエンドポイントに修正
         const scoreHistoryResponse = (await window.apiClient.get(
-          `/Prod/users/${user.id}/score-history`
+          `/Prod/scores`
         )) as ScoreHistoryApiResponse;
         const scoreHistoryData = scoreHistoryResponse.scores || [];
 
