@@ -652,6 +652,10 @@ Resources:
             TableName: !Ref ScoresTableName
         - DynamoDBReadPolicy:
             TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuizGroupsTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTable
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
