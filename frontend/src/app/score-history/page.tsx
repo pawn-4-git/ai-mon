@@ -56,7 +56,7 @@ export default function ScoreHistoryPage() {
 
             try {
                 setLoading(true);
-                const data = await window.apiClient.get(`/Prod/users/${userId}/scores`) as ApiResponse;
+                const data = await window.apiClient.get(`/Prod/scores`) as ApiResponse;
                 if (data && Array.isArray(data.scores)) {
                     setScores(data.scores);
                 } else {

@@ -23,11 +23,12 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
-        const userId = event.pathParameters?.userId;
-        if (!userId || userId != authResult.userId) {
+        const userId = authResult.userId;
+        if (!userId) {
+            // This case should technically not be reached if validateSession is working correctly
             return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "User ID is required." }),
+                statusCode: 403,
+                body: JSON.stringify({ message: "User ID could not be determined from session." }),
             };
         }
         const newSessionVersionId = await updateSessionTtl(authResult.sessionId);

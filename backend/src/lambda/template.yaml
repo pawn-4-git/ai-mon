@@ -631,7 +631,7 @@ Resources:
         ScoreHistoryGetEvent:
           Type: Api
           Properties:
-            Path: /users/{userId}/score-history
+            Path: /scores
             Method: get
 
   ScoresCreateFunction:
