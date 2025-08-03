@@ -241,7 +241,7 @@ export default function QuizListPage() {
               </div>
               <span className={`group-status ${getStatusTextClass(group.status)}`}>{group.statusText}</span>
               <div className="action-buttons">
-                <button onClick={() => router.push('/quiz-play')}>テスト開始</button>
+                <button onClick={() => handleStartTest(group.id)}>テスト開始</button>
                 {isAdminUser && (
                   <button className="edit-button" onClick={() => router.push(`/create-quiz?id=${group.id}&name=${encodeURIComponent(group.name)}`)}>編集</button>
                 )}
@@ -262,4 +262,26 @@ export default function QuizListPage() {
       />
     </div>
   );
+
+  async function handleStartTest(groupId: string) {
+    if (!window.apiClient) {
+      setError('APIクライアントが利用できません。');
+      return;
+    }
+    try {
+      const response = await window.apiClient.post('/Prod/scores', { groupId }) as { QuizSessionId: string };
+      if (response && response.QuizSessionId) {
+        router.push(`/quiz-play?sessionId=${response.QuizSessionId}`);
+      } else {
+        setError('テストセッションの開始に失敗しました。');
+      }
+    } catch (err) {
+      console.error('Error starting test session:', err);
+      if (err instanceof Error) {
+        setError(`エラーが発生しました: ${err.message}`);
+      } else {
+        setError('不明なエラーが発生しました。');
+      }
+    }
+  }
 }

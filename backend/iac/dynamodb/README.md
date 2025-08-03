@@ -95,6 +95,11 @@
     - `QuestionId`: 解答した問題のID
     - `SelectedChoice`: ユーザーが選択した解答
     - `IsCorrect`: 正解かどうか (Boolean)
+    - `CorrectChoice` : 正解の選択肢
+    - `Choice1` : 選択肢1
+    - `Choice2` : 選択肢2
+    - `Choice3` : 選択肢3
+    - `Choice4` : 選択肢4
 - `SubmittedAt`: 解答提出日時
 - `StartedAt`: 試験開始日時 (ISO 8601形式)
 - `ExpiresAt`: 試験の期限日時 (ISO 8601形式)
