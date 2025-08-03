@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand, QueryCommand, GetCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { validateSession } from "/opt/authHelper.js";
 
@@ -7,9 +7,20 @@ const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
 const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
+const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
+const QUIZ_GROUPS_TABLE_NAME = process.env.QUIZ_GROUPS_TABLE_NAME;
+
+// Function to shuffle an array
+const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+};
 
 export const lambdaHandler = async (event) => {
-    if (!SCORES_TABLE_NAME) {
+    if (!SCORES_TABLE_NAME || !QUESTIONS_TABLE_NAME || !QUIZ_GROUPS_TABLE_NAME) {
         console.error("Table name environment variables are not set.");
         return {
             statusCode: 500,
@@ -23,11 +34,11 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
-        const userId = event.pathParameters?.userId;
+        const userId = authResult.userId;
         if (!userId) {
             return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "User ID is required." }),
+                statusCode: 403,
+                body: JSON.stringify({ message: "User ID could not be determined from session." }),
             };
         }
 
@@ -49,44 +60,120 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const { quizId, score, date } = body;
-        
-        if (!quizId || score === undefined || !date) {
+        const { groupId } = body;
+        if (!groupId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "QuizId, score, and date are required." }),
+                body: JSON.stringify({ message: "groupId is required." }),
             };
         }
 
-        const scoreId = randomUUID();
-        const now = new Date();
+        // Search for an existing score that is not submitted and not expired
+        const queryScoresParams = {
+            TableName: SCORES_TABLE_NAME,
+            IndexName: "UserIdIndex",
+            KeyConditionExpression: "UserId = :userId",
+            FilterExpression: "GroupId = :groupId AND attribute_not_exists(SubmittedAt) AND attribute_not_exists(ExpiresAt)",
+            ExpressionAttributeValues: {
+                ":userId": userId,
+                ":groupId": groupId,
+            },
+        };
 
-        const scoreItem = {
-            ScoreId: scoreId,
+        const queryScoresCommand = new QueryCommand(queryScoresParams);
+        const queryScoresResult = await docClient.send(queryScoresCommand);
+
+        if (queryScoresResult.Items && queryScoresResult.Items.length > 0) {
+            return {
+                statusCode: 200,
+                body: JSON.stringify(queryScoresResult.Items[0].QuizSessionId),
+            };
+        }
+
+        // --- Create a new score if no active one is found ---
+
+        // 1. Fetch Quiz Group details
+        const getGroupParams = {
+            TableName: QUIZ_GROUPS_TABLE_NAME,
+            Key: { GroupId: groupId },
+        };
+        const getGroupCommand = new GetCommand(getGroupParams);
+        const groupResult = await docClient.send(getGroupCommand);
+
+        if (!groupResult.Item) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ message: "Quiz group not found." }),
+            };
+        }
+        const { TimeLimitMinutes = 60, QuestionCount = 10 } = groupResult.Item;
+
+        // 2. Fetch all questions for the given groupId
+        const queryQuestionsParams = {
+            TableName: QUESTIONS_TABLE_NAME,
+            IndexName: "GroupIdIndex",
+            KeyConditionExpression: "GroupId = :groupId",
+            ExpressionAttributeValues: {
+                ":groupId": groupId,
+            },
+        };
+        const queryQuestionsCommand = new QueryCommand(queryQuestionsParams);
+        const questionsResult = await docClient.send(queryQuestionsCommand);
+
+        if (!questionsResult.Items || questionsResult.Items.length === 0) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ message: "No questions found for the provided groupId." }),
+            };
+        }
+
+        // 3. Generate the Answers array (select a subset of questions)
+        const selectedQuestions = shuffleArray(questionsResult.Items).slice(0, QuestionCount);
+
+        const answers = selectedQuestions.map(q => {
+            const incorrectChoices = [...q.Choices.Incorrect];
+            const shuffledIncorrect = shuffleArray(incorrectChoices).slice(0, 3);
+            const finalChoices = shuffleArray([q.Choices.Correct, ...shuffledIncorrect]);
+
+            return {
+                QuestionId: q.QuestionId,
+                QuestionText: q.QuestionText,
+                Choices: finalChoices,
+                CorrectChoice: q.Choices.Correct,
+                SelectedChoice: null,
+                IsCorrect: null,
+                ReferenceURL: q.Explanation,
+            };
+        });
+
+        // 4. Create the new score item
+        const quizSessionId = randomUUID();
+        const now = new Date();
+        const expires = new Date(now.getTime() + TimeLimitMinutes * 60 * 1000);
+
+        const newScoreItem = {
+            QuizSessionId: quizSessionId,
             UserId: userId,
-            QuizId: quizId,
-            Score: score,
-            Date: date,
-            CreatedAt: now.toISOString(),
+            GroupId: groupId,
+            Answers: answers,
+            TotalCount: answers.length,
+            StartedAt: now.toISOString(),
+            ExpiresAt: expires.toISOString(),
         };
 
         const putCommand = new PutCommand({
             TableName: SCORES_TABLE_NAME,
-            Item: scoreItem,
+            Item: newScoreItem,
         });
 
         await docClient.send(putCommand);
 
         return {
             statusCode: 201,
-            body: JSON.stringify({
-                message: "Score record created successfully.",
-                ScoreId: scoreId,
-                ...scoreItem,
-            }),
+            body: JSON.stringify(newScoreItem.QuizSessionId),
         };
     } catch (error) {
-        console.error("Error creating score record:", error);
+        console.error("Error in scoresCreate:", error);
         return {
             statusCode: 500,
             body: JSON.stringify({ message: "Internal server error" }),

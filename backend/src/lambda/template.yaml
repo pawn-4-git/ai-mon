@@ -662,7 +662,7 @@ Resources:
         ScoresCreateEvent:
           Type: Api
           Properties:
-            Path: /users/{userId}/scores
+            Path: /scores
             Method: post
 
   ScoresDeleteFunction:
