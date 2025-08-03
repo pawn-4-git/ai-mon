@@ -51,6 +51,7 @@ function CreateQuizContent() {
     const [correctChoice, setCorrectChoice] = useState('');
     const [explanationText, setExplanationText] = useState('');
     const [dummyChoices, setDummyChoices] = useState<string[]>([]);
+    const [sourceText, setSourceText] = useState('');
 
 
     const fetchQuizGroups = useCallback(async () => {
@@ -89,6 +90,7 @@ function CreateQuizContent() {
         setExplanationText('');
         setDummyChoices([]);
         setShowDummyChoices(false);
+        setSourceText('');
     };
 
     const handleSaveQuestion = async () => {
@@ -159,6 +161,51 @@ function CreateQuizContent() {
         }
     };
 
+    const handleGenerateQuestion = async () => {
+        if (!currentGroup) {
+            alert('問題グループが設定されていません。');
+            return;
+        }
+        if (!sourceText) {
+            alert('生成元の文章を入力してください。');
+            return;
+        }
+
+        if (!window.apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        interface AiGenerateQuestionResponse {
+            questionText: string;
+            correctChoice: string;
+            incorrectChoices: string[];
+            explanation: string;
+        }
+
+        try {
+            const response = await window.apiClient.post(
+                `/Prod/ai/generate-question`,
+                { sourceText, groupId: currentGroup.id }
+            ) as AiGenerateQuestionResponse;
+
+            if (response && response.questionText) {
+                setQuestionText(response.questionText);
+                setCorrectChoice(response.correctChoice);
+                setDummyChoices(response.incorrectChoices);
+                setExplanationText(response.explanation);
+                setShowDummyChoices(true);
+                setCreationMethod('manual');
+                alert('問題が自動生成されました。内容を確認・修正して保存してください。');
+            } else {
+                alert('問題の自動生成に失敗しました。');
+            }
+        } catch (error) {
+            console.error('Failed to generate question:', error);
+            alert('問題の自動生成中にエラーが発生しました。');
+        }
+    };
+
     const handleCreationMethodChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setCreationMethod(e.target.value);
     };
@@ -180,9 +227,8 @@ function CreateQuizContent() {
         const groupIdFromUrl = searchParams.get('id');
         const groupNameFromUrl = searchParams.get('name');
         if (groupIdFromUrl) {
-            setQuizTitle(decodeURIComponent(groupNameFromUrl || ''));
             setCurrentGroup(prevGroup =>
-                prevGroup ? { ...prevGroup, id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || '') } : { id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || ''), questionCount: 0, timeLimit: 0, status: 'not-taken' } 
+                prevGroup ? { ...prevGroup, id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || '') } : { id: groupIdFromUrl, name: decodeURIComponent(groupNameFromUrl || ''), questionCount: 0, timeLimit: 0, status: 'not-taken' }
             );
         }
     }, [searchParams]);
@@ -258,7 +304,11 @@ function CreateQuizContent() {
 
                     {/* Auto Generation Section */}
                     <div id="auto-generation" style={{ display: creationMethod === 'auto' ? 'block' : 'none' }}>
-                        {/* ... auto-generation content ... */}
+                        <div className="form-group">
+                            <label htmlFor="source-text">生成元の文章:</label>
+                            <textarea id="source-text" placeholder="問題生成の元となる文章を入力してください" value={sourceText} onChange={(e) => setSourceText(e.target.value)}></textarea>
+                        </div>
+                        <button onClick={handleGenerateQuestion}>問��を自動生成</button>
                     </div>
 
                     <div className="button-group">
@@ -300,7 +350,7 @@ function CreateQuizContent() {
                     )}
                     <div className="product-links-section" style={{ marginTop: '30px' }}>
                         <h3>関連商品リンク (最大10個)</h3>
-                        <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品��、商品リンクを入力してください。</p>
+                        <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
                         <div id="product-links-container">
                             {productLinks.map((link, index) => (
                                 <div key={index} className="product-link-item" style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
