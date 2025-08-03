@@ -588,6 +588,8 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBReadPolicy:
             TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -600,7 +602,7 @@ Resources:
         ResultsGetEvent:
           Type: Api
           Properties:
-            Path: /quizzes/{quizId}/results
+            Path: /results/{quizSessionId}
             Method: get
 
   ScoreHistoryGetFunction:
