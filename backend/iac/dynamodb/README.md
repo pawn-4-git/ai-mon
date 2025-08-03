@@ -91,15 +91,14 @@
 - `Score`: 正解率 (例: 85.5)
 - `CorrectCount`: 正解数
 - `TotalCount`: 全問題数
-- `Answers`: ユーザーの解答リスト (List of Maps)
-    - `QuestionId`: 解答した問題のID
-    - `SelectedChoice`: ユーザーが選択した解答
-    - `IsCorrect`: 正解かどうか (Boolean)
-    - `CorrectChoice` : 正解の選択肢
-    - `Choice1` : 選択肢1
-    - `Choice2` : 選択肢2
-    - `Choice3` : 選択肢3
-    - `Choice4` : 選択肢4
+- `Answers`: ユーザーの解答リスト (Array of Objects)
+  - `QuestionId`: 解答した問題のID
+  - `QuestionText`: 問題文
+  - `Choices`: 表示された選択肢の配列 (Array of Strings)
+  - `CorrectChoice`: 正解の選択肢 (String)
+  - `SelectedChoice`: ユーザーが選択した解答 (String, nullable)
+  - `IsCorrect`: 正解かどうか (Boolean, nullable)
+  - `ReferenceURL`: 解説や参考情報のURL (String)
 - `SubmittedAt`: 解答提出日時
 - `StartedAt`: 試験開始日時 (ISO 8601形式)
 - `ExpiresAt`: 試験の期限日時 (ISO 8601形式)

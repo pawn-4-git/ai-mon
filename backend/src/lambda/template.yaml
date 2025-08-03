@@ -650,6 +650,8 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
             TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref ScoresTableName
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
