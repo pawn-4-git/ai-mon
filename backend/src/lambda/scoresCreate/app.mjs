@@ -68,25 +68,32 @@ export const lambdaHandler = async (event) => {
             };
         }
 
+        const currentTime = new Date().toISOString();
         // Search for an existing score that is not submitted and not expired
         const queryScoresParams = {
             TableName: SCORES_TABLE_NAME,
             IndexName: "UserIdIndex",
             KeyConditionExpression: "UserId = :userId",
-            FilterExpression: "GroupId = :groupId AND attribute_not_exists(SubmittedAt) AND attribute_not_exists(ExpiresAt)",
+            FilterExpression: "GroupId = :groupId AND attribute_not_exists(SubmittedAt) AND ExpiresAt > :currentTime",
             ExpressionAttributeValues: {
                 ":userId": userId,
                 ":groupId": groupId,
+                ":currentTime": currentTime,
             },
         };
 
         const queryScoresCommand = new QueryCommand(queryScoresParams);
         const queryScoresResult = await docClient.send(queryScoresCommand);
 
-        if (queryScoresResult.Items && queryScoresResult.Items.length > 0) {
+        const activeSession = queryScoresResult.Items.find(item => {
+            const expiresAt = new Date(item.ExpiresAt);
+            return expiresAt > new Date();
+        });
+
+        if (activeSession) {
             return {
                 statusCode: 200,
-                body: JSON.stringify(queryScoresResult.Items[0].QuizSessionId),
+                body: JSON.stringify({ QuizSessionId: activeSession.QuizSessionId }),
             };
         }
 
@@ -170,7 +177,7 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 201,
-            body: JSON.stringify(newScoreItem.QuizSessionId),
+            body: JSON.stringify({ QuizSessionId: newScoreItem.QuizSessionId }),
         };
     } catch (error) {
         console.error("Error in scoresCreate:", error);
