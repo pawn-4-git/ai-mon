@@ -2,6 +2,7 @@
 
 import React, { Suspense, useState, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import Header from '@/components/Header';
@@ -478,7 +479,14 @@ function CreateQuizContent() {
                                         <div key={resource.ResourceId || index} className="product-link-item" style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '4px', backgroundColor: '#f9f9f9' }}>
                                             {resource.ImageUrl && (
                                                 <a href={resource.ProductUrl || '#'} target="_blank" rel="noopener noreferrer" style={{ marginRight: '15px' }}>
-                                                    <img src={resource.ImageUrl} alt={resource.ProductName || '商品画像'} style={{ width: '100px', height: '100px', objectFit: 'cover', borderRadius: '4px' }} />
+                                                    <Image
+                                                        src={resource.ImageUrl}
+                                                        alt={resource.ProductName || '商品画像'}
+                                                        width={100}
+                                                        height={100}
+                                                        style={{ objectFit: 'cover', borderRadius: '4px' }}
+                                                        unoptimized
+                                                    />
                                                 </a>
                                             )}
                                             <div style={{ flex: 1 }}>

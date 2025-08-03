@@ -1,67 +1,148 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
+import { useAuth } from '@/context/AuthContext';
+import Script from 'next/script';
 
-const scoreRecords = [
-  { id: 1, text: '2024/06/01 - 数学テスト (正答率: 85%)' },
-  { id: 2, text: '2024/05/20 - 歴史クイズ (正答率: 70%)' },
-  { id: 3, text: '2024/05/15 - 科学演習 (正答率: 92%)' },
-  { id: 4, text: '2024/05/01 - 数学テスト (正答率: 78%)' },
-];
+// Define the structure of a single score record from the API
+interface ScoreRecord {
+    ScoreId: string;
+    GroupId: string;
+    UserId: string;
+    Score: number;
+    SubmittedAt: string;
+    QuizGroupName: string; // Assuming this is available, adjust if not
+}
+
+// Define the structure of the API response
+interface ApiResponse {
+    scores: ScoreRecord[];
+}
+
+declare global {
+    interface Window {
+        apiClient?: {
+            request: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+            get: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+            post: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+            put: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+            del: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+        };
+    }
+}
 
 export default function ScoreHistoryPage() {
-  const router = useRouter();
+    const router = useRouter();
+    const { user } = useAuth();
+    const userId = user?.id;
+    const [scores, setScores] = useState<ScoreRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-  return (
-    <div className="score-history-page">
-      <Header />
+    useEffect(() => {
+        const fetchScores = async () => {
+            if (!userId) {
+                setError("ユーザー情報が取得できません。ログインしているか確認してください。");
+                setLoading(false);
+                return;
+            }
+            if (!window.apiClient) {
+                setError("APIクライアントの読み込みに失敗しました。");
+                setLoading(false);
+                return;
+            }
 
-      <div className="container">
-        <h2>成績確認</h2>
+            try {
+                setLoading(true);
+                const data = await window.apiClient.get(`/Prod/users/${userId}/scores`) as ApiResponse;
+                if (data && Array.isArray(data.scores)) {
+                    setScores(data.scores);
+                } else {
+                    throw new Error("取得したデータの形式が正しくありません。");
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : "成績の読み込み中に不明なエラーが発生しました。");
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
 
-        <div className="section">
-          <h3>グループ別分析</h3>
-          <p><strong>数学:</strong> 平均正答率 75% / 最高得点 90点</p>
-          <p><strong>歴史:</strong> 平均正答率 60% / 最高得点 85点</p>
-          <p><strong>科学:</strong> 平均正答率 80% / 最高得点 95点</p>
-        </div>
+        // apiClient.js is loaded via the Script tag, so we wait for it.
+        // A simple delay might work for now, but a more robust solution would be preferable.
+        const checkApiClient = setInterval(() => {
+            if (window.apiClient) {
+                clearInterval(checkApiClient);
+                fetchScores();
+            }
+        }, 100); // Check every 100ms
 
-        <div className="section">
-          <h3>得点推移グラフ (直近10回)</h3>
-          <p><strong>数学グループ:</strong></p>
-          <div className="graph-placeholder">グラフ表示エリア（データ未実装）</div>
-          <p><strong>歴史グループ:</strong></p>
-          <div className="graph-placeholder">グラフ表示エリア（データ未実装）</div>
-        </div>
+        return () => clearInterval(checkApiClient);
+    }, [userId]);
 
-        <div className="section">
-          <h3>個別の成績記録</h3>
-          {scoreRecords.map((record) => (
-            <div key={record.id} className="score-record">
-              <span>{record.text}</span>
-              <button onClick={() => alert('この記録を削除します。（機能は未実装）')}>削除</button>
+    const formatDate = (dateString: string) => {
+        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleString('ja-JP', options);
+    };
+
+    return (
+        <>
+            <Script src="/contents/js/apiClient.js" strategy="beforeInteractive" />
+            <div className="score-history-page">
+                <Header />
+
+                <div className="container">
+                    <h2>成績確認</h2>
+
+                    {loading && <p>成績を読み込んでいます...</p>}
+                    {error && <p className="error-message" style={{ color: 'red' }}>エラー: {error}</p>}
+
+                    {!loading && !error && (
+                        <>
+                            <div className="section">
+                                <h3>個別の成績記録</h3>
+                                {scores.length > 0 ? (
+                                    scores.map((record) => (
+                                        <div key={record.ScoreId} className="score-record">
+                                            <span>
+                                                {formatDate(record.SubmittedAt)} - {record.QuizGroupName || `グループID: ${record.GroupId}`} (正答率: {record.Score}%)
+                                            </span>
+                                            <button onClick={() => alert('この記録を削除します。（機能は未���装）')}>削除</button>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>まだ成績記録がありません。</p>
+                                )}
+                            </div>
+
+                            {/* Placeholder sections for future implementation */}
+                            <div className="section">
+                                <h3>グループ別分析</h3>
+                                <p>（この機能は現在開発中です）</p>
+                            </div>
+                            <div className="section">
+                                <h3>得点推移グラフ</h3>
+                                <div className="graph-placeholder">（グラフ表示は現在開発中です）</div>
+                            </div>
+                            <div className="section">
+                                <h3>苦手傾向分析</h3>
+                                <p>（この機能は現在開発中です）</p>
+                            </div>
+
+                            <div className="action-buttons">
+                                <button onClick={() => alert('すべての成績記録を削除します。（機能は未実装）')}>
+                                    すべての成績記録を削除
+                                </button>
+                                <button onClick={() => router.push('/quiz-list')}>
+                                    問題一覧に戻る
+                                </button>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
-          ))}
-        </div>
-
-        <div className="section">
-          <h3>苦手傾向分析</h3>
-          <p><strong>数学:</strong> 「微分積分」に関する問題で間違いが多い傾向があります。</p>
-          <p><strong>歴史:</strong> 「江戸時代」の文化史に関する問題で理解が不足しているようです。</p>
-          <p><strong>全体:</strong> 長文読解を必要とする問題で正答率が低い傾向が見られます。</p>
-        </div>
-
-        <div className="action-buttons">
-          <button onClick={() => alert('すべての成績記録を削除します。（機能は未実装）')}>
-            すべての成績記録を削除
-          </button>
-          <button onClick={() => router.push('/quiz-list')}>
-            問題一覧に戻る
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+        </>
+    );
 }
