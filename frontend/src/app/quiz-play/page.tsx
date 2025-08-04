@@ -84,9 +84,29 @@ function QuizPlay() {
   }, [quizSessionId, questionNumber]);
 
 
-  const handleSelectChoice = (choice: string) => {
+  const handleSelectChoice = async (choice: string) => {
     setSelectedChoice(choice);
-    alert('選択しました: ' + choice);
+
+    if (!quizSessionId || !window.apiClient) {
+      setError('Quiz Session ID or API client is not available.');
+      return;
+    }
+
+    try {
+      // Assuming the backend expects a payload like { questionNumber: number, userAnswer: string }
+      await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
+        questionNumber: questionNumber,
+        userAnswer: choice,
+      });
+      // Optionally, handle success feedback or state update here
+      console.log('Answer submitted successfully!');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(`Failed to submit answer: ${err.message}`);
+      } else {
+        setError('Failed to submit answer.');
+      }
+    }
   };
 
   const handleNextQuestion = () => {

@@ -7,36 +7,6 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
 
-/**
- * リクエストボディに基づいて、DynamoDBのUpdateオペレーション用のパラメータを構築する。
- * @param {object} body - リクエストボディ。
- * @returns {object} - UpdateCommand用のパラメータ。
- */
-const buildUpdateParams = async (body) => {
-    const { answers, checkedLaterQuestions } = body;
-
-    const updateExpressions = [];
-    const expressionAttributeValues = {};
-    const expressionAttributeNames = {};
-
-    if (answers) {
-        updateExpressions.push("#ans = :answers");
-        expressionAttributeNames["#ans"] = "answers";
-        expressionAttributeValues[":answers"] = answers;
-    }
-
-    if (checkedLaterQuestions) {
-        updateExpressions.push("checkedLaterQuestions = :checkedLaterQuestions");
-        expressionAttributeValues[":checkedLaterQuestions"] = checkedLaterQuestions;
-    }
-
-    return {
-        UpdateExpression: "SET " + updateExpressions.join(", "),
-        ExpressionAttributeValues: expressionAttributeValues,
-        ExpressionAttributeNames: Object.keys(expressionAttributeNames).length > 0 ? expressionAttributeNames : undefined,
-    };
-};
-
 export const lambdaHandler = async (event) => {
     if (!SCORES_TABLE_NAME) {
         console.error("環境変数にテーブル名が設定されていません。");
@@ -86,12 +56,24 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const updateParams = await buildUpdateParams(body);
+        const updateExpressions = [];
+        const expressionAttributeValues = {};
+
+        if (answers) {
+            updateExpressions.push("answers = :answers");
+            expressionAttributeValues[":answers"] = answers;
+        }
+
+        if (checkedLaterQuestions) {
+            updateExpressions.push("checkedLaterQuestions = :checkedLaterQuestions");
+            expressionAttributeValues[":checkedLaterQuestions"] = checkedLaterQuestions;
+        }
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { ScoreId: scoreId },
-            ...updateParams,
+            UpdateExpression: "SET " + updateExpressions.join(", "),
+            ExpressionAttributeValues: expressionAttributeValues,
             ReturnValues: "ALL_NEW",
         });
 
@@ -106,10 +88,10 @@ export const lambdaHandler = async (event) => {
         };
 
     } catch (error) {
-        console.error("スコアの更新中にエラーが発生しました:", error);
+        console.error("回答の保存中にエラーが発生しました:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "スコアの更新に失敗しました。" }),
+            body: JSON.stringify({ message: "回答の保存に失敗しました。" }),
         };
     }
 };

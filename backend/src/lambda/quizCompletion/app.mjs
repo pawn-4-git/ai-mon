@@ -1,33 +1,53 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 
 const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
+const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 
 /**
  * リクエストボディに基づいて、DynamoDBのUpdateオペレーション用のパラメータを構築する。
  * @param {object} body - リクエストボディ。
  * @returns {object} - UpdateCommand用のパラメータ。
  */
-const buildUpdateParams = async (body) => {
-    const { answers, checkedLaterQuestions } = body;
+const buildUpdateParamsForCompletion = async (body) => {
+    const { scoreId, answers } = body;
 
     const updateExpressions = [];
     const expressionAttributeValues = {};
     const expressionAttributeNames = {};
 
-    if (answers) {
+    let correctCount = 0;
+    if (answers && answers.length > 0) {
+        for (const answer of answers) {
+            const getQuestionCommand = new GetCommand({
+                TableName: QUESTIONS_TABLE_NAME,
+                Key: { QuestionId: answer.questionId },
+            });
+            const questionResponse = await docClient.send(getQuestionCommand);
+            if (questionResponse.Item && questionResponse.Item.CorrectChoice === answer.selectedChoice) {
+                correctCount++;
+            }
+        }
+        const score = Math.round((correctCount / answers.length) * 100);
         updateExpressions.push("#ans = :answers");
         expressionAttributeNames["#ans"] = "answers";
         expressionAttributeValues[":answers"] = answers;
-    }
-
-    if (checkedLaterQuestions) {
-        updateExpressions.push("checkedLaterQuestions = :checkedLaterQuestions");
-        expressionAttributeValues[":checkedLaterQuestions"] = checkedLaterQuestions;
+        updateExpressions.push("score = :score");
+        expressionAttributeValues[":score"] = score;
+        updateExpressions.push("isFinished = :isFinished");
+        expressionAttributeValues[":isFinished"] = true;
+        updateExpressions.push("finishedAt = :finishedAt");
+        expressionAttributeValues[":finishedAt"] = new Date().toISOString();
+    } else {
+        // answers がない場合でも isFinished を true に設定す���
+        updateExpressions.push("isFinished = :isFinished");
+        expressionAttributeValues[":isFinished"] = true;
+        updateExpressions.push("finishedAt = :finishedAt");
+        expressionAttributeValues[":finishedAt"] = new Date().toISOString();
     }
 
     return {
@@ -38,7 +58,7 @@ const buildUpdateParams = async (body) => {
 };
 
 export const lambdaHandler = async (event) => {
-    if (!SCORES_TABLE_NAME) {
+    if (!SCORES_TABLE_NAME || !QUESTIONS_TABLE_NAME) {
         console.error("環境変数にテーブル名が設定されていません。");
         return {
             statusCode: 500,
@@ -70,7 +90,7 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const { scoreId, answers, checkedLaterQuestions } = body;
+        const { scoreId, answers } = body;
 
         if (!scoreId) {
             return {
@@ -79,14 +99,10 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        if (!answers && !checkedLaterQuestions) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "更新するデータがありません。" }),
-            };
-        }
+        // isFinished はこの Lambda で true に設定されるため、リクエストボディには含めない
+        // answers が空の場合でも、完了としてマークするために処理を続行する
 
-        const updateParams = await buildUpdateParams(body);
+        const updateParams = await buildUpdateParamsForCompletion(body);
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
@@ -106,10 +122,10 @@ export const lambdaHandler = async (event) => {
         };
 
     } catch (error) {
-        console.error("スコアの更新中にエラーが発生しました:", error);
+        console.error("クイズ完了処理中にエラーが発生しました:", error);
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "スコアの更新に失敗しました。" }),
+            body: JSON.stringify({ message: "クイズ完了処理に失敗しました。" }),
         };
     }
 };
