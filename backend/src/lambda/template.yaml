@@ -627,7 +627,7 @@ Resources:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
           SESSIONS_TABLE_NAME: !Ref SessionsTableName
-          SCORES_TABLE_NAME: !Ref ScoresTable
+          SCORES_TABLE_NAME: !Ref ScoresTableName
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
