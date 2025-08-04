@@ -146,7 +146,7 @@ export const lambdaHandler = async (event) => {
                 QuestionId: q.QuestionId,
                 QuestionText: q.QuestionText,
                 Choices: finalChoices,
-                CorrectChoice: q.Choices.Correct,
+                CorrectChoice: q.CorrectChoice,
                 SelectedChoice: null,
                 IsCorrect: null,
                 ReferenceURL: q.Explanation,
