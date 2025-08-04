@@ -23,6 +23,7 @@ interface QuestionData {
   questionText: string;
   choices: string[];
   userChoice: string | null;
+  groupName: string;
 }
 
 function QuizPlay() {
@@ -97,7 +98,7 @@ function QuizPlay() {
       />
 
       <div className="container">
-        <h2>問題出題中 (グループ: 数学)</h2>
+        <h2>問題出題中 (グループ: {questionData?.groupName || '...'})</h2>
         {loading && <p>Loading...</p>}
         {error && <p style={{ color: 'red' }}>Error: {error}</p>}
         {questionData && !loading && !error && (

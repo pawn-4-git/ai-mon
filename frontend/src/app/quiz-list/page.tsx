@@ -271,7 +271,7 @@ export default function QuizListPage() {
     try {
       const response = await window.apiClient.post('/Prod/scores', { groupId }) as { QuizSessionId: string };
       if (response && response.QuizSessionId) {
-        router.push(`/quiz-play?sessionId=${response.QuizSessionId}`);
+        router.push(`/quiz-play?quizSessionId=${response.QuizSessionId}`);
       } else {
         setError('テストセッションの開始に失敗しました。');
       }

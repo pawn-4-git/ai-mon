@@ -7,9 +7,10 @@ const docClient = DynamoDBDocumentClient.from(client);
 
 const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
 const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
+const QUIZ_GROUPS_TABLE_NAME = process.env.QUIZ_GROUPS_TABLE_NAME;
 
 export const lambdaHandler = async (event) => {
-    if (!SCORES_TABLE_NAME || !QUESTIONS_TABLE_NAME) {
+    if (!SCORES_TABLE_NAME || !QUESTIONS_TABLE_NAME || !QUIZ_GROUPS_TABLE_NAME) {
         console.error("Table name environment variables are not set.");
         return {
             statusCode: 500,
@@ -47,6 +48,23 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "Quiz session not found." }),
             };
         }
+
+        if (score.UserId !== authResult.userId) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ message: "Forbidden" }),
+            };
+        }
+
+        // Get group name from QuizGroupsTable
+        const groupCommand = new GetCommand({
+            TableName: QUIZ_GROUPS_TABLE_NAME,
+            Key: {
+                GroupId: score.GroupId,
+            },
+        });
+        const groupResponse = await docClient.send(groupCommand);
+        const groupName = groupResponse.Item?.GroupName || "Unknown Group";
 
         const questionNumberStr = event.queryStringParameters?.questionNumber;
 
@@ -86,6 +104,7 @@ export const lambdaHandler = async (event) => {
                     questionText: question.QuestionText,
                     choices: question.Choices,
                     userChoice: questionInfo.userChoice,
+                    groupName: groupName,
                 }),
             };
         }
@@ -95,7 +114,7 @@ export const lambdaHandler = async (event) => {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Quiz results retrieved successfully.",
-                results: score,
+                results: { ...score, GroupName: groupName },
             }),
         };
     } catch (error) {
