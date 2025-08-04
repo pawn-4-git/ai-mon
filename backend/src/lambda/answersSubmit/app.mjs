@@ -54,9 +54,9 @@ export const lambdaHandler = async (event) => {
 
         // URLパスからscoreIdを取得
         // template.yamlのPath: /quizzes/{quizId}/answers に基づいて、quizIdを取得
-        const scoreId = event.pathParameters?.quizId;
+        const quizId = event.pathParameters?.quizId;
 
-        if (!scoreId) {
+        if (!quizId) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: "URLパスからscoreIdを取得できませんでした。" }),
@@ -96,7 +96,7 @@ export const lambdaHandler = async (event) => {
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
-            Key: { ScoreId: scoreId }, // ここでパスから取得したscoreIdを使用
+            Key: { QuizSessionId: quizId }, // パスから取得したIDを使用
             ...updateParams,
             ReturnValues: "ALL_NEW",
         });
