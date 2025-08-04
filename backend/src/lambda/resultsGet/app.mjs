@@ -64,7 +64,11 @@ export const lambdaHandler = async (event) => {
             },
         });
         const groupResponse = await docClient.send(groupCommand);
-        const groupName = groupResponse.Item?.GroupName || "Unknown Group";
+        const groupItem = groupResponse.Item;
+        if (!groupItem) {
+            console.warn(`Group with ID ${score.GroupId} not found in QuizGroupsTable.`);
+        }
+        const groupName = groupItem?.GroupName || "Unknown Group";
 
         const questionNumberStr = event.queryStringParameters?.questionNumber;
 
