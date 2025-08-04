@@ -52,6 +52,17 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
+        // URLパスからscoreIdを取得
+        // template.yamlのPath: /quizzes/{quizId}/answers に基づいて、quizIdを取得
+        const scoreId = event.pathParameters?.quizId;
+
+        if (!scoreId) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "URLパスからscoreIdを取得できませんでした。" }),
+            };
+        }
+
         if (!event.body) {
             return {
                 statusCode: 400,
@@ -70,16 +81,11 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const { scoreId, answers, checkedLaterQuestions } = body;
+        // リクエストボディからscoreIdを削除（パスから取得したものを優先するため）
+        // ただし、buildUpdateParams内でbodyを使用しているため、削除せずに上書きする形でも良い
+        // ここでは、パスから取得したscoreIdを直接UpdateCommandで使用する
 
-        if (!scoreId) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: "scoreIdは必須です。" }),
-            };
-        }
-
-        if (!answers && !checkedLaterQuestions) {
+        if (!body.answers && !body.checkedLaterQuestions) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: "更新するデータがありません。" }),
@@ -90,7 +96,7 @@ export const lambdaHandler = async (event) => {
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
-            Key: { ScoreId: scoreId },
+            Key: { ScoreId: scoreId }, // ここでパスから取得したscoreIdを使用
             ...updateParams,
             ReturnValues: "ALL_NEW",
         });
