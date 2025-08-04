@@ -109,6 +109,17 @@ function QuizPlay() {
     }
   };
 
+  // 前の問題へ遷移する関数
+  const handlePreviousQuestion = () => {
+    if (questionNumber > 1) {
+      const prevQuestionNumber = questionNumber - 1;
+      router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
+    } else {
+      alert('これが最初の問題です。');
+    }
+  };
+
+  // 次の問題へ遷移する関数 (変更なし)
   const handleNextQuestion = () => {
     if (questionData && questionNumber < questionData.totalQuestions) {
       const nextQuestionNumber = questionNumber + 1;
@@ -154,6 +165,9 @@ function QuizPlay() {
           </>
         )}
         <div className="action-buttons">
+          <button className="previous-question" onClick={handlePreviousQuestion} disabled={questionNumber <= 1}>
+            前の問題へ
+          </button>
           <button className="check-later" onClick={() => alert('この問題を後で確認します。')}>
             後で確認する
           </button>

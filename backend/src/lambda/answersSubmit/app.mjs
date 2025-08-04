@@ -20,24 +20,13 @@ const buildUpdateParams = async (body) => {
     const expressionAttributeNames = {};
 
 
-    // DynamoDBのUpdateExpressionで配列の特定要素を更新するには、
-    // パスと値の指定が必要。例: #ans[0].selectedChoice = :selectedChoice
-    // ここでは、answers配列全体を更新するのではなく、
-    // 特定の問題に対する回答のみを更新するロジックを実装する。
-    // もしanswersが常に配列で、その中にquestionNumberとselectedChoiceが含まれる場合、
-    // 以下のようなパスを使用する。
-    // ただし、DynamoDBのUpdateExpressionでは配列のインデックスを指定して更新するのが一般的。
-    // questionNumberが0から始まるインデックスとして扱われると仮定する。
-    // もしquestionNumberが1から始まる場合は、answerIndex = questionNumber - 1 とする。
-    // ここでは、questionNumberが1から始まることを想定し、answerIndexを調整する。
-    // questionNumberが1から始まることを想定し、targetQuestionIndexを調整する。
     const targetQuestionIndex = questionNumber - 1;
     if (targetQuestionIndex >= 0 && userAnswer !== undefined) {
         // answers配列の特定要素のselectedChoiceを更新
-        updateExpressions.push(`#ans[${targetQuestionIndex}].selectedChoice = :selectedChoice`);
-        expressionAttributeNames[`#ans`] = "answers";
+        updateExpressions.push(`#ans[${targetQuestionIndex}].SelectedChoice = :selectedChoice`);
+        expressionAttributeNames[`#ans`] = "Answers";
         expressionAttributeValues[`:selectedChoice`] = userAnswer;
-    } else if (targetQuestionIndex < 0 || targetQuestionIndex >= answers.length) {
+    } else if (questionNumber !== undefined && targetQuestionIndex < 0) {
         console.warn(`Question number ${questionNumber} is out of bounds.`);
         // 必要に応じてエラーハンドリングを追加
     }
@@ -104,7 +93,8 @@ export const lambdaHandler = async (event) => {
         // ただし、buildUpdateParams内でbodyを使用しているため、削除せずに上書きする形でも良い
         // ここでは、パスから取得したscoreIdを直接UpdateCommandで使用する
 
-        if (!body.answers && !body.checkedLaterQuestions) {
+        console.log("Received body:", body);
+        if (!body.questionNumber && !body.userAnswer) {
             return {
                 statusCode: 400,
                 body: JSON.stringify({ message: "更新するデータがありません。" }),
@@ -112,7 +102,7 @@ export const lambdaHandler = async (event) => {
         }
 
         const updateParams = await buildUpdateParams(body);
-
+        console.log("Update parameters:", updateParams);
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { QuizSessionId: quizId }, // パスから取得したIDを使用
