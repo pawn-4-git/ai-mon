@@ -62,7 +62,7 @@ export const lambdaHandler = async (event) => {
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
-            Key: { ScoreId: scoreId },
+            Key: { QuizSessionId: scoreId },
             UpdateExpression: `SET Answers[${questionIndex}].AfterCheck = :afterCheck`,
             ExpressionAttributeValues: {
                 ":afterCheck": setAfterCheck,

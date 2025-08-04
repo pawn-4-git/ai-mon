@@ -93,7 +93,6 @@ export const lambdaHandler = async (event) => {
         // ただし、buildUpdateParams内でbodyを使用しているため、削除せずに上書きする形でも良い
         // ここでは、パスから取得したscoreIdを直接UpdateCommandで使用する
 
-        console.log("Received body:", body);
         if (!body.questionNumber && !body.userAnswer) {
             return {
                 statusCode: 400,
@@ -102,7 +101,6 @@ export const lambdaHandler = async (event) => {
         }
 
         const updateParams = await buildUpdateParams(body);
-        console.log("Update parameters:", updateParams);
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { QuizSessionId: quizId }, // パスから取得したIDを使用
