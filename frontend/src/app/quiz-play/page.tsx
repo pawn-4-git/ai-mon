@@ -89,6 +89,15 @@ function QuizPlay() {
     alert('選択しました: ' + choice);
   };
 
+  const handleNextQuestion = () => {
+    if (questionData && questionNumber < questionData.totalQuestions) {
+      const nextQuestionNumber = questionNumber + 1;
+      router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
+    } else {
+      alert('これが最後の問題です。');
+    }
+  };
+
   return (
     <div className="quiz-play-page">
       <Header />
@@ -128,7 +137,7 @@ function QuizPlay() {
           <button className="check-later" onClick={() => alert('この問題を後で確認します。')}>
             後で確認する
           </button>
-          <button onClick={() => alert('次の問題へ進みます。')}>
+          <button onClick={handleNextQuestion}>
             次の問題へ
           </button>
           <button onClick={() => router.push('/answer-status')}>

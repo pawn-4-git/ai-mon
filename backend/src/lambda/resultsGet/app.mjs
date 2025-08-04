@@ -68,46 +68,31 @@ export const lambdaHandler = async (event) => {
         if (!groupItem) {
             console.warn(`Group with ID ${score.GroupId} not found in QuizGroupsTable.`);
         }
-        const groupName = groupItem?.GroupName || "Unknown Group";
+        console.log(groupItem);
+        const groupName = groupItem?.Name || "Unknown Group";
 
         const questionNumberStr = event.queryStringParameters?.questionNumber;
 
+        console.log(score);
         // If questionNumber is specified, return specific question details
         if (questionNumberStr) {
             const questionNumber = parseInt(questionNumberStr, 10);
-            if (isNaN(questionNumber) || questionNumber <= 0 || questionNumber > score.questions.length) {
+            if (isNaN(questionNumber) || questionNumber <= 0 || questionNumber > score.TotalCount + 1) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({ message: "Invalid question number." }),
                 };
             }
 
-            const questionInfo = score.questions[questionNumber - 1];
-            
-            // Get question details from QuestionsTable
-            const questionCommand = new GetCommand({
-                TableName: QUESTIONS_TABLE_NAME,
-                Key: {
-                    QuestionId: questionInfo.questionId,
-                },
-            });
-            const questionResponse = await docClient.send(questionCommand);
-            const question = questionResponse.Item;
-
-            if (!question) {
-                 return {
-                    statusCode: 404,
-                    body: JSON.stringify({ message: "Question details not found." }),
-                };
-            }
+            const questionInfo = score.Answers[questionNumber - 1];
 
             return {
                 statusCode: 200,
                 body: JSON.stringify({
-                    totalQuestions: score.questions.length,
-                    questionText: question.QuestionText,
-                    choices: question.Choices,
-                    userChoice: questionInfo.userChoice,
+                    totalQuestions: score.TotalCount,
+                    questionText: questionInfo.QuestionText,
+                    choices: questionInfo.Choices,
+                    userChoice: questionInfo.SelectedChoice,
                     groupName: groupName,
                 }),
             };

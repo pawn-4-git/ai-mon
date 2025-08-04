@@ -150,6 +150,7 @@ export const lambdaHandler = async (event) => {
                 SelectedChoice: null,
                 IsCorrect: null,
                 ReferenceURL: q.Explanation,
+                AfterCheck: null,
             };
         });
 
