@@ -15,56 +15,38 @@ const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
  * @returns {object} - UpdateCommand用のパラメータ。
  */
 const buildUpdateParamsForCompletion = async (body) => {
-    const { scoreId, answers } = body;
+    const { scoreId, answers, userAnswer, questionNumber } = body;
+
+    // userAnswerとquestionNumberをanswers配列に追加する
+    let updatedAnswers = answers ? [...answers] : [];
+    if (userAnswer !== undefined && questionNumber !== undefined) {
+        updatedAnswers.push({
+            questionId: questionNumber,
+            selectedChoice: userAnswer
+        });
+    }
 
     const updateExpressions = [];
     const expressionAttributeValues = {};
     const expressionAttributeNames = {};
 
-    let correctCount = 0;
-    if (answers && answers.length > 0) {
-        // BatchGetItemのために、取得するキーのリストを作成
-        const keys = answers.map(answer => ({ QuestionId: answer.questionId }));
+    // スコア計算は不要とのことなので、正解数のみを記録する
+    // const score = Math.round((correctCount / answers.length) * 100);
+    // updateExpressions.push("#ans = :answers");
+    // expressionAttributeNames["#ans"] = "answers";
+    // expressionAttributeValues[":answers"] = answers;
+    // updateExpressions.push("score = :score");
+    // expressionAttributeValues[":score"] = score;
 
-        const batchGetCommand = new BatchGetCommand({
-            RequestItems: {
-                [QUESTIONS_TABLE_NAME]: {
-                    Keys: keys,
-                },
-            },
-        });
+    // updatedAnswers 配列を保存する
+    updateExpressions.push("#ans = :answers");
+    expressionAttributeNames["#ans"] = "answers";
+    expressionAttributeValues[":answers"] = updatedAnswers;
 
-        const questionResponses = await docClient.send(batchGetCommand);
-        const questions = questionResponses.Responses[QUESTIONS_TABLE_NAME];
-
-        // 回答と質問を照合して正解数をカウント
-        if (questions) {
-            const questionMap = new Map(questions.map(q => [q.QuestionId, q]));
-            for (const answer of answers) {
-                const question = questionMap.get(answer.questionId);
-                if (question && question.CorrectChoice === answer.selectedChoice) {
-                    correctCount++;
-                }
-            }
-        }
-
-        const score = Math.round((correctCount / answers.length) * 100);
-        updateExpressions.push("#ans = :answers");
-        expressionAttributeNames["#ans"] = "answers";
-        expressionAttributeValues[":answers"] = answers;
-        updateExpressions.push("score = :score");
-        expressionAttributeValues[":score"] = score;
-        updateExpressions.push("isFinished = :isFinished");
-        expressionAttributeValues[":isFinished"] = true;
-        updateExpressions.push("finishedAt = :finishedAt");
-        expressionAttributeValues[":finishedAt"] = new Date().toISOString();
-    } else {
-        // answers がない場合でも isFinished を true に設定する
-        updateExpressions.push("isFinished = :isFinished");
-        expressionAttributeValues[":isFinished"] = true;
-        updateExpressions.push("finishedAt = :finishedAt");
-        expressionAttributeValues[":finishedAt"] = new Date().toISOString();
-    }
+    updateExpressions.push("isFinished = :isFinished");
+    expressionAttributeValues[":isFinished"] = true;
+    updateExpressions.push("finishedAt = :finishedAt");
+    expressionAttributeValues[":finishedAt"] = new Date().toISOString();
 
     return {
         UpdateExpression: "SET " + updateExpressions.join(", "),
