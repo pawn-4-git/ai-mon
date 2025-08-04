@@ -84,9 +84,38 @@ function QuizPlay() {
   }, [quizSessionId, questionNumber]);
 
 
-  const handleSelectChoice = (choice: string) => {
+  const handleSelectChoice = async (choice: string) => {
     setSelectedChoice(choice);
-    alert('選択しました: ' + choice);
+
+    if (!quizSessionId || !window.apiClient) {
+      setError('Quiz Session ID or API client is not available.');
+      return;
+    }
+
+    try {
+      // Assuming the backend expects a payload like { questionNumber: number, userAnswer: string }
+      await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
+        questionNumber: questionNumber,
+        userAnswer: choice,
+      });
+      // Optionally, handle success feedback or state update here
+      console.log('Answer submitted successfully!');
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(`Failed to submit answer: ${err.message}`);
+      } else {
+        setError('Failed to submit answer.');
+      }
+    }
+  };
+
+  const handleNextQuestion = () => {
+    if (questionData && questionNumber < questionData.totalQuestions) {
+      const nextQuestionNumber = questionNumber + 1;
+      router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
+    } else {
+      alert('これが最後の問題です。');
+    }
   };
 
   return (
@@ -128,7 +157,7 @@ function QuizPlay() {
           <button className="check-later" onClick={() => alert('この問題を後で確認します。')}>
             後で確認する
           </button>
-          <button onClick={() => alert('次の問題へ進みます。')}>
+          <button onClick={handleNextQuestion}>
             次の問題へ
           </button>
           <button onClick={() => router.push('/answer-status')}>

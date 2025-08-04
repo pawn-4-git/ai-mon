@@ -572,6 +572,72 @@ Resources:
             Path: /quizzes/{quizId}/answers
             Method: post
 
+  QuizCompletionFunction: # 追加された関数
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizCompletion/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizCompletionEvent:
+          Type: Api
+          Properties:
+            Path: /quizzes/completion
+            Method: post
+
+  UserAnswerSelectionFunction: # 追加された関数
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: userAnswerSelection/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref ScoresTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuestionsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTable
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        UserAnswerSelectionEvent:
+          Type: Api
+          Properties:
+            Path: /quizzes/user-answer
+            Method: post
+
   ResultsGetFunction:
     Type: AWS::Serverless::Function
     Properties:

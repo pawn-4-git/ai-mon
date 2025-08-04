@@ -99,6 +99,7 @@
   - `SelectedChoice`: ユーザーが選択した解答 (String, nullable)
   - `IsCorrect`: 正解かどうか (Boolean, nullable)
   - `ReferenceURL`: 解説や参考情報のURL (String)
+  - `AtferCheck`: 後から確認するチェック
 - `SubmittedAt`: 解答提出日時
 - `StartedAt`: 試験開始日時 (ISO 8601形式)
 - `ExpiresAt`: 試験の期限日時 (ISO 8601形式)
