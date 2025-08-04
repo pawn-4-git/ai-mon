@@ -138,9 +138,9 @@ export const lambdaHandler = async (event) => {
         const selectedQuestions = shuffleArray(questionsResult.Items).slice(0, QuestionCount);
 
         const answers = selectedQuestions.map(q => {
-            const incorrectChoices = [...q.Choices.Incorrect];
+            const incorrectChoices = [...q.IncorrectChoices];
             const shuffledIncorrect = shuffleArray(incorrectChoices).slice(0, 3);
-            const finalChoices = shuffleArray([q.Choices.Correct, ...shuffledIncorrect]);
+            const finalChoices = shuffleArray([q.CorrectChoice, ...shuffledIncorrect]);
 
             return {
                 QuestionId: q.QuestionId,
