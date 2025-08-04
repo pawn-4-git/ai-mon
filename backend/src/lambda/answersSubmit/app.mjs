@@ -13,17 +13,36 @@ const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
  * @returns {object} - UpdateCommand用のパラメータ。
  */
 const buildUpdateParams = async (body) => {
-    const { answers, checkedLaterQuestions } = body;
+    const { answers, checkedLaterQuestions, questionNumber, userAnswer } = body;
 
     const updateExpressions = [];
     const expressionAttributeValues = {};
     const expressionAttributeNames = {};
 
-    if (answers) {
-        updateExpressions.push("#ans = :answers");
-        expressionAttributeNames["#ans"] = "answers";
-        expressionAttributeValues[":answers"] = answers;
+
+    // DynamoDBのUpdateExpressionで配列の特定要素を更新するには、
+    // パスと値の指定が必要。例: #ans[0].selectedChoice = :selectedChoice
+    // ここでは、answers配列全体を更新するのではなく、
+    // 特定の問題に対する回答のみを更新するロジックを実装する。
+    // もしanswersが常に配列で、その中にquestionNumberとselectedChoiceが含まれる場合、
+    // 以下のようなパスを使用する。
+    // ただし、DynamoDBのUpdateExpressionでは配列のインデックスを指定して更新するのが一般的。
+    // questionNumberが0から始まるインデックスとして扱われると仮定する。
+    // もしquestionNumberが1から始まる場合は、answerIndex = questionNumber - 1 とする。
+    // ここでは、questionNumberが1から始まることを想定し、answerIndexを調整する。
+    // questionNumberが1から始まることを想定し、targetQuestionIndexを調整する。
+    const targetQuestionIndex = questionNumber - 1;
+    if (targetQuestionIndex >= 0 && userAnswer !== undefined) {
+        // answers配列の特定要素のselectedChoiceを更新
+        updateExpressions.push(`#ans[${targetQuestionIndex}].selectedChoice = :selectedChoice`);
+        expressionAttributeNames[`#ans`] = "answers";
+        expressionAttributeValues[`:selectedChoice`] = userAnswer;
+    } else if (targetQuestionIndex < 0 || targetQuestionIndex >= answers.length) {
+        console.warn(`Question number ${questionNumber} is out of bounds.`);
+        // 必要に応じてエラーハンドリングを追加
     }
+
+
 
     if (checkedLaterQuestions) {
         updateExpressions.push("checkedLaterQuestions = :checkedLaterQuestions");
