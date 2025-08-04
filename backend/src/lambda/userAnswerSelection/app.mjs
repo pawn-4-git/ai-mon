@@ -40,40 +40,34 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const { scoreId, answers, checkedLaterQuestions } = body;
+        const { scoreId, questionNumber, checkedLaterQuestions } = body;
 
-        if (!scoreId) {
+        if (!scoreId || !questionNumber || !Array.isArray(checkedLaterQuestions)) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "scoreIdは必須です。" }),
+                body: JSON.stringify({ message: "scoreId, questionNumber, checkedLaterQuestionsは必須です。" }),
             };
         }
 
-        if (!answers && !checkedLaterQuestions) {
+        const questionIndex = questionNumber - 1;
+        if (questionIndex < 0) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "更新するデータがありません。" }),
+                body: JSON.stringify({ message: "無効なquestionNumberです。" }),
             };
         }
 
-        const updateExpressions = [];
-        const expressionAttributeValues = {};
-
-        if (answers) {
-            updateExpressions.push("answers = :answers");
-            expressionAttributeValues[":answers"] = answers;
-        }
-
-        if (checkedLaterQuestions) {
-            updateExpressions.push("checkedLaterQuestions = :checkedLaterQuestions");
-            expressionAttributeValues[":checkedLaterQuestions"] = checkedLaterQuestions;
-        }
+        // questionNumberがcheckedLaterQuestionsに含まれているかどうかに基づいて、AfterCheckの値を決定
+        const setAfterCheck = true;
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { ScoreId: scoreId },
-            UpdateExpression: "SET " + updateExpressions.join(", "),
-            ExpressionAttributeValues: expressionAttributeValues,
+            UpdateExpression: `SET Answers[${questionIndex}].AfterCheck = :afterCheck`,
+            ExpressionAttributeValues: {
+                ":afterCheck": setAfterCheck,
+                ":checkedLaterQuestions": checkedLaterQuestions,
+            },
             ReturnValues: "ALL_NEW",
         });
 

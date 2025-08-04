@@ -24,6 +24,7 @@ interface QuestionData {
   choices: string[];
   userChoice: string | null;
   groupName: string;
+  checkedLaterQuestions?: number[];
 }
 
 function QuizPlay() {
@@ -33,6 +34,7 @@ function QuizPlay() {
   const [quizSessionId, setQuizSessionId] = useState<string | null>(null);
   const [questionNumber, setQuestionNumber] = useState<number>(1);
   const [questionData, setQuestionData] = useState<QuestionData | null>(null);
+  const [checkedLaterQuestions, setCheckedLaterQuestions] = useState<number[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +71,9 @@ function QuizPlay() {
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData;
         setQuestionData(data);
         setSelectedChoice(data.userChoice);
+        if (data.checkedLaterQuestions) {
+          setCheckedLaterQuestions(data.checkedLaterQuestions);
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -93,12 +98,10 @@ function QuizPlay() {
     }
 
     try {
-      // Assuming the backend expects a payload like { questionNumber: number, userAnswer: string }
       await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
         questionNumber: questionNumber,
         userAnswer: choice,
       });
-      // Optionally, handle success feedback or state update here
       console.log('Answer submitted successfully!');
     } catch (err) {
       if (err instanceof Error) {
@@ -109,7 +112,46 @@ function QuizPlay() {
     }
   };
 
-  // 前の問題へ遷移する関数
+  const handleCheckLater = async () => {
+    if (!quizSessionId || !window.apiClient) {
+      setError('Quiz Session ID or API client is not available.');
+      return;
+    }
+
+    let updatedLaterQuestions;
+    const isAlreadyChecked = checkedLaterQuestions.includes(questionNumber);
+
+    if (isAlreadyChecked) {
+      updatedLaterQuestions = checkedLaterQuestions.filter(
+        (qNum) => qNum !== questionNumber
+      );
+    } else {
+      updatedLaterQuestions = [...checkedLaterQuestions, questionNumber].sort(
+        (a, b) => a - b
+      );
+    }
+
+    try {
+      await window.apiClient.post(`/Prod/userAnswerSelection`, {
+        scoreId: quizSessionId,
+        questionNumber: questionNumber,
+        checkedLaterQuestions: updatedLaterQuestions,
+      });
+      setCheckedLaterQuestions(updatedLaterQuestions);
+      if (isAlreadyChecked) {
+        alert(`問題${questionNumber}の「後で確認する」を解除しました。`);
+      } else {
+        alert(`問題${questionNumber}を「後で確認する」に設定しました。`);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(`Failed to update check later status: ${err.message}`);
+      } else {
+        setError('Failed to update check later status.');
+      }
+    }
+  };
+
   const handlePreviousQuestion = () => {
     if (questionNumber > 1) {
       const prevQuestionNumber = questionNumber - 1;
@@ -119,7 +161,6 @@ function QuizPlay() {
     }
   };
 
-  // 次の問題へ遷移する関数 (変更なし)
   const handleNextQuestion = () => {
     if (questionData && questionNumber < questionData.totalQuestions) {
       const nextQuestionNumber = questionNumber + 1;
@@ -168,8 +209,10 @@ function QuizPlay() {
           <button className="previous-question" onClick={handlePreviousQuestion} disabled={questionNumber <= 1}>
             前の問題へ
           </button>
-          <button className="check-later" onClick={() => alert('この問題を後で確認します。')}>
-            後で確認する
+          <button className="check-later" onClick={handleCheckLater}>
+            {checkedLaterQuestions.includes(questionNumber)
+              ? '「後で確認」を解除'
+              : '後で確認する'}
           </button>
           <button onClick={handleNextQuestion}>
             次の問題へ
@@ -193,3 +236,4 @@ export default function QuizPlayPage() {
     </Suspense>
   );
 }
+
