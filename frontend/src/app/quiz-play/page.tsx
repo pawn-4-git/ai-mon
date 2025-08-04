@@ -139,7 +139,7 @@ function QuizPlay() {
     }
 
     try {
-      await window.apiClient.post(`/Prod/userAnswerSelection`, {
+      await window.apiClient.post(`/Prod/quizzes/user-answer`, {
         scoreId: quizSessionId,
         questionNumber: questionNumber,
         checkedLaterQuestions: updatedLaterQuestions,

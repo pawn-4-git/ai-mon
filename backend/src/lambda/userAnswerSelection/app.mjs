@@ -57,8 +57,14 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        // afterCheckValueが渡されていればその値を使い、なければtrueをデフォルト値とする
-        const setAfterCheck = (afterCheckValue === undefined) ? true : afterCheckValue;
+        // afterCheckValueのバリデーションとデフォルト値設定
+        if (afterCheckValue !== undefined && typeof afterCheckValue !== 'boolean') {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "afterCheckValueはbooleanである必要があります。" }),
+            };
+        }
+        const setAfterCheck = afterCheckValue ?? true;
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
