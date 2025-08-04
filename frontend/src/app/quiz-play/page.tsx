@@ -26,6 +26,7 @@ interface QuestionData {
   userChoice: string | null;
   groupName: string;
   checkedLaterQuestions?: number[];
+  afterCheck?: boolean;
 }
 
 function QuizPlay() {
@@ -35,7 +36,7 @@ function QuizPlay() {
   const [quizSessionId, setQuizSessionId] = useState<string | null>(null);
   const [questionNumber, setQuestionNumber] = useState<number>(1);
   const [questionData, setQuestionData] = useState<QuestionData | null>(null);
-  const [checkedLaterQuestions, setCheckedLaterQuestions] = useState<number[]>([]);
+  const [isAfterChecked, setIsAfterChecked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,9 +73,8 @@ function QuizPlay() {
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData;
         setQuestionData(data);
         setSelectedChoice(data.userChoice);
-        if (data.checkedLaterQuestions) {
-          setCheckedLaterQuestions(data.checkedLaterQuestions);
-        }
+        // Set the initial state of the button based on the afterCheck value
+        setIsAfterChecked(data.afterCheck === true);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -114,35 +114,46 @@ function QuizPlay() {
   };
 
   const handleCheckLater = async () => {
-    if (!quizSessionId || !window.apiClient) {
-      setError('Quiz Session ID or API client is not available.');
+    if (!quizSessionId || !window.apiClient || !questionData) {
+      setError('Quiz Session ID, API client, or question data is not available.');
       return;
     }
 
+    const afterCheckValue = !isAfterChecked;
     let updatedLaterQuestions;
-    const isAlreadyChecked = checkedLaterQuestions.includes(questionNumber);
 
-    if (isAlreadyChecked) {
-      updatedLaterQuestions = checkedLaterQuestions.filter(
-        (qNum) => qNum !== questionNumber
-      );
+    const currentCheckedLater = questionData.checkedLaterQuestions || [];
+
+    if (afterCheckValue) {
+      // Add to list if not present
+      if (!currentCheckedLater.includes(questionNumber)) {
+        updatedLaterQuestions = [...currentCheckedLater, questionNumber].sort((a, b) => a - b);
+      } else {
+        updatedLaterQuestions = currentCheckedLater;
+      }
     } else {
-      updatedLaterQuestions = [...checkedLaterQuestions, questionNumber].sort(
-        (a, b) => a - b
+      // Remove from list
+      updatedLaterQuestions = currentCheckedLater.filter(
+        (qNum) => qNum !== questionNumber
       );
     }
 
     try {
-      await window.apiClient.post(`/Prod/quizzes/user-answer`, {
+      await window.apiClient.post(`/Prod/userAnswerSelection`, {
         scoreId: quizSessionId,
         questionNumber: questionNumber,
         checkedLaterQuestions: updatedLaterQuestions,
+        afterCheckValue: afterCheckValue,
       });
-      setCheckedLaterQuestions(updatedLaterQuestions);
-      if (isAlreadyChecked) {
-        toast.success(`問題${questionNumber}の「後で確認する」を解除しました。`);
-      } else {
+
+      // Update state after successful API call
+      setIsAfterChecked(afterCheckValue);
+      setQuestionData({ ...questionData, checkedLaterQuestions: updatedLaterQuestions });
+
+      if (afterCheckValue) {
         toast.success(`問題${questionNumber}を「後で確認する」に設定しました。`);
+      } else {
+        toast.success(`問題${questionNumber}の「後で確認する」を解除しました。`);
       }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -210,9 +221,7 @@ function QuizPlay() {
             前の問題へ
           </button>
           <button className="check-later" onClick={handleCheckLater}>
-            {checkedLaterQuestions.includes(questionNumber)
-              ? '「後で確認」を解除'
-              : '後で確認する'}
+            {isAfterChecked ? '「後で確認」を解除' : '後で確認する'}
           </button>
           <button onClick={handleNextQuestion}>
             次の問題へ
@@ -236,4 +245,5 @@ export default function QuizPlayPage() {
     </Suspense>
   );
 }
+
 

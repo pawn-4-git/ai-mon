@@ -40,7 +40,7 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const { scoreId, questionNumber, checkedLaterQuestions } = body;
+        const { scoreId, questionNumber, checkedLaterQuestions, afterCheckValue } = body;
 
         if (!scoreId || !questionNumber || !Array.isArray(checkedLaterQuestions)) {
             return {
@@ -57,15 +57,16 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        // questionNumberがcheckedLaterQuestionsに含まれているかどうかに基づいて、AfterCheckの値を決定
-        const setAfterCheck = true;
+        // afterCheckValueが渡されていればその値を使い、なければtrueをデフォルト値とする
+        const setAfterCheck = (afterCheckValue === undefined) ? true : afterCheckValue;
 
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { QuizSessionId: scoreId },
-            UpdateExpression: `SET Answers[${questionIndex}].AfterCheck = :afterCheck`,
+            UpdateExpression: `SET Answers[${questionIndex}].AfterCheck = :afterCheck, checkedLaterQuestions = :checkedLaterQuestions`,
             ExpressionAttributeValues: {
                 ":afterCheck": setAfterCheck,
+                ":checkedLaterQuestions": checkedLaterQuestions,
             },
             ReturnValues: "ALL_NEW",
         });

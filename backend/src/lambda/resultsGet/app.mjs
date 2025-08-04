@@ -94,6 +94,7 @@ export const lambdaHandler = async (event) => {
                     choices: questionInfo.Choices,
                     userChoice: questionInfo.SelectedChoice,
                     groupName: groupName,
+                    afterCheck: questionInfo.AfterCheck,
                 }),
             };
         }
