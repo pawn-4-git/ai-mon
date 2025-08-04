@@ -66,7 +66,6 @@ export const lambdaHandler = async (event) => {
             UpdateExpression: `SET Answers[${questionIndex}].AfterCheck = :afterCheck`,
             ExpressionAttributeValues: {
                 ":afterCheck": setAfterCheck,
-                ":checkedLaterQuestions": checkedLaterQuestions,
             },
             ReturnValues: "ALL_NEW",
         });
