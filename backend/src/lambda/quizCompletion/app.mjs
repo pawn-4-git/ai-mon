@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand, BatchGetCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
@@ -10,6 +10,7 @@ const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 
 /**
  * リクエストボディに基づいて、DynamoDBのUpdateオペレーション用のパラメータを構築する。
+ * BatchGetItemを使用して質問情報をまとめて取得する。
  * @param {object} body - リクエストボディ。
  * @returns {object} - UpdateCommand用のパラメータ。
  */
@@ -22,16 +23,31 @@ const buildUpdateParamsForCompletion = async (body) => {
 
     let correctCount = 0;
     if (answers && answers.length > 0) {
-        for (const answer of answers) {
-            const getQuestionCommand = new GetCommand({
-                TableName: QUESTIONS_TABLE_NAME,
-                Key: { QuestionId: answer.questionId },
-            });
-            const questionResponse = await docClient.send(getQuestionCommand);
-            if (questionResponse.Item && questionResponse.Item.CorrectChoice === answer.selectedChoice) {
-                correctCount++;
+        // BatchGetItemのために、取得するキーのリストを作成
+        const keys = answers.map(answer => ({ QuestionId: answer.questionId }));
+
+        const batchGetCommand = new BatchGetCommand({
+            RequestItems: {
+                [QUESTIONS_TABLE_NAME]: {
+                    Keys: keys,
+                },
+            },
+        });
+
+        const questionResponses = await docClient.send(batchGetCommand);
+        const questions = questionResponses.Responses[QUESTIONS_TABLE_NAME];
+
+        // 回答と質問を照合して正解数をカウント
+        if (questions) {
+            const questionMap = new Map(questions.map(q => [q.QuestionId, q]));
+            for (const answer of answers) {
+                const question = questionMap.get(answer.questionId);
+                if (question && question.CorrectChoice === answer.selectedChoice) {
+                    correctCount++;
+                }
             }
         }
+
         const score = Math.round((correctCount / answers.length) * 100);
         updateExpressions.push("#ans = :answers");
         expressionAttributeNames["#ans"] = "answers";
@@ -43,7 +59,7 @@ const buildUpdateParamsForCompletion = async (body) => {
         updateExpressions.push("finishedAt = :finishedAt");
         expressionAttributeValues[":finishedAt"] = new Date().toISOString();
     } else {
-        // answers がない場合でも isFinished を true に設定す���
+        // answers がない場合でも isFinished を true に設定する
         updateExpressions.push("isFinished = :isFinished");
         expressionAttributeValues[":isFinished"] = true;
         updateExpressions.push("finishedAt = :finishedAt");
@@ -98,9 +114,6 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "scoreIdは必須です。" }),
             };
         }
-
-        // isFinished はこの Lambda で true に設定されるため、リクエストボディには含めない
-        // answers が空の場合でも、完了としてマークするために処理を続行する
 
         const updateParams = await buildUpdateParamsForCompletion(body);
 
