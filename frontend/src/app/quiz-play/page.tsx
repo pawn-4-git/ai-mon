@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Script from 'next/script';
+import { Toaster, toast } from 'react-hot-toast';
 
 // apiClient の型定義を追加
 declare global {
@@ -132,23 +133,21 @@ function QuizPlay() {
     }
 
     try {
-      await window.apiClient.post(`/Prod/quizzes/user-answer`, {
+      await window.apiClient.post(`/Prod/userAnswerSelection`, {
         scoreId: quizSessionId,
         questionNumber: questionNumber,
         checkedLaterQuestions: updatedLaterQuestions,
       });
       setCheckedLaterQuestions(updatedLaterQuestions);
       if (isAlreadyChecked) {
-        alert(`問題${questionNumber}の「後で確認する」を解除しました。`);
+        toast.success(`問題${questionNumber}の「後で確認する」を解除しました。`);
       } else {
-        alert(`問題${questionNumber}を「後で確認する」に設定しました。`);
+        toast.success(`問題${questionNumber}を「後で確認する」に設定しました。`);
       }
     } catch (err) {
-      if (err instanceof Error) {
-        setError(`Failed to update check later status: ${err.message}`);
-      } else {
-        setError('Failed to update check later status.');
-      }
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      toast.error(`更新に失敗しました: ${errorMessage}`);
+      setError(`Failed to update check later status: ${errorMessage}`);
     }
   };
 
@@ -157,7 +156,7 @@ function QuizPlay() {
       const prevQuestionNumber = questionNumber - 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
     } else {
-      alert('これが最初の問題です。');
+      toast.error('これが最初の問題です。');
     }
   };
 
@@ -166,12 +165,13 @@ function QuizPlay() {
       const nextQuestionNumber = questionNumber + 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
     } else {
-      alert('これが最後の問題です。');
+      toast.error('これが最後の問題です。');
     }
   };
 
   return (
     <div className="quiz-play-page">
+      <Toaster position="top-center" />
       <Header />
       <Script
         src={`/contents/js/apiClient.js`}
