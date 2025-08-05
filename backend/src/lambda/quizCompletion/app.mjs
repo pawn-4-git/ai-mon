@@ -54,7 +54,6 @@ export const lambdaHandler = async (event) => {
             Key: { QuizSessionId: quizId },
             UpdateExpression: "SET #isFinished = :isFinished, #submittedAt = :submittedAt",
             ExpressionAttributeNames: {
-                '#isFinished': 'isFinished',
                 '#submittedAt': 'SubmittedAt'
             },
             ExpressionAttributeValues: {
