@@ -180,6 +180,29 @@ function QuizPlay() {
     }
   };
 
+  const handleFinishTest = async () => {
+    if (!quizSessionId || !window.apiClient) {
+      setError('Quiz Session ID or API client is not available.');
+      return;
+    }
+
+    if (!confirm('テストを本当に終了しますか？')) {
+      return;
+    }
+
+    try {
+      await window.apiClient.post(`/Prod/quizzes/completion`, {
+        quizId: quizSessionId,
+      });
+      toast.success('テストが完了しました。');
+      router.push(`/quiz-result?quizSessionId=${quizSessionId}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      toast.error(`テストの終了に失敗しました: ${errorMessage}`);
+      setError(`Failed to finish the test: ${errorMessage}`);
+    }
+  };
+
   return (
     <div className="quiz-play-page">
       <Toaster position="top-center" />
@@ -229,7 +252,7 @@ function QuizPlay() {
           <button onClick={() => router.push('/answer-status')}>
             解答状況を確認
           </button>
-          <button onClick={() => router.push('/quiz-result')}>
+          <button onClick={handleFinishTest}>
             テストを終える
           </button>
         </div>
