@@ -57,7 +57,6 @@ export const lambdaHandler = async (event) => {
                 '#submittedAt': 'SubmittedAt'
             },
             ExpressionAttributeValues: {
-                ":isFinished": true,
                 ":submittedAt": new Date().toISOString(),
             },
             ReturnValues: "ALL_NEW",
