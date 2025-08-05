@@ -1081,6 +1081,9 @@ Resources:
               - GET
               - HEAD
               - OPTIONS
+            MinTTL: 0
+            DefaultTTL: 0
+            MaxTTL: 0
             ForwardedValues:
               QueryString: true
               Cookies:
