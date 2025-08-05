@@ -45,7 +45,7 @@ export const lambdaHandler = async (event) => {
         if (!quizId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "scoreIdは必須です。" }),
+                body: JSON.stringify({ message: "quizIdは必須です。" }),
             };
         }
 

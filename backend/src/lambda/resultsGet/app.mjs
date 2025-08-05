@@ -68,12 +68,10 @@ export const lambdaHandler = async (event) => {
         if (!groupItem) {
             console.warn(`Group with ID ${score.GroupId} not found in QuizGroupsTable.`);
         }
-        console.log(groupItem);
         const groupName = groupItem?.Name || "Unknown Group";
 
         const questionNumberStr = event.queryStringParameters?.questionNumber;
 
-        console.log(score);
         // If questionNumber is specified, return specific question details
         if (questionNumberStr) {
             const questionNumber = parseInt(questionNumberStr, 10);
