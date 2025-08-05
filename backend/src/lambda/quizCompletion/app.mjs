@@ -52,7 +52,7 @@ export const lambdaHandler = async (event) => {
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { QuizSessionId: quizId },
-            UpdateExpression: "SET #isFinished = :isFinished, #submittedAt = :submittedAt",
+            UpdateExpression: "SET #submittedAt = :submittedAt",
             ExpressionAttributeNames: {
                 '#submittedAt': 'SubmittedAt'
             },
