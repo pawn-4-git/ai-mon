@@ -1,36 +1,49 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, useEffect, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
+import Script from 'next/script';
+import { Toaster, toast } from 'react-hot-toast';
 import Image from 'next/image';
 
-const quizResults = [
-  {
-    id: 1,
-    question: '日本の首都はどこでしょう？',
-    yourAnswer: '東京',
-    correctAnswer: '東京',
-    isCorrect: true,
-    explanation: '東京は日本の政治、経済、文化の中心地です。',
-  },
-  {
-    id: 2,
-    question: '富士山の高さは？',
-    yourAnswer: '3000m',
-    correctAnswer: '3776m',
-    isCorrect: false,
-    explanation: '富士山は標高3776メートルで、日本で最も高い山です。',
-  },
-  {
-    id: 3,
-    question: '世界で一番長い川は？',
-    yourAnswer: 'ナイル川',
-    correctAnswer: 'ナイル川',
-    isCorrect: true,
-    explanation: 'ナイル川はアフリカ大陸を流れ、世界で最も長い川として知られています。',
-  },
-];
+// apiClient の型定義
+declare global {
+  interface Window {
+    apiClient?: {
+      request: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      get: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+      post: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      put: (endpoint: string, body: unknown, options?: RequestInit) => Promise<unknown>;
+      del: (endpoint: string, options?: RequestInit) => Promise<unknown>;
+    };
+  }
+}
+
+interface AnswerResult {
+  QuestionId: string;
+  QuestionText: string;
+  SelectedChoice: string;
+  CorrectAnswer: string;
+  IsCorrect: boolean;
+  Explanation: string;
+}
+
+interface QuizResultData {
+  GroupName: string;
+  TotalCount: number;
+  CorrectCount: number;
+  Answers: AnswerResult[];
+  RecommendedResources?: {
+    Title: string;
+    URL: string;
+    ImageURL: string;
+  }[];
+}
+
+interface ApiResponse {
+  results: QuizResultData;
+}
 
 const allReferenceBooks = [
     { imgSrc: "https://via.placeholder.com/150x200?text=Math+Book+1", title: "数学の基礎 - 完全攻略", link: "https://example.com/math-book-1" },
@@ -51,39 +64,88 @@ const getRandomBooks = (arr: { imgSrc: string; title: string; link: string }[], 
 };
 
 
-export default function QuizResultPage() {
+function QuizResult() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [resultData, setResultData] = useState<QuizResultData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [recommendedBooks, setRecommendedBooks] = useState<{ imgSrc: string; title: string; link: string }[]>([]);
+
+  const quizSessionId = searchParams.get('quizSessionId');
 
   useEffect(() => {
     setRecommendedBooks(getRandomBooks(allReferenceBooks, 3));
-  }, []);
 
-  const correctCount = quizResults.filter(r => r.isCorrect).length;
-  const totalCount = quizResults.length;
-  const percentage = totalCount > 0 ? Math.round((correctCount / totalCount) * 100) : 0;
+    if (!quizSessionId) {
+      setError("Quiz Session ID is not provided.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchResultData = async () => {
+      if (!window.apiClient) {
+        setError('API client is not available.');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const data = await window.apiClient.get(`/Prod/results/${quizSessionId}`) as ApiResponse;
+        setResultData(data.results);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(`Failed to fetch quiz results: ${errorMessage}`);
+        toast.error(`結果の取得に失敗しました: ${errorMessage}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchResultData();
+  }, [quizSessionId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div style={{ color: 'red' }}>Error: {error}</div>;
+  }
+
+  if (!resultData) {
+    return <div>No result data found.</div>;
+  }
+
+  const { TotalCount, CorrectCount, Answers } = resultData;
+  const percentage = TotalCount > 0 ? Math.round((CorrectCount / TotalCount) * 100) : 0;
 
   return (
     <div className="quiz-result-page">
+      <Toaster position="top-center" />
       <Header />
+      <Script src={`/contents/js/apiClient.js`} strategy="beforeInteractive" />
 
       <div className="container">
-        <h2>テスト結果</h2>
+        <h2>テスト結果 (グループ: {resultData.GroupName})</h2>
         <div className="result-summary">
-          <p>{`あなたの正解率: ${percentage}% (${correctCount}/${totalCount}問)`}</p>
+          <p>{`あなたの正解率: ${percentage}% (${CorrectCount}/${TotalCount}問)`}</p>
         </div>
 
         <ul className="quiz-results-list">
-          {quizResults.map((result) => (
-            <li key={result.id} className={`quiz-result-item ${result.isCorrect ? 'correct' : 'incorrect'}`}>
-              <h3>{`問題${result.id}: ${result.question}`}</h3>
-              <p>あなたの回答: {result.yourAnswer}</p>
-              <p>正解: {result.correctAnswer}</p>
-              <p className={`answer-status ${result.isCorrect ? 'correct-text' : 'incorrect-text'}`}>
-                {result.isCorrect ? '正解！' : '不正解...'}
+          {Answers.map((result, index) => (
+            <li key={result.QuestionId} className={`quiz-result-item ${result.IsCorrect ? 'correct' : 'incorrect'}`}>
+              <h3>{`問題${index + 1}: ${result.QuestionText}`}</h3>
+              <p>あなたの回答: {result.SelectedChoice}</p>
+              <p>正解: {result.CorrectAnswer}</p>
+              <p className={`answer-status ${result.IsCorrect ? 'correct-text' : 'incorrect-text'}`}>
+                {result.IsCorrect ? '正解！' : '不正解...'}
               </p>
               <div className="explanation">
-                <p>解説: {result.explanation}</p>
+                <p>解説: {result.Explanation}</p>
               </div>
             </li>
           ))}
@@ -111,5 +173,13 @@ export default function QuizResultPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function QuizResultPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <QuizResult />
+    </Suspense>
   );
 }
