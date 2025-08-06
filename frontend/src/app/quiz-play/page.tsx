@@ -249,7 +249,7 @@ function QuizPlay() {
           <button onClick={handleNextQuestion}>
             次の問題へ
           </button>
-          <button onClick={() => router.push('/answer-status')}>
+          <button onClick={() => router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`)}>
             解答状況を確認
           </button>
           <button onClick={handleFinishTest}>
