@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
@@ -49,14 +49,48 @@ export const lambdaHandler = async (event) => {
             };
         }
 
+        // Get the current score item
+        const getCommand = new GetCommand({
+            TableName: SCORES_TABLE_NAME,
+            Key: { QuizSessionId: quizId },
+        });
+        const { Item: score } = await docClient.send(getCommand);
+
+        if (!score) {
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ message: "指定されたクイズセッションが見つかりません。" }),
+            };
+        }
+        
+        if (score.UserId !== authResult.userId) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ message: "Forbidden" }),
+            };
+        }
+
+        let correctCount = 0;
+        const updatedAnswers = score.Answers.map(answer => {
+            const isCorrect = answer.SelectedChoice === answer.CorrectAnswer;
+            if (isCorrect) {
+                correctCount++;
+            }
+            return { ...answer, IsCorrect: isCorrect };
+        });
+
         const updateCommand = new UpdateCommand({
             TableName: SCORES_TABLE_NAME,
             Key: { QuizSessionId: quizId },
-            UpdateExpression: "SET #submittedAt = :submittedAt",
+            UpdateExpression: "SET #answers = :answers, #correctCount = :correctCount, #submittedAt = :submittedAt",
             ExpressionAttributeNames: {
+                '#answers': 'Answers',
+                '#correctCount': 'CorrectCount',
                 '#submittedAt': 'SubmittedAt'
             },
             ExpressionAttributeValues: {
+                ":answers": updatedAnswers,
+                ":correctCount": correctCount,
                 ":submittedAt": new Date().toISOString(),
             },
             ReturnValues: "ALL_NEW",
