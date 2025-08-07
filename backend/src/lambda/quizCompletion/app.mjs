@@ -62,7 +62,7 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "指定されたクイズセッションが見つかりません。" }),
             };
         }
-        
+
         if (score.UserId !== authResult.userId) {
             return {
                 statusCode: 403,
@@ -72,7 +72,7 @@ export const lambdaHandler = async (event) => {
 
         let correctCount = 0;
         const updatedAnswers = score.Answers.map(answer => {
-            const isCorrect = answer.SelectedChoice === answer.CorrectAnswer;
+            const isCorrect = answer.SelectedChoice === answer.CorrectChoice;
             if (isCorrect) {
                 correctCount++;
             }
