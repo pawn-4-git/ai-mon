@@ -149,7 +149,7 @@ export const lambdaHandler = async (event) => {
                 CorrectChoice: q.CorrectChoice,
                 SelectedChoice: null,
                 IsCorrect: null,
-                ReferenceURL: q.Explanation,
+                Explanation: q.Explanation,
                 AfterCheck: null,
             };
         });
