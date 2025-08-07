@@ -30,53 +30,41 @@ interface AnswerResult {
 }
 
 interface QuizResultData {
+  GroupId: string;
   GroupName: string;
   TotalCount: number;
   CorrectCount: number;
   Answers: AnswerResult[];
-  RecommendedResources?: {
-    Title: string;
-    URL: string;
-    ImageURL: string;
-  }[];
+}
+
+interface Resource {
+  ResourceId: string;
+  GroupId: string;
+  URL: string;
+  Title: string;
+  ImgSrc: string;
+  CreatedAt: string;
 }
 
 interface ApiResponse {
   results: QuizResultData;
 }
 
-const allReferenceBooks = [
-  { imgSrc: "https://via.placeholder.com/150x200?text=Math+Book+1", title: "数学の基礎 - 完全攻略", link: "https://example.com/math-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=History+Book+1", title: "日本史重要ポイント解説", link: "https://example.com/history-guide-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Science+Book+1", title: "科学の不思議 - 図解百科", link: "https://example.com/science-encyclopedia-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=English+Book+1", title: "英語文法マスター", link: "https://example.com/english-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Physics+Book+1", title: "物理学入門", link: "https://example.com/physics-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Chemistry+Book+1", title: "化学の基本", link: "https://example.com/chemistry-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Geography+Book+1", title: "世界地理の旅", link: "https://example.com/geography-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Art+Book+1", title: "美術史概論", link: "https://example.com/art-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Economics+Book+1", title: "経済学のABC", link: "https://example.com/economics-book-1" },
-  { imgSrc: "https://via.placeholder.com/150x200?text=Programming+Book+1", title: "プログラミング基礎", link: "https://example.com/programming-book-1" }
-];
-
-const getRandomBooks = (arr: { imgSrc: string; title: string; link: string }[], num: number) => {
-  const shuffled = [...arr].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, num);
-};
-
+interface ResourcesApiResponse {
+  resources: Resource[];
+}
 
 function QuizResult() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [resultData, setResultData] = useState<QuizResultData | null>(null);
+  const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [recommendedBooks, setRecommendedBooks] = useState<{ imgSrc: string; title: string; link: string }[]>([]);
 
   const quizSessionId = searchParams.get('quizSessionId');
 
   useEffect(() => {
-    setRecommendedBooks(getRandomBooks(allReferenceBooks, 3));
-
     if (!quizSessionId) {
       setError("Quiz Session ID is not provided.");
       setLoading(false);
@@ -96,6 +84,12 @@ function QuizResult() {
       try {
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}`) as ApiResponse;
         setResultData(data.results);
+
+        if (data.results.GroupId) {
+          const resourceData = await window.apiClient.get(`/Prod/resources/list/${data.results.GroupId}`) as ResourcesApiResponse;
+          setResources(resourceData.resources);
+        }
+
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
         setError(`Failed to fetch quiz results: ${errorMessage}`);
@@ -154,11 +148,11 @@ function QuizResult() {
         <div className="reference-links">
           <h3>参考書・関連リソース</h3>
           <ul id="reference-books-list">
-            {recommendedBooks.map((book, index) => (
+            {resources.map((book, index) => (
               <li key={index}>
-                <a href={book.link} target="_blank" rel="noopener noreferrer">
-                  <Image src={book.imgSrc} alt={book.title} width={150} height={200} />
-                  {book.title}
+                <a href={book.URL} target="_blank" rel="noopener noreferrer">
+                  <Image src={book.ImgSrc} alt={book.Title} width={150} height={200} />
+                  {book.Title}
                 </a>
               </li>
             ))}
@@ -166,7 +160,7 @@ function QuizResult() {
         </div>
 
         <div className="action-buttons">
-          <button onClick={() => router.push('/score-history')}>成績を記録する</button>
+          <button onClick={() => router.push('/score-history')}>成績を見る</button>
           <button className="secondary" onClick={() => router.push('/quiz-list')}>
             問題一覧に戻る
           </button>

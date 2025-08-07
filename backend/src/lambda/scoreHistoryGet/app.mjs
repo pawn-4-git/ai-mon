@@ -31,7 +31,6 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "User ID could not be determined from session." }),
             };
         }
-        const newSessionVersionId = await updateSessionTtl(authResult.sessionId);
 
         const queryCommand = new QueryCommand({
             TableName: SCORES_TABLE_NAME,
@@ -49,11 +48,6 @@ export const lambdaHandler = async (event) => {
             statusCode: 200,
             multiValueHeaders: {
                 "Content-Type": ["application/json"], // Content-Typeも配列にする
-                // Set-Cookieを配列として指定する
-                "Set-Cookie": [
-                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
-                    `sessionVersionId=${newSessionVersionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
-                ]
             },
             body: JSON.stringify({
                 message: "Score history retrieved successfully.",

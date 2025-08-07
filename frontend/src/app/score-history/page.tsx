@@ -58,7 +58,8 @@ export default function ScoreHistoryPage() {
                 setLoading(true);
                 const data = await window.apiClient.get(`/Prod/scores`) as ApiResponse;
                 if (data && Array.isArray(data.scores)) {
-                    setScores(data.scores);
+                    const completedScores = data.scores.filter(score => score.SubmittedAt);
+                    setScores(completedScores);
                 } else {
                     throw new Error("取得したデータの形式が正しくありません。");
                 }
