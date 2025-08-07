@@ -41,11 +41,21 @@ export const lambdaHandler = async (event) => {
 
         const response = await docClient.send(queryCommand);
 
+        const shuffle = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const shuffledItems = response.Items ? shuffle([...response.Items]) : [];
+
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Resources retrieved successfully.",
-                resources: response.Items || [],
+                resources: shuffledItems,
             }),
         };
     } catch (error) {
