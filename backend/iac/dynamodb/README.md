@@ -105,7 +105,7 @@
 - `ExpiresAt`: 試験の期限日時 (ISO 8601形式)
 
 **グローバルセカンダリインデックス (GSI):**
-- **IndexName:** `UserIdStartedAtIndex`
+- **IndexName:** `UserIdIndex`
 - **GSI PK:** `UserId`
 - **目的:** 特定のユーザーの全成績記録を効率的に取得するため。
 
