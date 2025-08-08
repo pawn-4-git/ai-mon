@@ -22,10 +22,6 @@ export class ScoresTableStack extends cdk.Stack {
         name: 'UserId',
         type: dynamodb.AttributeType.STRING,
       },
-      sortKey: {
-        name: 'StartedAt',
-        type: dynamodb.AttributeType.STRING,
-      },
     });
   }
 }
