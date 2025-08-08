@@ -22,18 +22,18 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
-        const scoreId = event.pathParameters?.scoreId;
-        if (!scoreId) {
+        const quizSessionId = event.pathParameters?.quizSessionId;
+        if (!quizSessionId) {
             return {
                 statusCode: 400,
-                body: JSON.stringify({ message: "Score ID is required." }),
+                body: JSON.stringify({ message: "Quiz Session ID is required." }),
             };
         }
 
         const deleteCommand = new DeleteCommand({
             TableName: SCORES_TABLE_NAME,
             Key: {
-                ScoreId: scoreId,
+                QuizSessionId: quizSessionId,
             },
         });
 

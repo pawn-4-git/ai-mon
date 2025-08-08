@@ -22,9 +22,19 @@ export const lambdaHandler = async (event) => {
             return authResult;
         }
 
+        const newSession = await updateSessionTtl(authResult.sessionId);
+
         if (!event.body) {
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "リクエストボディがありません。" }),
             };
         }
@@ -36,6 +46,14 @@ export const lambdaHandler = async (event) => {
             console.error("JSONの解析エラー:", e);
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "リクエストボディのJSON形式が正しくありません。" }),
             };
         }
@@ -45,6 +63,14 @@ export const lambdaHandler = async (event) => {
         if (!quizId) {
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "quizIdは必須です。" }),
             };
         }
@@ -59,6 +85,14 @@ export const lambdaHandler = async (event) => {
         if (!score) {
             return {
                 statusCode: 404,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "指定されたクイズセッションが見つかりません。" }),
             };
         }
@@ -66,6 +100,14 @@ export const lambdaHandler = async (event) => {
         if (score.UserId !== authResult.userId) {
             return {
                 statusCode: 403,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "Forbidden" }),
             };
         }
@@ -99,9 +141,13 @@ export const lambdaHandler = async (event) => {
         const { Attributes } = await docClient.send(updateCommand);
         return {
             statusCode: 200,
-            headers: {
-                "Content-Type": "application/json",
-                "Access-Control-Allow-Origin": "*",
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
             },
             body: JSON.stringify(Attributes),
         };

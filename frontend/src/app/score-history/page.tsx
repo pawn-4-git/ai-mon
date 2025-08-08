@@ -8,7 +8,7 @@ import Script from 'next/script';
 
 // Define the structure of a single score record from the API
 interface ScoreRecord {
-    ScoreId: string;
+    QuizSessionId: string;
     GroupId: string;
     UserId: string;
     Score: number;
@@ -41,36 +41,41 @@ export default function ScoreHistoryPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const fetchScores = async () => {
+        if (!userId) {
+            setError("ユーザー情報が取得できません。ログインしているか確認してください。");
+            setLoading(false);
+            return;
+        }
+        if (!window.apiClient) {
+            setError("APIクライアントの読み込みに失敗しました。");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const data = await window.apiClient.get(`/Prod/scores`) as ApiResponse;
+            if (data && Array.isArray(data.scores)) {
+                const completedScores = data.scores.filter(score => score.SubmittedAt);
+                
+                // Sort by SubmittedAt in descending order (newest first)
+                completedScores.sort((a, b) => new Date(b.SubmittedAt).getTime() - new Date(a.SubmittedAt).getTime());
+                
+                // Take the top 10
+                setScores(completedScores.slice(0, 10));
+            } else {
+                throw new Error("取得したデータの形式が正しくありません。");
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "成績の読み込み中に不明なエラーが発生しました。");
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchScores = async () => {
-            if (!userId) {
-                setError("ユーザー情報が取得できません。ログインしているか確認してください。");
-                setLoading(false);
-                return;
-            }
-            if (!window.apiClient) {
-                setError("APIクライアントの読み込みに失敗しました。");
-                setLoading(false);
-                return;
-            }
-
-            try {
-                setLoading(true);
-                const data = await window.apiClient.get(`/Prod/scores`) as ApiResponse;
-                if (data && Array.isArray(data.scores)) {
-                    const completedScores = data.scores.filter(score => score.SubmittedAt);
-                    setScores(completedScores);
-                } else {
-                    throw new Error("取得したデータの形式が正しくありません。");
-                }
-            } catch (err) {
-                setError(err instanceof Error ? err.message : "成績の読み込み中に不明なエラーが発生しました。");
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         // apiClient.js is loaded via the Script tag, so we wait for it.
         // A simple delay might work for now, but a more robust solution would be preferable.
         const checkApiClient = setInterval(() => {
@@ -82,6 +87,26 @@ export default function ScoreHistoryPage() {
 
         return () => clearInterval(checkApiClient);
     }, [userId]);
+
+    const handleDelete = async (quizSessionId: string) => {
+        if (!window.confirm("この成績記録を本当に削除しますか？")) {
+            return;
+        }
+
+        if (!window.apiClient) {
+            setError("APIクライアントの読み込みに失敗しました。");
+            return;
+        }
+
+        try {
+            await window.apiClient.del(`/Prod/scores/${quizSessionId}`);
+            // Refresh the list after deletion
+            fetchScores();
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "削除中にエラーが発生しました。");
+            console.error(err);
+        }
+    };
 
     const formatDate = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
@@ -106,11 +131,11 @@ export default function ScoreHistoryPage() {
                                 <h3>個別の成績記録</h3>
                                 {scores.length > 0 ? (
                                     scores.map((record) => (
-                                        <div key={record.ScoreId} className="score-record">
+                                        <div key={record.QuizSessionId} className="score-record">
                                             <span>
                                                 {formatDate(record.SubmittedAt)} - {record.QuizGroupName || `グループID: ${record.GroupId}`} (正答率: {record.Score}%)
                                             </span>
-                                            <button onClick={() => alert('この記録を削除します。（機能は未���装）')}>削除</button>
+                                            <button onClick={() => handleDelete(record.QuizSessionId)}>削除</button>
                                         </div>
                                     ))
                                 ) : (
