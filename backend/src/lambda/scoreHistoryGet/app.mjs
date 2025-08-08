@@ -37,8 +37,7 @@ export const lambdaHandler = async (event) => {
             IndexName: "UserIdIndex",
             KeyConditionExpression: "UserId = :userId",
             ExpressionAttributeValues: {
-                ":userId": userId,
-                ":threeMonthsAgo": threeMonthsAgoISO,
+                ":userId": userId
             },
             ScanIndexForward: false,
         });
