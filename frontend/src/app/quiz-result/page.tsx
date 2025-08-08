@@ -86,8 +86,13 @@ function QuizResult() {
         setResultData(data.results);
 
         if (data.results.GroupId) {
-          const resourceData = await window.apiClient.get(`/Prod/resources/list/${data.results.GroupId}`) as ResourcesApiResponse;
-          setResources(resourceData.resources);
+          try {
+            const resourceData = await window.apiClient.get(`/Prod/resources/list/${data.results.GroupId}`) as ResourcesApiResponse;
+            setResources(resourceData.resources);
+          } catch (resourceErr) {
+            console.error('Failed to fetch recommended resources:', resourceErr);
+            toast.error('おすすめのリソースの取得に失敗しました。');
+          }
         }
 
       } catch (err) {
@@ -148,8 +153,8 @@ function QuizResult() {
         <div className="reference-links">
           <h3>参考書・関連リソース</h3>
           <ul id="reference-books-list">
-            {resources.map((book, index) => (
-              <li key={index}>
+            {resources.map((book) => (
+              <li key={book.ResourceId}>
                 <a href={book.URL} target="_blank" rel="noopener noreferrer">
                   <Image src={book.ImgSrc} alt={book.Title} width={150} height={200} />
                   {book.Title}
