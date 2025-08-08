@@ -155,7 +155,7 @@ export const lambdaHandler = async (event) => {
                 body: JSON.stringify({ message: "Quiz group not found." }),
             };
         }
-        const { TimeLimitMinutes = 60, QuestionCount = 10 } = groupResult.Item;
+        const { TimeLimitMinutes = 60, QuestionCount = 10, Name } = groupResult.Item;
 
         // 2. Fetch all questions for the given groupId
         const queryQuestionsParams = {
@@ -217,6 +217,7 @@ export const lambdaHandler = async (event) => {
             TotalCount: answers.length,
             StartedAt: now.toISOString(),
             ExpiresAt: expires.toISOString(),
+            QuizGroupName: Name
         };
 
         const putCommand = new PutCommand({
