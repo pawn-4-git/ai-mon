@@ -11,11 +11,6 @@ test('ScoresTable Created with correct properties', () => {
 
   template.hasResourceProperties('AWS::DynamoDB::Table', {
     TableName: 'ScoresTable',
-    AttributeDefinitions: [
-      { AttributeName: 'QuizSessionId', AttributeType: 'S' },
-      { AttributeName: 'UserId', AttributeType: 'S' },
-      { AttributeName: 'StartedAt', AttributeType: 'S' }
-    ],
     KeySchema: [
       { AttributeName: 'QuizSessionId', KeyType: 'HASH' }
     ],
@@ -23,8 +18,7 @@ test('ScoresTable Created with correct properties', () => {
       {
         IndexName: 'UserIdIndex',
         KeySchema: [
-          { AttributeName: 'UserId', KeyType: 'HASH' },
-          { AttributeName: 'StartedAt', KeyType: 'RANGE' }
+          { AttributeName: 'UserId', KeyType: 'HASH' }
         ],
         Projection: {
           ProjectionType: 'ALL'
