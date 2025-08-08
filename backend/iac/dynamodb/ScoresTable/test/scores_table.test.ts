@@ -21,7 +21,7 @@ test('ScoresTable Created with correct properties', () => {
     ],
     GlobalSecondaryIndexes: [
       {
-        IndexName: 'UserIdIndex',
+        IndexName: 'UserIdStartedAtIndex',
         KeySchema: [
           { AttributeName: 'UserId', KeyType: 'HASH' },
           { AttributeName: 'StartedAt', KeyType: 'RANGE' }

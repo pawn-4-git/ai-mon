@@ -17,7 +17,7 @@ export class ScoresTableStack extends cdk.Stack {
     });
 
     table.addGlobalSecondaryIndex({
-      indexName: 'UserIdIndex',
+      indexName: 'UserIdStartedAtIndex',
       partitionKey: {
         name: 'UserId',
         type: dynamodb.AttributeType.STRING,

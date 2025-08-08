@@ -72,7 +72,7 @@ export const lambdaHandler = async (event) => {
         // Search for an existing score that is not submitted and not expired
         const queryScoresParams = {
             TableName: SCORES_TABLE_NAME,
-            IndexName: "UserIdIndex",
+            IndexName: "UserIdStartedAtIndex",
             KeyConditionExpression: "UserId = :userId",
             FilterExpression: "GroupId = :groupId AND attribute_not_exists(SubmittedAt) AND ExpiresAt > :currentTime",
             ExpressionAttributeValues: {
