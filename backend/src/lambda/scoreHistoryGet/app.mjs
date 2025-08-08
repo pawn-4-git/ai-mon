@@ -34,7 +34,7 @@ export const lambdaHandler = async (event) => {
 
         const queryCommand = new QueryCommand({
             TableName: SCORES_TABLE_NAME,
-            IndexName: "UserIdIndex",
+            IndexName: "UserIdStartedAtIndex",
             KeyConditionExpression: "UserId = :userId",
             ExpressionAttributeValues: {
                 ":userId": userId,
