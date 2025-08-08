@@ -40,7 +40,7 @@ export const lambdaHandler = async (event) => {
 
         const deleteSessionsCommand = new QueryCommand({
             TableName: SESSIONS_TABLE_NAME,
-            IndexName: "UserIdIndex",
+            IndexName: "UserIdStartedAtIndex",
             KeyConditionExpression: "UserId = :userId",
             ExpressionAttributeValues: {
                 ":userId": userId,
@@ -48,7 +48,7 @@ export const lambdaHandler = async (event) => {
         });
 
         const sessionsResponse = await docClient.send(deleteSessionsCommand);
-        
+
         if (sessionsResponse.Items) {
             for (const session of sessionsResponse.Items) {
                 const deleteSessionCommand = new DeleteCommand({
