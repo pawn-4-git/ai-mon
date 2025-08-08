@@ -772,7 +772,7 @@ Resources:
         ScoresDeleteEvent:
           Type: Api
           Properties:
-            Path: /scores/{scoreId}
+            Path: /scores/{quizSessionId}
             Method: delete
 
   PerformanceAnalysisGetFunction:

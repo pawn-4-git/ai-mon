@@ -42,9 +42,19 @@ export const lambdaHandler = async (event) => {
             };
         }
 
+        const newSession = await updateSessionTtl(authResult.sessionId);
+
         if (!event.body) {
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "Request body is missing." }),
             };
         }
@@ -56,6 +66,14 @@ export const lambdaHandler = async (event) => {
             console.error("JSON parsing error:", e);
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "Invalid JSON format in request body." }),
             };
         }
@@ -64,6 +82,14 @@ export const lambdaHandler = async (event) => {
         if (!groupId) {
             return {
                 statusCode: 400,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "groupId is required." }),
             };
         }
@@ -93,6 +119,14 @@ export const lambdaHandler = async (event) => {
         if (activeSession) {
             return {
                 statusCode: 200,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ QuizSessionId: activeSession.QuizSessionId }),
             };
         }
@@ -110,6 +144,14 @@ export const lambdaHandler = async (event) => {
         if (!groupResult.Item) {
             return {
                 statusCode: 404,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "Quiz group not found." }),
             };
         }
@@ -130,6 +172,14 @@ export const lambdaHandler = async (event) => {
         if (!questionsResult.Items || questionsResult.Items.length === 0) {
             return {
                 statusCode: 404,
+                multiValueHeaders: {
+                    "Content-Type": ["application/json"], // Content-Typeも配列にする
+                    // Set-Cookieを配列として指定する
+                    "Set-Cookie": [
+                        `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                        `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                    ]
+                },
                 body: JSON.stringify({ message: "No questions found for the provided groupId." }),
             };
         }
@@ -178,6 +228,14 @@ export const lambdaHandler = async (event) => {
 
         return {
             statusCode: 201,
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
+            },
             body: JSON.stringify({ QuizSessionId: newScoreItem.QuizSessionId }),
         };
     } catch (error) {
