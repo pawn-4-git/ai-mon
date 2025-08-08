@@ -32,14 +32,10 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const threeMonthsAgo = new Date();
-        threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-        const threeMonthsAgoISO = threeMonthsAgo.toISOString();
-
         const queryCommand = new QueryCommand({
             TableName: SCORES_TABLE_NAME,
             IndexName: "UserIdIndex",
-            KeyConditionExpression: "UserId = :userId AND StartedAt > :threeMonthsAgo",
+            KeyConditionExpression: "UserId = :userId",
             ExpressionAttributeValues: {
                 ":userId": userId,
                 ":threeMonthsAgo": threeMonthsAgoISO,
