@@ -87,7 +87,7 @@ function QuizResult() {
 
         if (data.results.GroupId) {
           try {
-            const resourceData = await window.apiClient.get(`/Prod/resources/list/${data.results.GroupId}`) as ResourcesApiResponse;
+            const resourceData = await window.apiClient.get(`/Prod/quiz-groups/${data.results.GroupId}/resources`) as ResourcesApiResponse;
             setResources(resourceData.resources);
           } catch (resourceErr) {
             console.error('Failed to fetch recommended resources:', resourceErr);
