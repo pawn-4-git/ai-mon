@@ -43,6 +43,16 @@ export const lambdaHandler = async (event) => {
         });
 
         const response = await docClient.send(queryCommand);
+        const items = response.Items || [];
+
+        const latestScoresByGroup = {};
+        for (const item of items) {
+            if (!latestScoresByGroup[item.GroupId]) {
+                latestScoresByGroup[item.GroupId] = item;
+            }
+        }
+
+        const uniqueLatestScores = Object.values(latestScoresByGroup);
 
         return {
             statusCode: 200,
@@ -51,7 +61,7 @@ export const lambdaHandler = async (event) => {
             },
             body: JSON.stringify({
                 message: "Score history retrieved successfully.",
-                scores: response.Items || [],
+                scores: uniqueLatestScores,
             }),
         };
     } catch (error) {
