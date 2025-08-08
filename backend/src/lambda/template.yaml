@@ -77,11 +77,11 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
-  # UsersRegisterFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersRegisterFunction}
-  #     RetentionInDays: 1
+  UsersRegisterFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersRegisterFunction}
+      RetentionInDays: 1
 
   UsersLoginFunction:
     Type: AWS::Serverless::Function
@@ -109,11 +109,11 @@ Resources:
           Properties:
             Path: /users/login
             Method: post
-  # UsersLoginFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersLoginFunction}
-  #     RetentionInDays: 1
+  UsersLoginFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersLoginFunction}
+      RetentionInDays: 1
 
   UsersGetFunction:
     Type: AWS::Serverless::Function
@@ -147,11 +147,11 @@ Resources:
           Properties:
             Path: /users/get
             Method: get
-  # UsersGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersGetFunction}
-  #     RetentionInDays: 1
+  UsersGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersGetFunction}
+      RetentionInDays: 1
 
   UsersLogoutFunction:
     Type: AWS::Serverless::Function
@@ -179,11 +179,11 @@ Resources:
           Properties:
             Path: /users/logout
             Method: post
-  # UsersLogoutFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersLogoutFunction}
-  #     RetentionInDays: 1
+  UsersLogoutFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersLogoutFunction}
+      RetentionInDays: 1
 
   UsersDeleteFunction:
     Type: AWS::Serverless::Function
@@ -213,11 +213,11 @@ Resources:
           Properties:
             Path: /users/{userId}
             Method: delete
-  # UsersDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersDeleteFunction}
-  #     RetentionInDays: 1
+  UsersDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersDeleteFunction}
+      RetentionInDays: 1
 
   QuizGroupsCreateFunction:
     Type: AWS::Serverless::Function
@@ -255,11 +255,11 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: post
-  # QuizGroupsCreateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizGroupsCreateFunction}
-  #     RetentionInDays: 1
+  QuizGroupsCreateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizGroupsCreateFunction}
+      RetentionInDays: 1
 
   QuizGroupsListFunction:
     Type: AWS::Serverless::Function
@@ -291,11 +291,11 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: get
-  # QuizGroupsListFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizGroupsListFunction}
-  #     RetentionInDays: 1
+  QuizGroupsListFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizGroupsListFunction}
+      RetentionInDays: 1
 
   QuizGroupsGetFunction:
     Type: AWS::Serverless::Function
@@ -327,11 +327,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: get
-  # QuizGroupsGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizGroupsGetFunction}
-  #     RetentionInDays: 1
+  QuizGroupsGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizGroupsGetFunction}
+      RetentionInDays: 1
 
   QuizGroupsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -369,11 +369,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: put
-  # QuizGroupsUpdateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizGroupsUpdateFunction}
-  #     RetentionInDays: 1
+  QuizGroupsUpdateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizGroupsUpdateFunction}
+      RetentionInDays: 1
 
   QuizGroupsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -411,11 +411,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: delete
-  # QuizGroupsDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizGroupsDeleteFunction}
-  #     RetentionInDays: 1
+  QuizGroupsDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizGroupsDeleteFunction}
+      RetentionInDays: 1
 
   QuestionsCreateFunction:
     Type: AWS::Serverless::Function
@@ -453,11 +453,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: post
-  # QuestionsCreateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuestionsCreateFunction}
-  #     RetentionInDays: 1
+  QuestionsCreateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuestionsCreateFunction}
+      RetentionInDays: 1
 
   QuestionsListFunction:
     Type: AWS::Serverless::Function
@@ -489,11 +489,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: get
-  # QuestionsListFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuestionsListFunction}
-  #     RetentionInDays: 1
+  QuestionsListFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuestionsListFunction}
+      RetentionInDays: 1
 
   QuestionsGetFunction:
     Type: AWS::Serverless::Function
@@ -525,11 +525,11 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: get
-  # QuestionsGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuestionsGetFunction}
-  #     RetentionInDays: 1
+  QuestionsGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuestionsGetFunction}
+      RetentionInDays: 1
 
   QuestionsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -567,11 +567,11 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: put
-  # QuestionsUpdateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuestionsUpdateFunction}
-  #     RetentionInDays: 1
+  QuestionsUpdateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuestionsUpdateFunction}
+      RetentionInDays: 1
 
   QuestionsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -609,11 +609,11 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: delete
-  # QuestionsDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuestionsDeleteFunction}
-  #     RetentionInDays: 1
+  QuestionsDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuestionsDeleteFunction}
+      RetentionInDays: 1
 
   AnswersSubmitFunction:
     Type: AWS::Serverless::Function
@@ -647,11 +647,11 @@ Resources:
           Properties:
             Path: /quizzes/{quizId}/answers
             Method: post
-  # AnswersSubmitFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${AnswersSubmitFunction}
-  #     RetentionInDays: 1
+  AnswersSubmitFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AnswersSubmitFunction}
+      RetentionInDays: 1
 
   QuizCompletionFunction: # 追加された関数
     Type: AWS::Serverless::Function
@@ -688,11 +688,11 @@ Resources:
           Properties:
             Path: /quizzes/completion
             Method: post
-  # QuizCompletionFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${QuizCompletionFunction}
-  #     RetentionInDays: 1
+  QuizCompletionFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${QuizCompletionFunction}
+      RetentionInDays: 1
 
   UserAnswerSelectionFunction: # 追加された関数
     Type: AWS::Serverless::Function
@@ -726,11 +726,11 @@ Resources:
           Properties:
             Path: /quizzes/user-answer
             Method: post
-  # UserAnswerSelectionFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UserAnswerSelectionFunction}
-  #     RetentionInDays: 1
+  UserAnswerSelectionFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UserAnswerSelectionFunction}
+      RetentionInDays: 1
 
   ResultsGetFunction:
     Type: AWS::Serverless::Function
@@ -766,11 +766,11 @@ Resources:
           Properties:
             Path: /results/{quizSessionId}
             Method: get
-  # ResultsGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ResultsGetFunction}
-  #     RetentionInDays: 1
+  ResultsGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ResultsGetFunction}
+      RetentionInDays: 1
 
   ScoreHistoryGetFunction:
     Type: AWS::Serverless::Function
@@ -802,11 +802,11 @@ Resources:
           Properties:
             Path: /scores
             Method: get
-  # ScoreHistoryGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ScoreHistoryGetFunction}
-  #     RetentionInDays: 1
+  ScoreHistoryGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ScoreHistoryGetFunction}
+      RetentionInDays: 1
 
   ScoresCreateFunction:
     Type: AWS::Serverless::Function
@@ -844,11 +844,11 @@ Resources:
           Properties:
             Path: /scores
             Method: post
-  # ScoresCreateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ScoresCreateFunction}
-  #     RetentionInDays: 1
+  ScoresCreateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ScoresCreateFunction}
+      RetentionInDays: 1
 
   ScoresDeleteFunction:
     Type: AWS::Serverless::Function
@@ -880,11 +880,11 @@ Resources:
           Properties:
             Path: /scores/{quizSessionId}
             Method: delete
-  # ScoresDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ScoresDeleteFunction}
-  #     RetentionInDays: 1
+  ScoresDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ScoresDeleteFunction}
+      RetentionInDays: 1
 
   PerformanceAnalysisGetFunction:
     Type: AWS::Serverless::Function
@@ -916,11 +916,11 @@ Resources:
           Properties:
             Path: /users/{userId}/performance-analysis
             Method: get
-  # PerformanceAnalysisGetFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${PerformanceAnalysisGetFunction}
-  #     RetentionInDays: 1
+  PerformanceAnalysisGetFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${PerformanceAnalysisGetFunction}
+      RetentionInDays: 1
 
   ResourcesCreateFunction:
     Type: AWS::Serverless::Function
@@ -958,11 +958,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: post
-  # ResourcesCreateFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ResourcesCreateFunction}
-  #     RetentionInDays: 1
+  ResourcesCreateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ResourcesCreateFunction}
+      RetentionInDays: 1
 
   ResourcesListFunction:
     Type: AWS::Serverless::Function
@@ -994,11 +994,11 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: get
-  # ResourcesListFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ResourcesListFunction}
-  #     RetentionInDays: 1
+  ResourcesListFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ResourcesListFunction}
+      RetentionInDays: 1
 
   ResourcesDeleteFunction:
     Type: AWS::Serverless::Function
@@ -1036,11 +1036,11 @@ Resources:
           Properties:
             Path: /resources/{resourceId}
             Method: delete
-  # ResourcesDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${ResourcesDeleteFunction}
-  #     RetentionInDays: 1
+  ResourcesDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ResourcesDeleteFunction}
+      RetentionInDays: 1
 
   AiGenerateQuestionFunction:
     Type: AWS::Serverless::Function
@@ -1084,11 +1084,11 @@ Resources:
           Properties:
             Path: /ai/generate-question
             Method: post
-  # AiGenerateQuestionFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${AiGenerateQuestionFunction}
-  #     RetentionInDays: 1
+  AiGenerateQuestionFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AiGenerateQuestionFunction}
+      RetentionInDays: 1
 
   AiGenerateChoicesFunction:
     Type: AWS::Serverless::Function
@@ -1131,11 +1131,11 @@ Resources:
           Properties:
             Path: /ai/generate-choices
             Method: post
-  # AiGenerateChoicesFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${AiGenerateChoicesFunction}
-  #     RetentionInDays: 1
+  AiGenerateChoicesFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AiGenerateChoicesFunction}
+      RetentionInDays: 1
 
   UsersInactiveDeleteFunction:
     Type: AWS::Serverless::Function
@@ -1165,11 +1165,11 @@ Resources:
           Properties:
             Path: /users/inactive
             Method: delete
-  # UsersInactiveDeleteFunctionLogGroup:
-  #   Type: AWS::Logs::LogGroup
-  #   Properties:
-  #     LogGroupName: !Sub /aws/lambda/${UsersInactiveDeleteFunction}
-  #     RetentionInDays: 1
+  UsersInactiveDeleteFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${UsersInactiveDeleteFunction}
+      RetentionInDays: 1
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
