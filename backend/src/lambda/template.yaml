@@ -11,6 +11,8 @@ Globals:
     Runtime: nodejs22.x
     LoggingConfig:
       LogFormat: JSON
+      LogGroup: !Sub "/aws/lambda/${AWS::StackName}-${AWS::Lambda::FunctionName}"
+      RetentionInDays: 1
 
 Parameters:
   UsersTableName:
