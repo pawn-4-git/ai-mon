@@ -132,11 +132,11 @@ export const lambdaHandler = async (event) => {
         """
         解答:
         """
-        ${generatedQuestion}
+        ${correctChoice}
         """
         
         `;
-        const explanation = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
+        const explanation = await invokeBedrock(questionGenerationPromptExplanation, questionGenerationSystemPrompt);
 
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
