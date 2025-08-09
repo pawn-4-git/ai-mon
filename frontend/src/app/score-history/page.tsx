@@ -11,9 +11,10 @@ interface ScoreRecord {
     QuizSessionId: string;
     GroupId: string;
     UserId: string;
-    Score: number;
     SubmittedAt: string;
     QuizGroupName: string; // Assuming this is available, adjust if not
+    CorrectCount: number;
+    TotalCount: number;
 }
 
 // Define the structure of the API response
@@ -130,14 +131,17 @@ export default function ScoreHistoryPage() {
                             <div className="section">
                                 <h3>個別の成績記録</h3>
                                 {scores.length > 0 ? (
-                                    scores.map((record) => (
-                                        <div key={record.QuizSessionId} className="score-record">
-                                            <span>
-                                                {formatDate(record.SubmittedAt)} - {record.QuizGroupName || `グループID: ${record.GroupId}`} (正答率: {record.Score}%)
-                                            </span>
-                                            <button onClick={() => handleDelete(record.QuizSessionId)}>削除</button>
-                                        </div>
-                                    ))
+                                    scores.map((record) => {
+                                        const accuracy = record.TotalCount > 0 ? Math.floor((record.CorrectCount / record.TotalCount) * 100) : 0;
+                                        return (
+                                            <div key={record.QuizSessionId} className="score-record">
+                                                <span>
+                                                    {formatDate(record.SubmittedAt)} - {record.QuizGroupName || `グループID: ${record.GroupId}`} (正答数: {record.CorrectCount}/{record.TotalCount} 正答率: {accuracy}%)
+                                                </span>
+                                                <button onClick={() => handleDelete(record.QuizSessionId)}>削除</button>
+                                            </div>
+                                        );
+                                    })
                                 ) : (
                                     <p>まだ成績記録がありません。</p>
                                 )}
