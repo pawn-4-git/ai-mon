@@ -1224,6 +1224,7 @@ Resources:
             AllowedMethods:
               - GET
               - HEAD
+              - OPTIONS
             CachedMethods:
               - GET
               - HEAD
