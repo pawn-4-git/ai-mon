@@ -5,7 +5,7 @@ version = 0.1
 [default.global.parameters]
 # The stack name for the deployment. This should be unique for each deployment.
 # We will use a generic name here, but in a real-world scenario, you might want to parameterize this.
-stack_name = "aimon-backend-api"
+stack_name = "aimon-backend-api-dev"
 
 [default.build.parameters]
 cached = true
@@ -20,7 +20,7 @@ lint = true
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
 confirm_changeset = true
 resolve_s3 = true
-s3_prefix = "aimon-backend-api" # Specify an S3 prefix for deployment artifacts
+s3_prefix = "aimon-backend-api-dev" # Specify an S3 prefix for deployment artifacts
 region_name = "us-east-1" # Specify your desired AWS region
 
 # Parameters for specific functions (if needed, but template.yaml handles most of this)
@@ -29,7 +29,7 @@ region_name = "us-east-1" # Specify your desired AWS region
 
 [default.package.parameters]
 resolve_s3 = true
-s3_prefix = "aimon-backend-api" # Specify an S3 prefix for deployment artifacts
+s3_prefix = "aimon-backend-api-dev" # Specify an S3 prefix for deployment artifacts
 region_name = "us-east-1" # Specify your desired AWS region
 
 [default.sync.parameters]
