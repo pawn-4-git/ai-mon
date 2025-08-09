@@ -86,6 +86,10 @@ export const lambdaHandler = async (event) => {
 
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
         const generatedQuestion = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);
+        if (!generatedQuestion) {
+            console.error("Bedrock did not return a valid question.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
+        }
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationPromptCorrectChoice = `以下の文章から、重要な情報に基づいた解答を生成してください。
@@ -102,6 +106,31 @@ export const lambdaHandler = async (event) => {
         """`;
 
         const correctChoice = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
+        if (!correctChoice) {
+            console.error("Bedrock did not return a valid correct choice.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for correct choice generation." }) };
+        }
+
+
+        const questionGenerationPromptExplanation = `以下の文章から、重要な情報に基づいた解説を生成してください。
+        次に元の文章と問題文と解答を記載するので、解答を説明する文章を解説とします
+
+        元文章:
+        """
+        ${sourceText}
+        """
+
+        問題文:
+        """
+        ${generatedQuestion}
+        """
+        解答:
+        """
+        ${generatedQuestion}
+        """
+        
+        `;
+        const explanation = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
 
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
