@@ -80,6 +80,8 @@ export const lambdaHandler = async (event) => {
         作成するのは問題文だけとします。
         問題は文章から特定できる内容に限定します。
         問題文内に選択肢は不要です。
+        人名の場合は「・・・さん」と表記してください
+        ヒントは不要です。
         問題は1問だけとして、
 
         文章:
@@ -166,14 +168,6 @@ export const lambdaHandler = async (event) => {
 
         // Remove choices that are the same as the correct answer and deduplicate
         incorrectChoices = [...new Set(incorrectChoices.filter(choice => choice !== correctChoice))];
-
-        // Ensure we have exactly 10 incorrect choices
-        while (incorrectChoices.length < 10) {
-            incorrectChoices.push(`ダミー選択肢 ${incorrectChoices.length + 1}`);
-        }
-        if (incorrectChoices.length > 10) {
-            incorrectChoices.length = 10;
-        }
 
         // 4. Return the generated question to the client
         return {

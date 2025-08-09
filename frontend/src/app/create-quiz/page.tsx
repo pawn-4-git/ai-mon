@@ -149,7 +149,6 @@ function CreateQuizContent() {
 
 
     const resetForm = () => {
-        setQuizTitle('');
         setQuestionText('');
         setCorrectChoice('');
         setExplanationText('');
@@ -398,7 +397,7 @@ function CreateQuizContent() {
                             <label htmlFor="correct-choice">正解の選択肢:</label>
                             <input type="text" id="correct-choice" placeholder="正解の選択肢を入力してください" value={correctChoice} onChange={(e) => setCorrectChoice(e.target.value)} />
                         </div>
-                        <button onClick={handleGenerateDummies}>ダミー選択肢を10���生成</button>
+                        <button onClick={handleGenerateDummies} style={{ marginTop: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>ダミー選択肢を10個生成</button>
 
                         {showDummyChoices && (
                             <div className="dummy-choices">
@@ -426,7 +425,7 @@ function CreateQuizContent() {
                             <label htmlFor="source-text">生成元の文章:</label>
                             <textarea id="source-text" placeholder="問題生成の元となる文章を入力してください" value={sourceText} onChange={(e) => setSourceText(e.target.value)}></textarea>
                         </div>
-                        <button onClick={handleGenerateQuestion}>問題を自動生成</button>
+                        <button onClick={handleGenerateQuestion} style={{ marginTop: '10px', padding: '8px 15px', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>問題を自動生成</button>
                     </div>
 
                     <div className="button-group">
