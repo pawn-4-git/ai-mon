@@ -86,6 +86,10 @@ export const lambdaHandler = async (event) => {
 
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
         const generatedQuestion = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);
+        if (!generatedQuestion) {
+            console.error("Bedrock did not return a valid question.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
+        }
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationPromptCorrectChoice = `以下の文章から、重要な情報に基づいた解答を生成してください。
@@ -102,6 +106,10 @@ export const lambdaHandler = async (event) => {
         """`;
 
         const correctChoice = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
+        if (!correctChoice) {
+            console.error("Bedrock did not return a valid correct choice.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for correct choice generation." }) };
+        }
 
 
         const questionGenerationPromptExplanation = `以下の文章から、重要な情報に基づいた解説を生成してください。
