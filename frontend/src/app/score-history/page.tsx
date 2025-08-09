@@ -87,7 +87,7 @@ export default function ScoreHistoryPage() {
         }, 100); // Check every 100ms
 
         return () => clearInterval(checkApiClient);
-    }, [userId]);
+    }, [userId, fetchScores]);
 
     const handleDelete = async (quizSessionId: string) => {
         if (!window.confirm("この成績記録を本当に削除しますか？")) {
