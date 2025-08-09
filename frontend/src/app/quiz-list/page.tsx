@@ -250,7 +250,7 @@ export default function QuizListPage() {
           ))}
         </ul>
         {isAdminUser && (
-          <button className="add-button" onClick={() => router.push('/create-quiz')}>
+          <button className="add-button" onClick={() => router.push('/quiz-group')}>
             新しい問題グループを作成
           </button>
         )}

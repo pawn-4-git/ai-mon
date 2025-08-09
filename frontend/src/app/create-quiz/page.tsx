@@ -50,9 +50,34 @@ function CreateQuizContent() {
     const [showDummyChoices, setShowDummyChoices] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [quizzes] = useState<Quiz[]>([]);
+    const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+    const [isLoadingQuizzes, setIsLoadingQuizzes] = useState(false);
+    const [quizListError, setQuizListError] = useState<string | null>(null);
     const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
     const [productResources, setProductResources] = useState<Partial<ProductResource>[]>([]);
+
+    const fetchQuestions = useCallback(async (groupId: string) => {
+        if (!window.apiClient) {
+            console.error('API client is not loaded yet.');
+            return;
+        }
+        setIsLoadingQuizzes(true);
+        setQuizListError(null);
+        try {
+            const data = await window.apiClient.get(`/Prod/quiz-groups/${groupId}/questions`) as { questions?: Quiz[] };
+            if (data && data.questions) {
+                setQuizzes(data.questions);
+            } else {
+                setQuizListError('問題の取得に失敗しました。');
+                console.error('Unexpected data format:', data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch questions:', error);
+            setQuizListError('問題の取得中にエラーが発生しました。');
+        } finally {
+            setIsLoadingQuizzes(false);
+        }
+    }, []);
     const [isLoadingResources, setIsLoadingResources] = useState(false);
     const [resourceError, setResourceError] = useState<string | null>(null);
     const [currentGroup, setCurrentGroup] = useState<QuizGroup | null>(null);
@@ -144,8 +169,9 @@ function CreateQuizContent() {
                 status: 'not-taken'
             });
             fetchResources(groupId);
+            fetchQuestions(groupId); // Fetch questions when group is set
         }
-    }, [searchParams, fetchResources]);
+    }, [searchParams, fetchResources, fetchQuestions]);
 
 
     const resetForm = () => {
