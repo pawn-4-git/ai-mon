@@ -1223,6 +1223,7 @@ Resources:
                 FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
             AllowedMethods:
               - GET
+              - HEAD
             CachedMethods:
               - GET
               - HEAD
