@@ -117,7 +117,7 @@ export default function QuizListPage() {
         console.log('Latest Score History List:', latestScoreHistoryList);
 
         // quizGroups を取得するロジック
-        const data = await window.apiClient.get(`/Prod/quiz-groups`);
+        const data = await window.apiClient.get(`/Prod/quiz-groups-list`);
         console.log(data);
 
         const apiResponse = data as ApiResponse;

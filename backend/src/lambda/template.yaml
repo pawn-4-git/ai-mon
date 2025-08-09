@@ -296,6 +296,41 @@ Resources:
 #    Properties:
 #      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsListFunction}
 #      RetentionInDays: 1
+  QuizGroupsListCacheFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: quizGroupsList/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBReadPolicy:
+            TableName: !Ref QuizGroupsTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        QuizGroupsListEvent:
+          Type: Api
+          Properties:
+            Path: /quiz-groups-list
+            Method: get
+#  QuizGroupsListFunctionLogGroup:
+#    Type: AWS::Logs::LogGroup
+#    Properties:
+#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsListFunction}
+#      RetentionInDays: 1
 
   QuizGroupsGetFunction:
     Type: AWS::Serverless::Function
@@ -1217,6 +1252,40 @@ Resources:
         CacheBehaviors:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod/quiz-groups-resources/*"
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: 'viewer-request'
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            MinTTL: 600
+            DefaultTTL: 600
+            MaxTTL: 600
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: whitelist
+                WhitelistedNames:
+                  - username
+                  - sessionId
+                  - sessionVersionId
+              Headers:
+                - Accept
+                - Accept-Language
+                - Content-Language
+                - Content-Type
+                - Referer
+                - User-Agent
+                - X-Forwarded-For
+                - X-Forwarded-Proto
+          - TargetOriginId: AimonApiGatewayOrigin
+            PathPattern: "/Prod/quiz-groups-list*"
             ViewerProtocolPolicy: redirect-to-https
             FunctionAssociations:
               - EventType: 'viewer-request'
