@@ -111,8 +111,8 @@ function CreateQuizContent() {
                 resources?: ApiResource[];
             }
 
-            const data = await window.apiClient.get(`/Prod/quiz-groups/${groupId}/resources`) as ApiResponse;
-            
+            const data = await window.apiClient.get(`/Prod/quiz-groups-resources/${groupId}/`) as ApiResponse;
+
             if (data && data.resources) {
                 // Map the API response to the frontend's ProductResource type
                 const formattedResources: ProductResource[] = data.resources.map(res => ({
@@ -301,7 +301,7 @@ function CreateQuizContent() {
         }
 
         const resourceToDelete = productResources[index];
-        
+
         // Only call API if the resource exists in the database (i.e., has a real ResourceId)
         if (resourceToDelete.ResourceId && !resourceToDelete.ResourceId.startsWith('new-')) {
             try {
@@ -467,7 +467,7 @@ function CreateQuizContent() {
                     <div className="product-links-section" style={{ marginTop: '30px' }}>
                         <h3>関連商品リンク (最大10個)</h3>
                         <p style={{ fontSize: '0.9em', color: '#777' }}>問題に関連する商品の画像URL、商品名、商品リンクを入力してください。</p>
-                        
+
                         {isLoadingResources && <p>関連商品を読み込み中...</p>}
                         {resourceError && <p style={{ color: 'red' }}>{resourceError}</p>}
 
