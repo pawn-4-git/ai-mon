@@ -77,7 +77,10 @@ export const lambdaHandler = async (event) => {
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationPrompt = `以下の文章から、重要な情報に基づいた問題を生成してください。
-        問題は１問とします。
+        作成するのは問題文だけとします。
+        問題は文章から特定できる内容に限定します。
+        問題文内に選択肢は不要です。
+        問題は1問だけとして、
 
         文章:
         """
@@ -93,7 +96,9 @@ export const lambdaHandler = async (event) => {
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationPromptCorrectChoice = `以下の文章から、重要な情報に基づいた解答を生成してください。
-        問題は１問とします。
+        解答は以下の元文章と問題文を参考に解答を作成してください。
+        解答は選択肢の表記は不要です。
+        解答は一つだけとします。出力は解答だけとします。
 
         元文章:
         """
@@ -113,7 +118,8 @@ export const lambdaHandler = async (event) => {
 
 
         const questionGenerationPromptExplanation = `以下の文章から、重要な情報に基づいた解説を生成してください。
-        次に元の文章と問題文と解答を記載するので、解答を説明する文章を解説とします
+        次に元の文章と問題文と解答を記載するので、解答を説明する文章を解説とします。
+        応答は解説だけとします。
 
         元文章:
         """
@@ -126,11 +132,11 @@ export const lambdaHandler = async (event) => {
         """
         解答:
         """
-        ${generatedQuestion}
+        ${correctChoice}
         """
         
         `;
-        const explanation = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
+        const explanation = await invokeBedrock(questionGenerationPromptExplanation, questionGenerationSystemPrompt);
 
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
@@ -156,7 +162,10 @@ export const lambdaHandler = async (event) => {
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for choice generation." }) };
         }
 
-        const incorrectChoices = generatedChoicesText.split('\n').map(line => line.trim()).filter(line => line !== '');
+        let incorrectChoices = generatedChoicesText.split('\n').map(line => line.trim()).filter(line => line !== '');
+
+        // Remove choices that are the same as the correct answer and deduplicate
+        incorrectChoices = [...new Set(incorrectChoices.filter(choice => choice !== correctChoice))];
 
         // Ensure we have exactly 10 incorrect choices
         while (incorrectChoices.length < 10) {
