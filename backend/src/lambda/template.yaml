@@ -992,7 +992,7 @@ Resources:
         ResourcesListEvent:
           Type: Api
           Properties:
-            Path: /quiz-groups/{groupId}/resources
+            Path: /quiz-groups-resources/{groupId}/
             Method: get
 #  ResourcesListFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
@@ -1216,7 +1216,7 @@ Resources:
               OriginAccessIdentity: ''
         CacheBehaviors:
           - TargetOriginId: AimonApiGatewayOrigin
-            PathPattern: "/Prod/quiz-groups/*"
+            PathPattern: "/Prod/quiz-groups-resources/*"
             ViewerProtocolPolicy: redirect-to-https
             FunctionAssociations:
               - EventType: 'viewer-request'
