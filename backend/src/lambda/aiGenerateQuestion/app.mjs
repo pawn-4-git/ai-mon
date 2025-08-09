@@ -76,51 +76,32 @@ export const lambdaHandler = async (event) => {
         }
 
         // 1. Generate Question, Answer, and Explanation from sourceText
-        const questionGenerationPrompt = `以下の文章から、重要な情報に基づいた問題、その正解、そして解説を生成してください。
+        const questionGenerationPrompt = `以下の文章から、重要な情報に基づいた問題を生成してください。
         問題は１問とします。
 
         文章:
         """
         ${sourceText}
-        """
-
-        生成する形式は以下のJSONフォーマットに従ってください。
-        {
-          "question": "生成された問題文",
-          "answer": "問題の正解",
-          "explanation": "問題の解説"
-        }
-
-        もし、与えられた文章から明確な問題と正解を生成できない場合は、"error" という文字列を含むJSONを返してください。
-        例:
-        {
-          "error": "問題を生成できませんでした。"
-        }`;
+        """`;
 
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
-        const generatedQuestionJSON = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);
+        const generatedQuestion = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);
 
-        if (!generatedQuestionJSON) {
-            console.error("Bedrock did not return a valid question JSON.");
-            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
-        }
+        // 1. Generate Question, Answer, and Explanation from sourceText
+        const questionGenerationPromptCorrectChoice = `以下の文章から、重要な情報に基づいた解答を生成してください。
+        問題は１問とします。
 
-        let generatedData;
-        try {
-            generatedData = JSON.parse(generatedQuestionJSON);
-        } catch (e) {
-            console.error("Failed to parse Bedrock response for question generation:", e, "Response:", generatedQuestionJSON);
-            return { statusCode: 500, body: JSON.stringify({ message: "Failed to parse AI response." }) };
-        }
+        元文章:
+        """
+        ${sourceText}
+        """
 
-        if (generatedData.error) {
-            return {
-                statusCode: 400,
-                body: JSON.stringify({ message: `問題の生成に失敗しました: ${generatedData.error}` }),
-            };
-        }
+        問題文:
+        """
+        ${generatedQuestion}
+        """`;
 
-        const { question: questionText, answer: correctChoice, explanation } = generatedData;
+        const correctChoice = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
 
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
@@ -161,7 +142,7 @@ export const lambdaHandler = async (event) => {
             statusCode: 201,
             body: JSON.stringify({
                 message: "Question generated successfully.",
-                questionText: questionText,
+                questionText: generatedQuestion,
                 correctChoice: correctChoice,
                 incorrectChoices: incorrectChoices,
                 explanation: explanation,
