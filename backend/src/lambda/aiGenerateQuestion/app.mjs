@@ -103,6 +103,27 @@ export const lambdaHandler = async (event) => {
 
         const correctChoice = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
 
+
+        const questionGenerationPromptExplanation = `以下の文章から、重要な情報に基づいた解説を生成してください。
+        次に元の文章と問題文と解答を記載するので、解答を説明する文章を解説とします
+
+        元文章:
+        """
+        ${sourceText}
+        """
+
+        問題文:
+        """
+        ${generatedQuestion}
+        """
+        解答:
+        """
+        ${generatedQuestion}
+        """
+        
+        `;
+        const explanation = await invokeBedrock(questionGenerationPromptCorrectChoice, questionGenerationSystemPrompt);
+
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
         結果は改行で分けて、不正解の選択肢以外は返さないでください。
