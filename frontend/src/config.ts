@@ -1,0 +1,1 @@
+export const appTitle = process.env.NEXT_PUBLIC_APP_TITLE || 'あいもん';
