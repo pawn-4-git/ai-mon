@@ -18,7 +18,7 @@ const GithubIcon = () => (
   </svg>
 );
 
-
+const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-6 mt-12">
@@ -32,7 +32,7 @@ const Footer = () => {
           </a>
         </div>
         <p className="text-gray-500 text-sm">
-          &copy; {new Date().getFullYear()} あいもん. All Rights Reserved.
+          &copy; {new Date().getFullYear()} {appTitle}. All Rights Reserved.
         </p>
       </div>
     </footer>
