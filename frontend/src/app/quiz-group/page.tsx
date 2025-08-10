@@ -87,7 +87,7 @@ export default function QuizGroupPage() {
       return;
     }
     if (!window.apiClient) {
-      alert('APIクライアントの準備ができていませ��。');
+      alert('APIクライアントの準備ができていません。');
       return;
     }
 

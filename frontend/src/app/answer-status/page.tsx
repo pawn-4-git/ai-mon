@@ -96,7 +96,7 @@ function AnswerStatus() {
       return;
     }
 
-    if (!confirm('テス���を本当に終了しますか？')) {
+    if (!confirm('テストを本当に終了しますか？')) {
       return;
     }
 
@@ -169,9 +169,9 @@ function AnswerStatus() {
 }
 
 export default function AnswerStatusPage() {
-    return (
-      <Suspense fallback={<div>Loading...</div>}>
-        <AnswerStatus />
-      </Suspense>
-    );
-  }
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AnswerStatus />
+    </Suspense>
+  );
+}

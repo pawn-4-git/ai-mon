@@ -20,7 +20,7 @@ const getCookieValue = (cookieHeader, cookieName) => {
 /**
  * 指定されたuserIdが管理者であるかどうかを判定します。
  * 管理者IDはAWS Secrets Managerから取得し、キャッシュします。
- * @param {string} userId - チェック対象���ユーザーID
+ * @param {string} userId - チェック対象のユーザーID
  * @returns {Promise<boolean>} - 管理者の場合はtrue、それ以外はfalse
  */
 export const isAdmin = async (userId) => {
