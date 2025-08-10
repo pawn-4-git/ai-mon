@@ -1,169 +1,169 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f4f4f4;
-  --foreground: #333333;
-  --primary: #007bff;
-  --primary-hover: #0056b3;
-  --success: #28a745;
-  --danger: #dc3545;
-  --warning: #ffc107;
-  --card-bg: #ffffff;
+    --background: #f4f4f4;
+    --foreground: #333333;
+    --primary: #007bff;
+    --primary-hover: #0056b3;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --card-bg: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-success: var(--success);
-  --color-danger: var(--danger);
-  --color-warning: var(--warning);
-  --color-card-bg: var(--card-bg);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-primary: var(--primary);
+    --color-primary-hover: var(--primary-hover);
+    --color-success: var(--success);
+    --color-danger: var(--danger);
+    --color-warning: var(--warning);
+    --color-card-bg: var(--card-bg);
+    --font-sans: var(--font-geist-sans);
+    --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  margin: 0;
-  padding: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
-  background-color: var(--card-bg);
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 800px;
-  margin: 20px auto;
+    background-color: var(--card-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin: 20px auto;
 }
 
 .btn-primary {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
+    background-color: var(--primary-hover);
 }
 
 .btn-success {
-  background-color: var(--success);
-  color: white;
+    background-color: var(--success);
+    color: white;
 }
 
 .btn-danger {
-  background-color: var(--danger);
-  color: white;
+    background-color: var(--danger);
+    color: white;
 }
 
 .btn-warning {
-  background-color: var(--warning);
-  color: black;
+    background-color: var(--warning);
+    color: black;
 }
 
 .form-group {
-  margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 .form-group label {
-  display: block;
-  margin-bottom: 5px;
-  color: #555;
-  font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+    font-weight: bold;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 16px;
-  box-sizing: border-box;
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 .status-badge {
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
 }
 
 .status-not-taken {
-  background-color: #e9ecef;
-  color: #495057;
+    background-color: #e9ecef;
+    color: #495057;
 }
 
 .status-updated {
-  background-color: #fff3cd;
-  color: #856404;
+    background-color: #fff3cd;
+    color: #856404;
 }
 
 .status-completed {
-  background-color: #d4edda;
-  color: #155724;
+    background-color: #d4edda;
+    color: #155724;
 }
 
 .quiz-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 15px;
-  background-color: var(--card-bg);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: var(--card-bg);
 }
 
 .timer {
-  background-color: #f8f9fa;
-  border: 1px solid #dee2e6;
-  border-radius: 4px;
-  padding: 10px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 18px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 .choice-button {
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin: 10px 0;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  cursor: pointer;
-  text-align: left;
-  transition: all 0.3s ease;
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.3s ease;
 }
 
 .choice-button:hover {
-  border-color: var(--primary);
-  background-color: #f8f9fa;
+    border-color: var(--primary);
+    background-color: #f8f9fa;
 }
 
 .choice-button.selected {
-  border-color: var(--primary);
-  background-color: #e3f2fd;
+    border-color: var(--primary);
+    background-color: #e3f2fd;
 }
 
 .result-correct {
-  background-color: #d4edda;
-  border-color: var(--success);
+    background-color: #d4edda;
+    border-color: var(--success);
 }
 
 .result-incorrect {
-  background-color: #f8d7da;
-  border-color: var(--danger);
+    background-color: #f8d7da;
+    border-color: var(--danger);
 }
 
 /* Styles from index.html, scoped with .login-page */
@@ -591,22 +591,27 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    max-width: 600px; /* コンテナの最大幅を調整 */
-    margin: 0 auto; /* コンテンツを中央寄せ */
-    padding: 30px; /* 内側の余白を調整 */
+    max-width: 600px;
+    /* コンテナの最大幅を調整 */
+    margin: 0 auto;
+    /* コンテンツを中央寄せ */
+    padding: 30px;
+    /* 内側の余白を調整 */
 }
 
 .quiz-group-page h2 {
     color: #333;
     margin-top: 0;
     margin-bottom: 20px;
-    text-align: center; /* 見出しを中央寄せ */
+    text-align: center;
+    /* 見出しを中央寄せ */
     margin-bottom: 30px;
 }
 
 .quiz-group-page .form-group {
     margin-bottom: 15px;
-    margin-bottom: 20px; /* フォーム要素間の余白を調整 */
+    margin-bottom: 20px;
+    /* フォーム要素間の余白を調整 */
 }
 
 .quiz-group-page label {
@@ -614,7 +619,8 @@ body {
     margin-bottom: 5px;
     color: #555;
     font-weight: bold;
-    font-size: 16px; /* ラベルのフォントサイズを調整 */
+    font-size: 16px;
+    /* ラベルのフォントサイズを調整 */
     margin-bottom: 8px;
 }
 
@@ -626,15 +632,19 @@ body {
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 16px;
-    padding: 12px; /* 入力フィールドのパディングを調整 */
-    font-size: 16px; /* 入力フィールドのフォントサイズを調整 */
+    padding: 12px;
+    /* 入力フィールドのパディングを調整 */
+    font-size: 16px;
+    /* 入力フィールドのフォントサイズを調整 */
 }
 
 .quiz-group-page .button-group {
     margin-top: 20px;
     display: flex;
-    justify-content: center; /* ボタンを中央寄せ */
-    gap: 15px; /* ボタン間の間隔 */
+    justify-content: center;
+    /* ボタンを中央寄せ */
+    gap: 15px;
+    /* ボタン間の間隔 */
     margin-top: 30px;
 }
 
@@ -647,8 +657,10 @@ body {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    padding: 12px 25px; /* ボタンのパディングを調整 */
-    font-size: 16px; /* ボタンのフォントサイズを調整 */
+    padding: 12px 25px;
+    /* ボタンのパディングを調整 */
+    font-size: 16px;
+    /* ボタンのフォントサイズを調整 */
 }
 
 .quiz-group-page .button-group button:hover {
@@ -1329,36 +1341,46 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #fff; /* ヘッダーの背景色 */
+    background-color: #fff;
+    /* ヘッダーの背景色 */
     padding: 15px 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
-    max-width: 600px; /* コンテナの幅に合わせる */
-    margin: 0 auto; /* ��ッダーを中央寄せ */
-    margin-bottom: 20px; /* コンテナとの間隔 */
-    box-sizing: border-box; /* paddingとborderをwidthに含める */
+    max-width: 600px;
+    /* コンテナの幅に合わせる */
+    margin: 0 auto;
+    /* ヘッダーを中央寄せ */
+    margin-bottom: 20px;
+    /* コンテナとの間隔 */
+    box-sizing: border-box;
+    /* paddingとborderをwidthに含める */
 }
 
 .header h1 {
     margin: 0;
-    color: #333; /* ロゴの文字色 */
-    font-size: 24px; /* ロゴの文字サイズ */
+    color: #333;
+    /* ロゴの文字色 */
+    font-size: 24px;
+    /* ロゴの文字サイズ */
 }
 
 .header .user-info {
     font-size: 16px;
-    color: #555; /* ユーザー情報の文字色 */
+    color: #555;
+    /* ユーザー情報の文字色 */
 }
 
 .header .user-info a {
     margin-left: 15px;
-    color: #007bff; /* リンクの色 */
+    color: #007bff;
+    /* リンクの色 */
     text-decoration: none;
 }
 
 .header .user-info a:hover {
-    text-decoration: underline; /* ホバー時の下線 */
+    text-decoration: underline;
+    /* ホバー時の下線 */
 }
 
 .reference-books-list {
