@@ -364,6 +364,14 @@ function CreateQuizContent() {
         }
     };
 
+    const handleDeleteButtonClick = () => {
+        if (selectedQuiz) {
+            handleDeleteQuestion(selectedQuiz.id);
+        } else {
+            alert('削除する問題が選択されていません。');
+        }
+    };
+
     const handleOpenQuizListModal = async () => {
         if (!currentGroup) {
             alert('問題グループが設定されていません。');
@@ -571,7 +579,7 @@ function CreateQuizContent() {
                                         </ul>
                                         <p><strong>解説:</strong> {selectedQuiz.explanation}</p>
                                         <button onClick={() => setSelectedQuiz(null)} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>一覧に戻る</button>
-                                        <button onClick={() => handleDeleteQuestion(selectedQuiz.id)} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>削除</button>
+                                        <button onClick={handleDeleteButtonClick} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>削除</button>
                                     </div>
                                 )}
                             </div>
