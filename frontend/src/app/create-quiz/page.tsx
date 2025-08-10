@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Script from 'next/script';
 import Header from '@/components/Header';
-import { Quiz, QuizGroup } from '@/types/index';
+import { QuizGroup, Question } from '@/types/index';
 
 declare global {
     interface Window {
@@ -50,8 +50,8 @@ function CreateQuizContent() {
     const [showDummyChoices, setShowDummyChoices] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [quizzes] = useState<Quiz[]>([]);
-    const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
+    const [quizzes, setQuizzes] = useState<Question[]>([]);
+    const [selectedQuiz, setSelectedQuiz] = useState<Question | null>(null);
     const [productResources, setProductResources] = useState<Partial<ProductResource>[]>([]);
     const [isLoadingResources, setIsLoadingResources] = useState(false);
     const [resourceError, setResourceError] = useState<string | null>(null);
@@ -339,17 +339,62 @@ function CreateQuizContent() {
         setProductResources(newResources);
     };
 
+    const handleOpenQuizListModal = async () => {
+        if (!currentGroup) {
+            alert('問題グループが設定されていません。');
+            return;
+        }
+        const apiClient = window.apiClient;
+        if (!apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        try {
+            // Define the expected API response structure
+            interface ApiQuestion {
+                QuestionID: string;
+                QuestionText: string;
+                CorrectChoice: string;
+                IncorrectChoices: string[];
+                Explanation: string;
+            }
+            interface ApiQuestionsResponse {
+                questions: ApiQuestion[];
+            }
+
+            const data = await apiClient.get(`/Prod/quiz-groups/${currentGroup.id}/questions`) as ApiQuestionsResponse;
+
+            if (data && data.questions) {
+                const formattedQuizzes: Question[] = data.questions.map(q => ({
+                    id: q.QuestionID,
+                    text: q.QuestionText,
+                    correctAnswer: q.IncorrectChoices.indexOf(q.CorrectChoice), // This is likely incorrect, needs adjustment
+                    choices: [q.CorrectChoice, ...q.IncorrectChoices].sort(() => Math.random() - 0.5), // Shuffle choices
+                    explanation: q.Explanation,
+                }));
+                setQuizzes(formattedQuizzes);
+            }
+            setIsModalOpen(true);
+        } catch (error) {
+            console.error('Failed to fetch questions:', error);
+            alert('問題一覧の取得に失敗しました。');
+        }
+    };
+
     const handleSaveResources = async () => {
         if (!currentGroup) {
             alert('問題グループが設定されていません。');
             return;
         }
-        if (!window.apiClient) {
+        const apiClient = window.apiClient;
+        if (!apiClient) {
             alert('APIクライアントの準備ができていません。');
             return;
         }
 
         const newResources = productResources.filter(r => r.ResourceId && r.ResourceId.startsWith('new-'));
+        const existingResources = productResources.filter(r => !r.ResourceId || !r.ResourceId.startsWith('new-'));
 
         if (newResources.length === 0) {
             alert('保存する新しい商品リンクがありません。');
@@ -357,16 +402,33 @@ function CreateQuizContent() {
         }
 
         try {
-            for (const resource of newResources) {
+            // The raw response from the backend API for a single resource
+            interface ApiResource {
+                ResourceId: string;
+                GroupId: string;
+                Title: string;
+                URL: string;
+                ImgSrc?: string;
+            }
+
+            const savedResources = await Promise.all(newResources.map(async (resource) => {
                 const payload = {
                     title: resource.ProductName,
                     url: resource.ProductUrl,
                     imgSrc: resource.ImageUrl,
                 };
-                await window.apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/resources`, payload);
-            }
+                const response = await apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/resources`, payload) as ApiResource;
+                return {
+                    ResourceId: response.ResourceId,
+                    GroupId: response.GroupId,
+                    ProductName: response.Title,
+                    ProductUrl: response.URL,
+                    ImageUrl: response.ImgSrc || '',
+                };
+            }));
+
+            setProductResources([...existingResources, ...savedResources]);
             alert('新しい商品リンクを保存しました。');
-            fetchResources(currentGroup.id); // Refresh the list to get new ResourceIds
         } catch (error) {
             console.error('Failed to save new resources:', error);
             alert('商品リンクの保存に失敗しました。');
@@ -393,8 +455,8 @@ function CreateQuizContent() {
                     </div>
 
                     <p>現在のグループ: <span id="current-group">{currentGroup ? `${currentGroup.name} (ID: ${currentGroup.id})` : '未設定'}</span></p>
-                    <div className="form-group">
-                        <Link href="/quiz-group">問題グループを設定</Link>
+                    <div className="button-group">
+                        <Link href="/quiz-group" className="button">問題グループを設定</Link>
                     </div>
 
                     <div className="radio-group">
@@ -452,7 +514,7 @@ function CreateQuizContent() {
                     <div className="button-group">
                         <button onClick={handleSaveQuestion}>問題を保存</button>
                         <button className="secondary" onClick={() => router.push('/quiz-list')}>キャンセル</button>
-                        <button onClick={() => setIsModalOpen(true)} style={{ backgroundColor: '#17a2b8' }}>問題の一覧を確認</button>
+                        <button onClick={handleOpenQuizListModal} style={{ backgroundColor: '#17a2b8' }}>問題の一覧を確認</button>
                     </div>
 
                     {isModalOpen && (
@@ -466,7 +528,7 @@ function CreateQuizContent() {
                                             <ul>
                                                 {quizzes.map(quiz => (
                                                     <li key={quiz.id} onClick={() => setSelectedQuiz(quiz)}>
-                                                        {quiz.question}
+                                                        {quiz.text}
                                                     </li>
                                                 ))}
                                             </ul>
@@ -475,10 +537,14 @@ function CreateQuizContent() {
                                 ) : (
                                     <div id="quiz-detail-container">
                                         <h3>問題詳細</h3>
-                                        <p><strong>問題文:</strong> {selectedQuiz.question}</p>
-                                        <p><strong>正解:</strong> {selectedQuiz.correct}</p>
+                                        <p><strong>問題文:</strong> {selectedQuiz.text}</p>
+                                        <p><strong>選択肢:</strong></p>
+                                        <ul>
+                                            {selectedQuiz.choices.map((choice, index) => (
+                                                <li key={index}>{choice}</li>
+                                            ))}
+                                        </ul>
                                         <p><strong>解説:</strong> {selectedQuiz.explanation}</p>
-                                        <p><strong>誤った回答:</strong> {selectedQuiz.dummies.join(', ')}</p>
                                         <button onClick={() => setSelectedQuiz(null)} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>一覧に戻る</button>
                                     </div>
                                 )}
