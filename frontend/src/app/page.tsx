@@ -62,7 +62,7 @@ export default function LoginPage() {
       }
       try {
         setLoadingResources(true);
-        const data = await window.apiClient.get('/Prod/resources/list/all') as ResourcesApiResponse;
+        const data = await window.apiClient.get('/Prod/resources/all') as ResourcesApiResponse;
         if (data && data.resourcesByGroup) {
           setResourcesByGroup(data.resourcesByGroup);
         }
