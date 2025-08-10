@@ -55,8 +55,11 @@ export const lambdaHandler = async (event) => {
             return dateB.getTime() - dateA.getTime(); // 降順
         }) : [];
 
-        // ソートされたアイテムをさらにランダムにシャッフル
-        const shuffledItems = sortedItems ? shuffle([...sortedItems]) : [];
+        // ソートされたアイテムの上位100件を取得
+        const latestItems = sortedItems.slice(0, 100);
+
+        // 上位100件をシャッフル
+        const shuffledItems = latestItems ? shuffle([...latestItems]) : [];
 
         // シャッフルされたアイテムから最初の20件を取得
         const limitedItems = shuffledItems.slice(0, 20);
