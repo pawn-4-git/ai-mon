@@ -14,6 +14,7 @@ export class ScoresTableStack extends cdk.Stack {
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.RETAIN,
+      timeToLiveAttribute: 'DataExpiresAt',
     });
 
     table.addGlobalSecondaryIndex({

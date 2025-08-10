@@ -210,6 +210,11 @@ export const lambdaHandler = async (event) => {
         const now = new Date();
         const expires = new Date(now.getTime() + TimeLimitMinutes * 60 * 1000);
 
+        // Calculate TTL for 3 months from now
+        const ttlDate = new Date();
+        ttlDate.setMonth(ttlDate.getMonth() + 3);
+        const dataExpiresAt = Math.floor(ttlDate.getTime() / 1000);
+
         const newScoreItem = {
             QuizSessionId: quizSessionId,
             UserId: userId,
@@ -218,7 +223,8 @@ export const lambdaHandler = async (event) => {
             TotalCount: answers.length,
             StartedAt: now.toISOString(),
             ExpiresAt: expires.toISOString(),
-            QuizGroupName: Name
+            QuizGroupName: Name,
+            DataExpiresAt: dataExpiresAt,
         };
 
         const putCommand = new PutCommand({
