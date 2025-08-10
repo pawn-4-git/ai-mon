@@ -1037,6 +1037,31 @@ Resources:
 #      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ResourcesListFunction}
 #      RetentionInDays: 1
 
+  ResourcesListAllFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Layers:
+        - !Ref SharedLogicLayer
+      CodeUri: resourcesListAll/
+      Handler: app.lambdaHandler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref ResourcesTableName
+      Environment:
+        Variables:
+          USERS_TABLE_NAME: !Ref UsersTableName
+          SESSIONS_TABLE_NAME: !Ref SessionsTableName
+          SCORES_TABLE_NAME: !Ref ScoresTableName
+          RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
+          QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
+      Events:
+        ResourcesListAllEvent:
+          Type: Api
+          Properties:
+            Path: /resources/all
+            Method: get
+
   ResourcesDeleteFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -1252,6 +1277,40 @@ Resources:
             S3OriginConfig:
               OriginAccessIdentity: ''
         CacheBehaviors:
+          - TargetOriginId: AimonApiGatewayOrigin
+            PathPattern: "/Prod/resources/all"
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations:
+              - EventType: 'viewer-request'
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            MinTTL: 600
+            DefaultTTL: 600
+            MaxTTL: 600
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: whitelist
+                WhitelistedNames:
+                  - username
+                  - sessionId
+                  - sessionVersionId
+              Headers:
+                - Accept
+                - Accept-Language
+                - Content-Language
+                - Content-Type
+                - Referer
+                - User-Agent
+                - X-Forwarded-For
+                - X-Forwarded-Proto
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod/quiz-groups-resources/*"
             ViewerProtocolPolicy: redirect-to-https

@@ -101,6 +101,8 @@
 *   **`GET /quiz-groups-resources/:groupId/`**: 参考書リンク一覧取得
     *   パスパラメータ: `groupId`
     *   レスポンス: リソースリスト
+    **`GET /quiz-groups-resources-all/`**: 参考書リンク一覧取得(認証なしの取得)
+    *   レスポンス: リソースリスト
 *   **`DELETE /resources/:resourceId`**: 参考書リンク削除 (特権ユーザーのみ)
     *   パスパラメータ: `resourceId`
     *   レスポンス: 削除成功/失敗
