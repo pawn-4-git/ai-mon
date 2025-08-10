@@ -106,6 +106,8 @@ export const lambdaHandler = async (event) => {
 
         await docClient.send(putSessionCommand);
 
+        await updateUserTtl(userId);
+
         return {
             statusCode: 200,
             multiValueHeaders: {
