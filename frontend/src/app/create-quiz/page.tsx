@@ -339,6 +339,31 @@ function CreateQuizContent() {
         setProductResources(newResources);
     };
 
+    const handleDeleteQuestion = async (questionId: string) => {
+        if (!window.confirm('本当にこの問題を削除しますか？')) {
+            return;
+        }
+
+        const apiClient = window.apiClient;
+        if (!apiClient) {
+            alert('APIクライアントの準備ができていません。');
+            return;
+        }
+
+        try {
+            await apiClient.del(`/Prod/questions/${questionId}`);
+            alert('問題を削除しました。');
+
+            // Update the local state to reflect the deletion
+            setQuizzes(prevQuizzes => prevQuizzes.filter(q => q.id !== questionId));
+            setSelectedQuiz(null); // Go back to the list view
+
+        } catch (error) {
+            console.error('Failed to delete question:', error);
+            alert('問題の削除に失敗しました。');
+        }
+    };
+
     const handleOpenQuizListModal = async () => {
         if (!currentGroup) {
             alert('問題グループが設定されていません。');
@@ -546,6 +571,7 @@ function CreateQuizContent() {
                                         </ul>
                                         <p><strong>解説:</strong> {selectedQuiz.explanation}</p>
                                         <button onClick={() => setSelectedQuiz(null)} style={{ marginTop: '15px', padding: '8px 15px', backgroundColor: '#6c757d', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>一覧に戻る</button>
+                                        <button onClick={() => handleDeleteQuestion(selectedQuiz.id)} style={{ marginTop: '15px', marginLeft: '10px', padding: '8px 15px', backgroundColor: '#dc3545', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>削除</button>
                                     </div>
                                 )}
                             </div>
