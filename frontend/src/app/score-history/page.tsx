@@ -59,10 +59,10 @@ export default function ScoreHistoryPage() {
             const data = await window.apiClient.get(`/Prod/scores`) as ApiResponse;
             if (data && Array.isArray(data.scores)) {
                 const completedScores = data.scores.filter(score => score.SubmittedAt);
-                
+
                 // Sort by SubmittedAt in descending order (newest first)
                 completedScores.sort((a, b) => new Date(b.SubmittedAt).getTime() - new Date(a.SubmittedAt).getTime());
-                
+
                 // Take the top 10
                 setScores(completedScores.slice(0, 10));
             } else {
@@ -155,7 +155,7 @@ export default function ScoreHistoryPage() {
                             </div>
 
                             {/* Placeholder sections for future implementation */}
-                            <div className="section">
+                            {/* <div className="section">
                                 <h3>グループ別分析</h3>
                                 <p>（この機能は現在開発中です）</p>
                             </div>
@@ -166,12 +166,12 @@ export default function ScoreHistoryPage() {
                             <div className="section">
                                 <h3>苦手傾向分析</h3>
                                 <p>（この機能は現在開発中です）</p>
-                            </div>
+                            </div> */}
 
                             <div className="action-buttons">
-                                <button onClick={() => alert('すべての成績記録を削除します。（機能は未実装）')}>
+                                {/* <button onClick={() => alert('すべての成績記録を削除します。（機能は未実装）')}>
                                     すべての成績記録を削除
-                                </button>
+                                </button> */}
                                 <button onClick={() => router.push('/quiz-list')}>
                                     問題一覧に戻る
                                 </button>
