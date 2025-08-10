@@ -35,6 +35,14 @@ export const lambdaHandler = async (event) => {
             ExclusiveStartKey = response.LastEvaluatedKey;
         } while (ExclusiveStartKey);
 
+        const shuffle = (array) => {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
         const resourcesByGroup = {};
 
         const queryPromises = quizGroups.map(group => {
@@ -45,12 +53,17 @@ export const lambdaHandler = async (event) => {
                 ExpressionAttributeValues: {
                     ":groupId": group.GroupId,
                 },
-                Limit: 5,
+                Limit: 10,
             });
-            return docClient.send(command).then(response => ({
-                group: group,
-                resources: response.Items || []
-            }));
+            return docClient.send(command).then(response => {
+                const items = response.Items || [];
+                const shuffledItems = shuffle([...items]);
+                const limitedItems = shuffledItems.slice(0, 4);
+                return {
+                    group: group,
+                    resources: limitedItems
+                };
+            });
         });
 
         const results = await Promise.all(queryPromises);
