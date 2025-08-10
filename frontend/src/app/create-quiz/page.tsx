@@ -274,7 +274,7 @@ function CreateQuizContent() {
                 setCorrectChoice(response.correctChoice);
                 setDummyChoices(response.incorrectChoices);
                 setExplanationText(response.explanation);
-                
+
                 // Update the source text with the modified version from the API
                 if (response.modifiedText) {
                     setSourceText(response.modifiedText);
@@ -386,7 +386,7 @@ function CreateQuizContent() {
         try {
             // Define the expected API response structure
             interface ApiQuestion {
-                QuestionID: string;
+                QuestionId: string;
                 QuestionText: string;
                 CorrectChoice: string;
                 IncorrectChoices: string[];
@@ -400,7 +400,7 @@ function CreateQuizContent() {
 
             if (data && data.questions) {
                 const formattedQuizzes: Question[] = data.questions.map(q => ({
-                    id: q.QuestionID,
+                    id: q.QuestionId,
                     text: q.QuestionText,
                     correctAnswer: q.IncorrectChoices.indexOf(q.CorrectChoice), // This is likely incorrect, needs adjustment
                     choices: [q.CorrectChoice, ...q.IncorrectChoices].sort(() => Math.random() - 0.5), // Shuffle choices
