@@ -624,7 +624,7 @@ Resources:
             TableName: !Ref SessionsTableName
         - DynamoDBWritePolicy:
             TableName: !Ref UsersTableName
-        - DynamoDBWritePolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref QuestionsTableName
         - Statement:
           - Effect: Allow

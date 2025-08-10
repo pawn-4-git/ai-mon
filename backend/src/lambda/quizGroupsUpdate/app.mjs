@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
 import { isAdmin } from "/opt/authHelper.js";
+import { updateSessionTtl } from "/opt/userHelper.js";
 
 
 const client = new DynamoDBClient({});
