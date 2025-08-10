@@ -94,6 +94,8 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref UsersTableName
         - DynamoDBWritePolicy:
+            TableName: !Ref UsersTableName
+        - DynamoDBWritePolicy:
             TableName: !Ref SessionsTableName
       Environment:
         Variables:
