@@ -45,7 +45,7 @@ export const lambdaHandler = async (event) => {
                 ExpressionAttributeValues: {
                     ":groupId": group.GroupId,
                 },
-                Limit: 10,
+                Limit: 5,
             });
             return docClient.send(command).then(response => ({
                 group: group,
