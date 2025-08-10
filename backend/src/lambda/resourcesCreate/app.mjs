@@ -3,6 +3,7 @@ import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { validateSession } from "/opt/authHelper.js";
 import { isAdmin } from "/opt/authHelper.js";
+import { updateSessionTtl } from "/opt/userHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
