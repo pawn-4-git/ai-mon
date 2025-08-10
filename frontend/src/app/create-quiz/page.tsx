@@ -344,12 +344,14 @@ function CreateQuizContent() {
             alert('問題グループが設定されていません。');
             return;
         }
-        if (!window.apiClient) {
+        const apiClient = window.apiClient;
+        if (!apiClient) {
             alert('APIクライアントの準備ができていません。');
             return;
         }
 
         const newResources = productResources.filter(r => r.ResourceId && r.ResourceId.startsWith('new-'));
+        const existingResources = productResources.filter(r => !r.ResourceId || !r.ResourceId.startsWith('new-'));
 
         if (newResources.length === 0) {
             alert('保存する新しい商品リンクがありません。');
@@ -357,16 +359,33 @@ function CreateQuizContent() {
         }
 
         try {
-            for (const resource of newResources) {
+            // The raw response from the backend API for a single resource
+            interface ApiResource {
+                ResourceId: string;
+                GroupId: string;
+                Title: string;
+                URL: string;
+                ImgSrc?: string;
+            }
+
+            const savedResources = await Promise.all(newResources.map(async (resource) => {
                 const payload = {
                     title: resource.ProductName,
                     url: resource.ProductUrl,
                     imgSrc: resource.ImageUrl,
                 };
-                await window.apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/resources`, payload);
-            }
+                const response = await apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/resources`, payload) as ApiResource;
+                return {
+                    ResourceId: response.ResourceId,
+                    GroupId: response.GroupId,
+                    ProductName: response.Title,
+                    ProductUrl: response.URL,
+                    ImageUrl: response.ImgSrc || '',
+                };
+            }));
+
+            setProductResources([...existingResources, ...savedResources]);
             alert('新しい商品リンクを保存しました。');
-            fetchResources(currentGroup.id); // Refresh the list to get new ResourceIds
         } catch (error) {
             console.error('Failed to save new resources:', error);
             alert('商品リンクの保存に失敗しました。');
@@ -393,8 +412,8 @@ function CreateQuizContent() {
                     </div>
 
                     <p>現在のグループ: <span id="current-group">{currentGroup ? `${currentGroup.name} (ID: ${currentGroup.id})` : '未設定'}</span></p>
-                    <div className="form-group">
-                        <Link href="/quiz-group">問題グループを設定</Link>
+                    <div className="button-group">
+                        <Link href="/quiz-group" className="button">問題グループを設定</Link>
                     </div>
 
                     <div className="radio-group">
