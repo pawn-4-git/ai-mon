@@ -148,12 +148,16 @@ function CreateQuizContent() {
     }, [searchParams, fetchResources]);
 
 
-    const resetForm = () => {
+    const resetQuestionFields = () => {
         setQuestionText('');
         setCorrectChoice('');
         setExplanationText('');
         setDummyChoices([]);
         setShowDummyChoices(false);
+    };
+
+    const resetForm = () => {
+        resetQuestionFields();
         setSourceText('');
     };
 
@@ -188,7 +192,17 @@ function CreateQuizContent() {
         try {
             await window.apiClient.post(`/Prod/quiz-groups/${currentGroup.id}/questions`, requestBody);
             alert('登録が完了しました。');
-            resetForm();
+
+            if (sourceText.trim().length >= 20) {
+                if (window.confirm('元の文章が残っています。続けて新しい問題を自動生成しますか？')) {
+                    resetQuestionFields();
+                    await handleGenerateQuestion();
+                } else {
+                    resetForm();
+                }
+            } else {
+                resetForm();
+            }
         } catch (error) {
             console.error('Failed to save question:', error);
             alert('問題の保存に失敗しました。');
@@ -246,6 +260,7 @@ function CreateQuizContent() {
             correctChoice: string;
             incorrectChoices: string[];
             explanation: string;
+            modifiedText: string; // Add modifiedText to the response type
         }
 
         try {
@@ -259,6 +274,12 @@ function CreateQuizContent() {
                 setCorrectChoice(response.correctChoice);
                 setDummyChoices(response.incorrectChoices);
                 setExplanationText(response.explanation);
+                
+                // Update the source text with the modified version from the API
+                if (response.modifiedText) {
+                    setSourceText(response.modifiedText);
+                }
+
                 setShowDummyChoices(true);
                 setCreationMethod('manual');
                 alert('問題が自動生成されました。内容を確認・修正して保存してください。');
