@@ -38,6 +38,7 @@ jobs:
           # GitHub Secrets から API ドメインを取得して環境変数として渡す
           # secrets.API_DOMAIN は、リポジトリの Settings > Secrets and variables > Actions で設定したシークレット名に置き換えてください。
           NEXT_PUBLIC_GA4_ID: ${{ secrets.GA4_ID }}
+          NEXT_PUBLIC_APP_TITLE: ${{ secrets.APP_TITLE }}
           # 他に必要なシークレットがあればここに追加します
           # NEXT_PUBLIC_ANOTHER_KEY: ${{ secrets.ANOTHER_KEY }}
           # DATABASE_URL: ${{ secrets.DATABASE_URL }} # サーバーサイドのみで使う場合

@@ -92,6 +92,8 @@ export default function LoginPage() {
     }
   };
 
+  const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
+
   return (
     <>
       <Script
@@ -101,7 +103,7 @@ export default function LoginPage() {
       <div className="login-page">
         <div className="container mx-auto">
           <div className="header">
-            <h1>あいもん</h1>
+            <h1>{appTitle}</h1>
           </div>
 
           <div id="login-form" style={{ display: isLoginView ? 'block' : 'none' }}>
@@ -138,4 +140,3 @@ export default function LoginPage() {
     </>
   );
 }
-

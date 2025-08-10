@@ -13,10 +13,10 @@ export default function Header() {
     await logout();
     router.push('/');
   };
-
+  const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
   return (
     <div className="header">
-      <h1>あいもん</h1>
+      <h1>{appTitle}</h1>
       {isAuthenticated && (
         <div className="user-info">
           <Link href="/score-history">
