@@ -26,16 +26,19 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
-        const quizGroupsScanCommand = new ScanCommand({
-            TableName: QUIZ_GROUPS_TABLE_NAME,
-        });
-        const quizGroupsResponse = await docClient.send(quizGroupsScanCommand);
-        const quizGroups = quizGroupsResponse.Items || [];
+        const quizGroups = [];
+        let ExclusiveStartKey;
+        do {
+            const command = new ScanCommand({ TableName: QUIZ_GROUPS_TABLE_NAME, ExclusiveStartKey });
+            const response = await docClient.send(command);
+            quizGroups.push(...(response.Items || []));
+            ExclusiveStartKey = response.LastEvaluatedKey;
+        } while (ExclusiveStartKey);
 
         const resourcesByGroup = {};
 
-        for (const group of quizGroups) {
-            const resourcesQueryCommand = new QueryCommand({
+        const queryPromises = quizGroups.map(group => {
+            const command = new QueryCommand({
                 TableName: RESOURCES_TABLE_NAME,
                 IndexName: "GroupIdIndex",
                 KeyConditionExpression: "GroupId = :groupId",
@@ -44,11 +47,19 @@ export const lambdaHandler = async (event) => {
                 },
                 Limit: 10,
             });
-            const resourcesResponse = await docClient.send(resourcesQueryCommand);
-            if (resourcesResponse.Items && resourcesResponse.Items.length > 0) {
-                resourcesByGroup[group.GroupId] = {
-                    GroupName: group.GroupName,
-                    resources: resourcesResponse.Items || []
+            return docClient.send(command).then(response => ({
+                group: group,
+                resources: response.Items || []
+            }));
+        });
+
+        const results = await Promise.all(queryPromises);
+
+        for (const result of results) {
+            if (result.resources.length > 0) {
+                resourcesByGroup[result.group.GroupId] = {
+                    GroupName: result.group.GroupName,
+                    resources: result.resources
                 };
             }
         }
