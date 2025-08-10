@@ -23,5 +23,14 @@ export class ResourcesTableStack extends cdk.Stack {
         type: dynamodb.AttributeType.STRING,
       },
     });
+
+    // Add index for CreatedAt
+    table.addGlobalSecondaryIndex({
+      indexName: 'CreatedAt',
+      partitionKey: {
+        name: 'CreatedAt',
+        type: dynamodb.AttributeType.STRING, // Assuming CreatedAt is stored as a string (e.g., ISO 8601 format)
+      },
+    });
   }
 }
