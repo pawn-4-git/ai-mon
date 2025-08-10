@@ -13,7 +13,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export function AuthProvider({ children, className }: { children: ReactNode, className?: string }) {
   const [user, setUser] = useState<User | null>(null);
   const [accountName, setAccountName] = useState<string | null>(null);
 
@@ -75,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       logout,
       isAuthenticated: !!accountName
     }}>
-      {children}
+      <div className={className}>{children}</div>
     </AuthContext.Provider>
   );
 }
