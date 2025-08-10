@@ -1335,7 +1335,7 @@ body {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 600px; /* コンテナの幅に合わせる */
-    margin: 0 auto; /* ヘッダーを中央寄せ */
+    margin: 0 auto; /* ��ッダーを中央寄せ */
     margin-bottom: 20px; /* コンテナとの間隔 */
     box-sizing: border-box; /* paddingとborderをwidthに含める */
 }
@@ -1359,4 +1359,33 @@ body {
 
 .header .user-info a:hover {
     text-decoration: underline; /* ホバー時の下線 */
+}
+
+.reference-books-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.reference-books-list li {
+    text-align: center;
+    width: 150px;
+}
+
+.reference-books-list a {
+    color: #007bff;
+    text-decoration: none;
+    display: block;
+}
+
+.reference-books-list a:hover {
+    text-decoration: underline;
+}
+
+.reference-books-list img {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
