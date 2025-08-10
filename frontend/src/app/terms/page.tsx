@@ -3,7 +3,6 @@
 import React from 'react';
 import Header from '@/components/Header';
 import Card from '@/components/Card';
-import Link from 'next/link';
 
 const TermsOfServicePage = () => {
   return (
@@ -90,7 +89,11 @@ const TermsOfServicePage = () => {
                 <p>
                   アプリケーションを利用してサービスの公開しても問題はありません。ただし公開の際には、下記のリンクを必ずサイトのフッターに表示してください。
                 </p>
-
+                <p>
+                  <a href="https://github.com/pawn-4-git/ai-mon" target="_blank" rel="noopener noreferrer" className="group">
+                    Github(https://github.com/pawn-4-git/ai-mon/)
+                  </a>
+                </p>
               </section>
 
               <p className="text-right mt-8">以上</p>
