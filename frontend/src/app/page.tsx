@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import { useAuth } from '@/context/AuthContext'; // useAuth をインポート
 import Announcements from '@/components/Announcements'; // お知らせコンポーネントをインポート
+import { appTitle } from '@/config'; // appTitle をインポート
 
 declare global {
   interface Window {
@@ -92,7 +93,7 @@ export default function LoginPage() {
     }
   };
 
-  const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
+  // const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
 
   return (
     <>

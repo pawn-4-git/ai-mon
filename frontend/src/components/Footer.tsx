@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { appTitle } from '@/config'; // appTitle をインポート
 
 const GithubIcon = () => (
   <svg
@@ -18,7 +19,7 @@ const GithubIcon = () => (
   </svg>
 );
 
-const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
+// const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
 const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-6 mt-12">
