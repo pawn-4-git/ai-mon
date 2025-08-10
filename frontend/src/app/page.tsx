@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
-import { useAuth } from '@/context/AuthContext'; // useAuth をインポート
-import Announcements from '@/components/Announcements'; // お知らせコンポーネントをインポート
-import { appTitle } from '@/config'; // appTitle をインポート
+import { useAuth } from '@/context/AuthContext';
+import Announcements from '@/components/Announcements';
+import { appTitle } from '@/config';
+import Image from 'next/image';
 
 declare global {
   interface Window {
@@ -19,13 +20,61 @@ declare global {
   }
 }
 
+// APIレスポンスの型定義
+interface Resource {
+  ResourceId: string;
+  GroupId: string;
+  URL: string;
+  Title: string;
+  ImgSrc: string;
+  CreatedAt: string;
+}
+
+interface ResourceGroup {
+  GroupName: string;
+  resources: Resource[];
+}
+
+interface ResourcesByGroup {
+  [groupId: string]: ResourceGroup;
+}
+
+interface ResourcesApiResponse {
+  resourcesByGroup: ResourcesByGroup;
+}
+
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
-  const auth = useAuth(); // AuthContext を使用
+  const auth = useAuth();
 
   const loginUsernameRef = useRef<HTMLInputElement>(null);
   const registerUsernameRef = useRef<HTMLInputElement>(null);
+
+  const [resourcesByGroup, setResourcesByGroup] = useState<ResourcesByGroup>({});
+  const [loadingResources, setLoadingResources] = useState<boolean>(true);
+
+  useEffect(() => {
+    const fetchResources = async () => {
+      if (!window.apiClient) {
+        setTimeout(fetchResources, 100);
+        return;
+      }
+      try {
+        setLoadingResources(true);
+        const data = await window.apiClient.get('/Prod/resources/list/all') as ResourcesApiResponse;
+        if (data && data.resourcesByGroup) {
+          setResourcesByGroup(data.resourcesByGroup);
+        }
+      } catch (error) {
+        console.error('Failed to fetch resources:', error);
+      } finally {
+        setLoadingResources(false);
+      }
+    };
+
+    fetchResources();
+  }, []);
 
   const handleLogin = async () => {
     if (!window.apiClient) {
@@ -42,11 +91,10 @@ export default function LoginPage() {
 
     try {
       const requestBody = { accountName: accountName };
-      // 型アサーションから .data を削除
       const response = await window.apiClient.post('/Prod/users/login', requestBody) as { AccountName: string, message: string };
 
       if (response && response.AccountName) {
-        auth.login(response.AccountName); // AuthContext の状態を更新
+        auth.login(response.AccountName);
         alert('ログインに成功しました！');
         router.push('/quiz-list');
       } else {
@@ -70,14 +118,13 @@ export default function LoginPage() {
       }
 
       const endpoint = '/Prod/users/register';
-      // 型アサーションから .data を削除
       const response = await window.apiClient.post(
         endpoint,
         { anonymous: true }
       ) as { AccountName: string };
 
       if (response && response.AccountName) {
-        auth.login(response.AccountName); // AuthContext の状態を更新
+        auth.login(response.AccountName);
         alert('匿名アカウントが作成されました！');
         router.push('/quiz-list');
       } else {
@@ -86,14 +133,8 @@ export default function LoginPage() {
 
     } catch (error) {
       console.error('Failed to create anonymous user:', error);
-      if (String(error).includes('apiClient is not available') || String(error).includes('not defined')) {
-      } else {
-        alert('匿名アカウントの作成に失敗しました。');
-      }
     }
   };
-
-  // const appTitle = process.env.NEXT_PUBLIC_APP_TITLE;
 
   return (
     <>
@@ -134,8 +175,33 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* お知らせセクションをコンポーネントに���き換え */}
           <Announcements />
+
+          {/* 学習リソースセクション */}
+          <div className="learning-resources">
+            <h2>参考書・関連リソース</h2>
+            {loadingResources ? (
+              <p>Loading resources...</p>
+            ) : (
+              Object.entries(resourcesByGroup).map(([groupId, groupData]) => (
+                <div key={groupId} className="resource-group">
+                  <h3>{groupData.GroupName}</h3>
+                  <ul className="reference-books-list">
+                    {groupData.resources.map((resource) => (
+                      <li key={resource.ResourceId}>
+                        <a href={resource.URL} target="_blank" rel="noopener noreferrer">
+                          {resource.ImgSrc && (
+                            <Image src={resource.ImgSrc} alt={resource.Title} width={150} height={200} style={{ objectFit: 'contain' }} />
+                          )}
+                          <span>{resource.Title}</span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </div>
     </>
