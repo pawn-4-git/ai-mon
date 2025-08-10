@@ -27,6 +27,7 @@ interface QuestionData {
   groupName: string;
   checkedLaterQuestions?: number[];
   afterCheck?: boolean;
+  expiresAt: string; // APIからの有効期限
 }
 
 function QuizPlay() {
@@ -39,6 +40,7 @@ function QuizPlay() {
   const [isAfterChecked, setIsAfterChecked] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [remainingTime, setRemainingTime] = useState<number | null>(null);
 
   useEffect(() => {
     const sessionId = searchParams.get('quizSessionId');
@@ -73,8 +75,16 @@ function QuizPlay() {
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData;
         setQuestionData(data);
         setSelectedChoice(data.userChoice);
-        // Set the initial state of the button based on the afterCheck value
         setIsAfterChecked(data.afterCheck === true);
+
+        // Calculate remaining time from expiresAt
+        if (data.expiresAt) {
+          const expiryTime = new Date(data.expiresAt).getTime();
+          const now = new Date().getTime();
+          const timeLeft = Math.round((expiryTime - now) / 1000);
+          setRemainingTime(timeLeft > 0 ? timeLeft : 0);
+        }
+
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -88,6 +98,23 @@ function QuizPlay() {
 
     fetchQuestion();
   }, [quizSessionId, questionNumber]);
+
+  // Timer effect
+  useEffect(() => {
+    if (remainingTime === null || remainingTime <= 0) {
+      if (remainingTime === 0) {
+        toast.error("時間切れです。テストを終了します。");
+        handleFinishTest(true); // 自動終了
+      }
+      return;
+    }
+
+    const timerId = setInterval(() => {
+      setRemainingTime(prevTime => (prevTime ? prevTime - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [remainingTime]);
 
 
   const handleSelectChoice = async (choice: string) => {
@@ -180,13 +207,13 @@ function QuizPlay() {
     }
   };
 
-  const handleFinishTest = async () => {
+  const handleFinishTest = async (autoSubmit = false) => {
     if (!quizSessionId || !window.apiClient) {
       setError('Quiz Session ID or API client is not available.');
       return;
     }
 
-    if (!confirm('テストを本当に終了しますか？')) {
+    if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
       return;
     }
 
@@ -201,6 +228,13 @@ function QuizPlay() {
       toast.error(`テストの終了に失敗しました: ${errorMessage}`);
       setError(`Failed to finish the test: ${errorMessage}`);
     }
+  };
+
+  const formatTime = (timeInSeconds: number | null) => {
+    if (timeInSeconds === null) return '...';
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = timeInSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   };
 
   return (
@@ -224,7 +258,7 @@ function QuizPlay() {
                 : {questionData.questionText}
               </p>
             </div>
-            <p>残り時間: <span id="remaining-time">10:00</span></p>
+            <p>残り時間: <span id="remaining-time">{formatTime(remainingTime)}</span></p>
             <ul className="choices-list">
               {questionData.choices.map((choice, index) => (
                 <li key={index}>
@@ -252,7 +286,7 @@ function QuizPlay() {
           <button onClick={() => router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`)}>
             解答状況を確認
           </button>
-          <button onClick={handleFinishTest}>
+          <button onClick={() => handleFinishTest(false)}>
             テストを終える
           </button>
         </div>
