@@ -93,6 +93,8 @@ export const lambdaHandler = async (event) => {
                     userChoice: questionInfo.SelectedChoice,
                     groupName: groupName,
                     afterCheck: questionInfo.AfterCheck,
+                    expiresAt: score.ExpiresAt,
+                    startedAt: score.StartedAt
                 }),
             };
         }
