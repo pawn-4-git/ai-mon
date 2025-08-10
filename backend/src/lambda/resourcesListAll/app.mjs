@@ -42,12 +42,15 @@ export const lambdaHandler = async (event) => {
                 ExpressionAttributeValues: {
                     ":groupId": group.GroupId,
                 },
+                Limit: 10,
             });
             const resourcesResponse = await docClient.send(resourcesQueryCommand);
-            resourcesByGroup[group.GroupId] = {
-                GroupName: group.GroupName,
-                resources: resourcesResponse.Items || []
-            };
+            if (resourcesResponse.Items && resourcesResponse.Items.length > 0) {
+                resourcesByGroup[group.GroupId] = {
+                    GroupName: group.GroupName,
+                    resources: resourcesResponse.Items || []
+                };
+            }
         }
 
         return {
