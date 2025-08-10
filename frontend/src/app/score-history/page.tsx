@@ -135,9 +135,16 @@ export default function ScoreHistoryPage() {
                                         const accuracy = record.TotalCount > 0 ? Math.floor((record.CorrectCount / record.TotalCount) * 100) : 0;
                                         return (
                                             <div key={record.QuizSessionId} className="score-record">
-                                                <span>
+                                                <a
+                                                    href={`/quiz-result?quizSessionId=${record.QuizSessionId}`}
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        router.push(`/quiz-result?quizSessionId=${record.QuizSessionId}`);
+                                                    }}
+                                                    style={{ cursor: 'pointer', textDecoration: 'underline', flexGrow: 1 }}
+                                                >
                                                     {formatDate(record.SubmittedAt)} - {record.QuizGroupName || `グループID: ${record.GroupId}`} (正答数: {record.CorrectCount}/{record.TotalCount} 正答率: {accuracy}%)
-                                                </span>
+                                                </a>
                                                 <button onClick={() => handleDelete(record.QuizSessionId)}>削除</button>
                                             </div>
                                         );
