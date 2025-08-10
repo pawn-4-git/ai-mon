@@ -82,7 +82,7 @@ export const lambdaHandler = async (event) => {
         問題文内に選択肢は不要です。
         人名の場合は「・・・さん」と表記してください
         ヒントは不要です。
-        問題は1問だけとして、ください。
+        問題は1問だけとしてください。
         文章が短いなど問題が作れない場合は、問題作成失敗と返してください。
 
         文章:
@@ -137,13 +137,9 @@ export const lambdaHandler = async (event) => {
         ${sourceText}
         """
 
-        問題文:
         """
-        ${generatedQuestion}
-        """
-        解答:
-        """
-        ${correctChoice}
+        問題文:${generatedQuestion}
+        解答:${correctChoice}
         """
         
         `;
@@ -182,7 +178,7 @@ export const lambdaHandler = async (event) => {
         const textModificationPrompt = `以下の「元の文章」から、「問題」と「答え」の根拠となる一文または部分を特定し、その部分だけを完全に削除した新しい文章を生成してください。
         生成する文章には、元の文章の他の部分はすべてそのまま含めてください。
         余計な解説や前置きは一切含めず、加工後の文章のみを返してください。
-        ただし人名や地名などの固有名詞は削除しないください。
+        ただし人名や地名などの固有名詞は削除しないでください。
 
         元の文章:
         """
