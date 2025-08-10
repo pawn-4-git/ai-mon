@@ -58,7 +58,7 @@ export const lambdaHandler = async (event) => {
         for (const result of results) {
             if (result.resources.length > 0) {
                 resourcesByGroup[result.group.GroupId] = {
-                    GroupName: result.group.GroupName,
+                    GroupName: result.group.Name,
                     resources: result.resources
                 };
             }
