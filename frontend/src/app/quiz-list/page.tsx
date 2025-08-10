@@ -26,9 +26,8 @@ interface QuizGroup {
   status: string;
   statusText: string;
   timeLimitMinutes?: number;
+  quizSessionId?: string; // 結果画面への遷移用にセッションIDを追加
 }
-
-
 
 // Lambda から返されるデータ構造（仮定）
 interface LambdaQuizGroup {
@@ -63,26 +62,17 @@ export default function QuizListPage() {
       }
 
       if (!user) {
-        // ユーザー情報がまだ読み込まれていない場合は待機
-        // AuthContextがユーザー情報を取得するのを待つ
         return;
       }
 
       try {
-        // Fetch user data to check isAdmin status
-        // apiClient.get の戻り値に型アサーションを適用
         const userData = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string, isAdmin: boolean };
-
-        // Check for isAdmin property
-        // isAdmin が存在し、かつ boolean 型であるかを確認
         if (userData && typeof userData.isAdmin === 'boolean') {
           setIsAdminUser(userData.isAdmin);
         } else {
-          // isAdmin プロパティが存在しない、または boolean 型でない場合のデフォルト値
           setIsAdminUser(false);
         }
 
-        // ScoreHistory データを取得するロジック
         interface ScoreHistory {
           QuizSessionId: string;
           UserId: string;
@@ -97,13 +87,10 @@ export default function QuizListPage() {
           scores?: ScoreHistory[];
         }
 
-        // 正しいエンドポイントに修正
         const scoreHistoryResponse = (await window.apiClient.get(
           `/Prod/scores`
         )) as ScoreHistoryApiResponse;
         const scoreHistoryData = scoreHistoryResponse.scores || [];
-
-        console.log('Raw Score History Data:', scoreHistoryData);
 
         const latestScoresByGroup: { [groupId: string]: ScoreHistory } = {};
         scoreHistoryData.forEach((score) => {
@@ -114,12 +101,8 @@ export default function QuizListPage() {
         });
 
         const latestScoreHistoryList = Object.values(latestScoresByGroup);
-        console.log('Latest Score History List:', latestScoreHistoryList);
 
-        // quizGroups を取得するロジック
         const data = await window.apiClient.get(`/Prod/quiz-groups-list`);
-        console.log(data);
-
         const apiResponse = data as ApiResponse;
 
         if (apiResponse && apiResponse.groups && Array.isArray(apiResponse.groups)) {
@@ -130,8 +113,10 @@ export default function QuizListPage() {
 
             let status = 'not-taken';
             let statusText = '未受験';
+            let quizSessionId: string | undefined = undefined;
 
             if (latestScore) {
+              quizSessionId = latestScore.QuizSessionId; // セッションIDをセット
               if (latestScore.SubmittedAt) {
                 status = 'completed';
                 const submittedDate = new Date(latestScore.SubmittedAt);
@@ -150,6 +135,7 @@ export default function QuizListPage() {
               timeLimitMinutes: group.TimeLimitMinutes,
               status: status,
               statusText: statusText,
+              quizSessionId: quizSessionId,
             };
           });
           setQuizGroups(formattedData);
@@ -170,17 +156,17 @@ export default function QuizListPage() {
     };
 
     fetchQuizData();
-  }, [user]); // useEffect の依存配列に user を追加
+  }, [user]);
 
   const getStatusClass = (status: string) => {
     switch (status) {
       case 'not-taken':
         return 'not-taken';
-      case 'completed': // 'completed' ステータスを追加
+      case 'completed':
         return 'completed';
-      case 'in-progress': // 'in-progress' ステータスを追加
+      case 'in-progress':
         return 'in-progress';
-      case 'updated': // 既存の 'updated' ステータス
+      case 'updated':
         return 'updated';
       default:
         return '';
@@ -191,11 +177,11 @@ export default function QuizListPage() {
     switch (status) {
       case 'not-taken':
         return 'not-taken-text';
-      case 'completed': // 'completed' ステータスを追加
+      case 'completed':
         return 'completed-text';
-      case 'in-progress': // 'in-progress' ステータスを追加
+      case 'in-progress':
         return 'in-progress-text';
-      case 'updated': // 既存の 'updated' ステータス
+      case 'updated':
         return 'updated-text';
       default:
         return '';
@@ -239,7 +225,22 @@ export default function QuizListPage() {
                 <h3>{group.name}</h3>
                 <p>問題数: {group.questionCount}問</p>
               </div>
-              <span className={`group-status ${getStatusTextClass(group.status)}`}>{group.statusText}</span>
+              <span className={`group-status ${getStatusTextClass(group.status)}`}>
+                {group.status === 'completed' && group.quizSessionId ? (
+                  <a
+                    href={`/quiz-result?quizSessionId=${group.quizSessionId}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      router.push(`/quiz-result?quizSessionId=${group.quizSessionId}`);
+                    }}
+                    style={{ cursor: 'pointer', textDecoration: 'underline' }}
+                  >
+                    {group.statusText}
+                  </a>
+                ) : (
+                  group.statusText
+                )}
+              </span>
               <div className="action-buttons">
                 <button onClick={() => handleStartTest(group.id)}>テスト開始</button>
                 {isAdminUser && (
@@ -255,9 +256,8 @@ export default function QuizListPage() {
           </button>
         )}
       </div>
-      {/* apiClient.js を Script コンポーネントで読み込む */}
       <Script
-        src={`/contents/js/apiClient.js`} // apiClient.js のパスを指定
+        src={`/contents/js/apiClient.js`}
         strategy="beforeInteractive"
       />
     </div>
@@ -285,3 +285,4 @@ export default function QuizListPage() {
     }
   }
 }
+

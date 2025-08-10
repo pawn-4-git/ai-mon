@@ -121,16 +121,15 @@ function QuizPlay() {
 
     const expiryTime = new Date(questionData.expiresAt).getTime();
 
-    const timerId = setInterval(() => {
+    const updateRemainingTime = () => {
       const now = new Date().getTime();
       const timeLeft = Math.round((expiryTime - now) / 1000);
       setRemainingTime(timeLeft > 0 ? timeLeft : 0);
-    }, 1000);
+    };
 
-    // Set time immediately on first render
-    const now = new Date().getTime();
-    const timeLeft = Math.round((expiryTime - now) / 1000);
-    setRemainingTime(timeLeft > 0 ? timeLeft : 0);
+    // Set time immediately and then every second
+    updateRemainingTime();
+    const timerId = setInterval(updateRemainingTime, 1000);
 
     return () => clearInterval(timerId);
   }, [questionData?.expiresAt]);
