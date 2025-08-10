@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
 import { useAuth } from '@/context/AuthContext'; // useAuth をインポート
@@ -17,6 +17,13 @@ declare global {
   }
 }
 
+// お知らせの型定義
+interface Announcement {
+  id: number;
+  title: string;
+  date: string;
+}
+
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
@@ -24,6 +31,20 @@ export default function LoginPage() {
 
   const loginUsernameRef = useRef<HTMLInputElement>(null);
   const registerUsernameRef = useRef<HTMLInputElement>(null);
+
+  // 固定のお知らせデータ
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+
+  useEffect(() => {
+    // ここでAPIから取得するか、固定データをセットする
+    const mockAnnouncements: Announcement[] = [
+      { id: 1, title: 'システムメンテナンスのお知らせ', date: '2025-08-15' },
+      { id: 2, title: '新しいクイズグループ「歴史編」を追加しました！', date: '2025-08-10' },
+      { id: 3, title: '利用規約を更新しました。', date: '2025-08-01' },
+    ];
+    setAnnouncements(mockAnnouncements);
+  }, []);
+
 
   const handleLogin = async () => {
     if (!window.apiClient) {
@@ -111,7 +132,7 @@ export default function LoginPage() {
             </div>
             <button onClick={handleLogin}>ログイン</button>
             <p className="toggle-link" onClick={() => setIsLoginView(false)}>
-              アカウントをお持ちでない方はこち��
+              アカウントをお持ちでない方はこちら
             </p>
           </div>
 
@@ -129,8 +150,25 @@ export default function LoginPage() {
               すでにアカウントをお持ちの方はこちら
             </p>
           </div>
+
+          {/* お知らせセクション */}
+          <div className="announcements-section" style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '8px' }}>
+            <h2>お知らせ</h2>
+            {announcements.length > 0 ? (
+              <ul>
+                {announcements.map(ann => (
+                  <li key={ann.id} style={{ marginBottom: '0.5rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>
+                    <strong>{ann.date}:</strong> {ann.title}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p>現在、新しいお知らせはありません。</p>
+            )}
+          </div>
         </div>
       </div>
     </>
   );
 }
+
