@@ -82,7 +82,8 @@ export const lambdaHandler = async (event) => {
         問題文内に選択肢は不要です。
         人名の場合は「・・・さん」と表記してください
         ヒントは不要です。
-        問題は1問だけとして、
+        問題は1問だけとして、ください。
+        文章が短いなど問題が作れない場合は、問題作成失敗と返してください。
 
         文章:
         """
@@ -94,6 +95,14 @@ export const lambdaHandler = async (event) => {
         if (!generatedQuestion) {
             console.error("Bedrock did not return a valid question.");
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
+        }
+
+        if (generatedQuestion.includes('問題作成失敗')) {
+            console.error("AI failed to generate a question from the source text.");
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "問題の作成に失敗しました。文章が短すぎるか、内容が不適切である可能性があります。" })
+            };
         }
 
         // 1. Generate Question, Answer, and Explanation from sourceText
@@ -170,16 +179,20 @@ export const lambdaHandler = async (event) => {
         incorrectChoices = [...new Set(incorrectChoices.filter(choice => choice !== correctChoice))];
 
         // 5. Generate the modified text with the answer part removed
-        const textModificationPrompt = `以下の「元の文章」から、「答え」の根拠となる一文または部分を特定し、その部分だけを完全に削除した新しい文章を生成してください。
+        const textModificationPrompt = `以下の「元の文章」から、「問題」と「答え」の根拠となる一文または部分を特定し、その部分だけを完全に削除した新しい文章を生成してください。
         生成する文章には、元の文章の他の部分はすべてそのまま含めてください。
         余計な解説や前置きは一切含めず、加工後の文章のみを返してください。
+        ただし人名や地名などの固有名詞は削除しないください。
 
         元の文章:
         """
         ${sourceText}
         """
 
-        削除するべき答え:
+        削除するべき問題と答え:
+        """
+        ${generatedQuestion}
+        """
         """
         ${correctChoice}
         """
