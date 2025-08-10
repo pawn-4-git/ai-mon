@@ -1052,6 +1052,7 @@ Resources:
       Environment:
         Variables:
           RESOURCES_TABLE_NAME: !Ref ResourcesTableName
+          QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
       Events:
         ResourcesListAllEvent:
           Type: Api
