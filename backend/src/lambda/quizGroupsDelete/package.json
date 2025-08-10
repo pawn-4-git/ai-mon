@@ -4,9 +4,6 @@
   "description": "Quiz group delete Lambda function",
   "main": "app.mjs",
   "type": "module",
-  "dependencies": {
-    "axios": ">=1.6.0"
-  },
   "scripts": {
     "test": "mocha tests/unit/"
   },
