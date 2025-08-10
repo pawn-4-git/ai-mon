@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession } from "/opt/authHelper.js";
+import { isAdmin } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -20,6 +21,14 @@ export const lambdaHandler = async (event) => {
         const authResult = await validateSession(event);
         if (!authResult.isValid) {
             return authResult;
+        }
+
+        // Check if the user is an administrator
+        if (!await isAdmin(authResult.userId)) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ message: "Only administrators can perform this action." }),
+            };
         }
 
         const questionId = event.pathParameters?.questionId;
@@ -92,9 +101,18 @@ export const lambdaHandler = async (event) => {
         });
 
         const response = await docClient.send(updateCommand);
+        const newSession = await updateSessionTtl(authResult.sessionId);
 
         return {
             statusCode: 200,
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
+            },
             body: JSON.stringify({
                 message: "Question updated successfully.",
                 question: response.Attributes,
