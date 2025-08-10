@@ -23,6 +23,15 @@ test('ResourcesTable Created with correct properties', () => {
         Projection: {
           ProjectionType: 'ALL'
         }
+      },
+      {
+        IndexName: 'CreatedAtIndex',
+        KeySchema: [
+          { AttributeName: 'CreatedAt', KeyType: 'HASH' }
+        ],
+        Projection: {
+          ProjectionType: 'ALL'
+        }
       }
     ],
     BillingMode: 'PAY_PER_REQUEST'

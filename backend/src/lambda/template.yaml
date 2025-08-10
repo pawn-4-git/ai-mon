@@ -1046,6 +1046,8 @@ Resources:
       Handler: app.lambdaHandler
       Policies:
         - DynamoDBReadPolicy:
+            TableName: !Ref QuizGroupsTableName
+        - DynamoDBReadPolicy:
             TableName: !Ref ResourcesTableName
       Environment:
         Variables:
