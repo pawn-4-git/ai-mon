@@ -119,7 +119,7 @@ export default function LoginPage() {
         strategy="beforeInteractive"
       />
       <div className="login-page">
-        <div className="container mx-auto">
+        <div className="container">
           <div className="header">
             <h1>あいもん</h1>
           </div>

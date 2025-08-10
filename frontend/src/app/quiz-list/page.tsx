@@ -64,7 +64,7 @@ export default function QuizListPage() {
 
       if (!user) {
         // ユーザー情報がまだ読み込まれていない場合は待機
-        // AuthContextがユーザー情報を取得す��のを待つ
+        // AuthContextがユーザー情報を取得するのを待つ
         return;
       }
 
@@ -82,7 +82,7 @@ export default function QuizListPage() {
           setIsAdminUser(false);
         }
 
-        // ScoreHistory データを取得するロジ��ク
+        // ScoreHistory データを取得するロジック
         interface ScoreHistory {
           QuizSessionId: string;
           UserId: string;
