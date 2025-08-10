@@ -169,6 +169,28 @@ export const lambdaHandler = async (event) => {
         // Remove choices that are the same as the correct answer and deduplicate
         incorrectChoices = [...new Set(incorrectChoices.filter(choice => choice !== correctChoice))];
 
+        // 5. Generate the modified text with the answer part removed
+        const textModificationPrompt = `以下の「元の文章」から、「答え」の根拠となる一文または部分を特定し、その部分だけを完全に削除した新しい文章を生成してください。
+        生成する文章には、元の文章の他の部分はすべてそのまま含めてください。
+        余計な解説や前置きは一切含めず、加工後の文章のみを返してください。
+
+        元の文章:
+        """
+        ${sourceText}
+        """
+
+        削除するべき答え:
+        """
+        ${correctChoice}
+        """
+        `;
+        const textModificationSystemPrompt = "あなたは、文章から特定の部分を削除して編集する専門家です。";
+        const modifiedText = await invokeBedrock(textModificationPrompt, textModificationSystemPrompt);
+
+        if (!modifiedText) {
+            console.warn("Bedrock did not return a valid modified text. Returning original text.");
+        }
+
         // 4. Return the generated question to the client
         return {
             statusCode: 201,
@@ -178,6 +200,7 @@ export const lambdaHandler = async (event) => {
                 correctChoice: correctChoice,
                 incorrectChoices: incorrectChoices,
                 explanation: explanation,
+                modifiedText: modifiedText || sourceText, // Return modified text, or original if modification fails
             }),
         };
     } catch (error) {
