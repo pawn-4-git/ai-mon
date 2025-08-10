@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Script from 'next/script';
@@ -76,15 +76,6 @@ function QuizPlay() {
         setQuestionData(data);
         setSelectedChoice(data.userChoice);
         setIsAfterChecked(data.afterCheck === true);
-
-        // Calculate remaining time from expiresAt
-        if (data.expiresAt) {
-          const expiryTime = new Date(data.expiresAt).getTime();
-          const now = new Date().getTime();
-          const timeLeft = Math.round((expiryTime - now) / 1000);
-          setRemainingTime(timeLeft > 0 ? timeLeft : 0);
-        }
-
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -99,22 +90,58 @@ function QuizPlay() {
     fetchQuestion();
   }, [quizSessionId, questionNumber]);
 
-  // Timer effect
-  useEffect(() => {
-    if (remainingTime === null || remainingTime <= 0) {
-      if (remainingTime === 0) {
-        toast.error("時間切れです。テストを終了します。");
-        handleFinishTest(true); // 自動終了
-      }
+  const handleFinishTest = useCallback(async (autoSubmit = false) => {
+    if (!quizSessionId || !window.apiClient) {
+      setError('Quiz Session ID or API client is not available.');
       return;
     }
 
+    if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
+      return;
+    }
+
+    try {
+      await window.apiClient.post(`/Prod/quizzes/completion`, {
+        quizId: quizSessionId,
+      });
+      toast.success('テストが完了しました。');
+      router.push(`/quiz-result?quizSessionId=${quizSessionId}`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      toast.error(`テストの終了に失敗しました: ${errorMessage}`);
+      setError(`Failed to finish the test: ${errorMessage}`);
+    }
+  }, [quizSessionId, router]);
+
+  // Timer effect - recalculates from expiry time to prevent drift
+  useEffect(() => {
+    if (!questionData?.expiresAt) {
+      return;
+    }
+
+    const expiryTime = new Date(questionData.expiresAt).getTime();
+
     const timerId = setInterval(() => {
-      setRemainingTime(prevTime => (prevTime ? prevTime - 1 : 0));
+      const now = new Date().getTime();
+      const timeLeft = Math.round((expiryTime - now) / 1000);
+      setRemainingTime(timeLeft > 0 ? timeLeft : 0);
     }, 1000);
 
+    // Set time immediately on first render
+    const now = new Date().getTime();
+    const timeLeft = Math.round((expiryTime - now) / 1000);
+    setRemainingTime(timeLeft > 0 ? timeLeft : 0);
+
     return () => clearInterval(timerId);
-  }, [remainingTime]);
+  }, [questionData?.expiresAt]);
+
+  // Effect for when time runs out
+  useEffect(() => {
+    if (remainingTime === 0) {
+      toast.error("時間切れです。テストを終了します。");
+      handleFinishTest(true); // auto-submit
+    }
+  }, [remainingTime, handleFinishTest]);
 
 
   const handleSelectChoice = async (choice: string) => {
@@ -204,29 +231,6 @@ function QuizPlay() {
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
     } else {
       toast.error('これが最後の問題です。');
-    }
-  };
-
-  const handleFinishTest = async (autoSubmit = false) => {
-    if (!quizSessionId || !window.apiClient) {
-      setError('Quiz Session ID or API client is not available.');
-      return;
-    }
-
-    if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
-      return;
-    }
-
-    try {
-      await window.apiClient.post(`/Prod/quizzes/completion`, {
-        quizId: quizSessionId,
-      });
-      toast.success('テストが完了しました。');
-      router.push(`/quiz-result?quizSessionId=${quizSessionId}`);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      toast.error(`テストの終了に失敗しました: ${errorMessage}`);
-      setError(`Failed to finish the test: ${errorMessage}`);
     }
   };
 
