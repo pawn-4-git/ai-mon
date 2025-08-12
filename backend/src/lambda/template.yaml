@@ -119,8 +119,6 @@ Resources:
             Path: /users/register
             Method: post
             ApiId: !Ref HttpApi
-            Auth:
-              Authorizer: NONE
 #  UsersRegisterFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -155,9 +153,7 @@ Resources:
           Properties:
             Path: /users/login
             Method: post
-            ApiId: !Ref HttpApi
-            Auth:
-              Authorizer: NONE
+            ApiId: !Ref HttpApi            
 #  UsersLoginFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
