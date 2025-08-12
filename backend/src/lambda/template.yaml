@@ -41,8 +41,49 @@ Parameters:
     Type: String
     Description: The name of the secret containing application configurations.
     Default: ai-mon-secret
+  CloudFrontSecretHeaderValue:
+    Type: String
+    Description: The secret value for the X-CloudFront-Secret header.
+    NoEcho: true
 
 Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Auth:
+        DefaultAuthorizer: CustomAuthorizer
+        Authorizers:
+          CustomAuthorizer:
+            FunctionArn: !GetAtt CustomAuthorizerFunction.Arn
+            FunctionPayloadType: TOKEN
+            Identity:
+              Headers:
+                - x-cloudfront-secret
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "Content-Type"
+        AllowMethods:
+          - "GET"
+          - "POST"
+          - "PUT"
+          - "DELETE"
+          - "OPTIONS"
+        MaxAge: 600
+
+  CustomAuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: customAuthorizer/
+      Handler: app.lambdaHandler
+      Runtime: nodejs22.x
+      Timeout: 5
+      Policies: []
+      Environment:
+        Variables:
+          CLOUDFRONT_SECRET_HEADER: !Ref CloudFrontSecretHeaderValue
+
   SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -73,10 +114,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersRegisterEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/register
             Method: post
+            ApiId: !Ref HttpApi
 #  UsersRegisterFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -107,10 +149,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersLoginEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/login
             Method: post
+            ApiId: !Ref HttpApi            
 #  UsersLoginFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -145,10 +188,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         UsersGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/get
             Method: get
+            ApiId: !Ref HttpApi
 #  UsersGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -177,10 +221,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersLogoutEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/logout
             Method: post
+            ApiId: !Ref HttpApi
 #  UsersLogoutFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -211,10 +256,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/{userId}
             Method: delete
+            ApiId: !Ref HttpApi
 #  UsersDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -253,10 +299,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsCreateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups
             Method: post
+            ApiId: !Ref HttpApi
 #  QuizGroupsCreateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -289,10 +336,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuizGroupsListEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups
             Method: get
+            ApiId: !Ref HttpApi
 #  QuizGroupsListFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -324,10 +372,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuizGroupsListEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups-list
             Method: get
+            ApiId: !Ref HttpApi
 #  QuizGroupsListFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -360,10 +409,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuizGroupsGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}
             Method: get
+            ApiId: !Ref HttpApi
 #  QuizGroupsGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -402,10 +452,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsUpdateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}
             Method: put
+            ApiId: !Ref HttpApi
 #  QuizGroupsUpdateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -444,10 +495,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuizGroupsDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}
             Method: delete
+            ApiId: !Ref HttpApi
 #  QuizGroupsDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -486,10 +538,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsCreateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: post
+            ApiId: !Ref HttpApi
 #  QuestionsCreateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -522,10 +575,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuestionsListEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: get
+            ApiId: !Ref HttpApi
 #  QuestionsListFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -558,10 +612,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuestionsGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /questions/{questionId}
             Method: get
+            ApiId: !Ref HttpApi
 #  QuestionsGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -600,10 +655,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsUpdateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /questions/{questionId}
             Method: put
+            ApiId: !Ref HttpApi
 #  QuestionsUpdateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -642,10 +698,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         QuestionsDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /questions/{questionId}
             Method: delete
+            ApiId: !Ref HttpApi
 #  QuestionsDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -680,10 +737,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         AnswersSubmitEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quizzes/{quizId}/answers
             Method: post
+            ApiId: !Ref HttpApi
 #  AnswersSubmitFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -721,10 +779,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         QuizCompletionEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quizzes/completion
             Method: post
+            ApiId: !Ref HttpApi
 #  QuizCompletionFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -759,10 +818,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UserAnswerSelectionEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quizzes/user-answer
             Method: post
+            ApiId: !Ref HttpApi
 #  UserAnswerSelectionFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -799,10 +859,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         ResultsGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /results/{quizSessionId}
             Method: get
+            ApiId: !Ref HttpApi
 #  ResultsGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -835,10 +896,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         ScoreHistoryGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /scores
             Method: get
+            ApiId: !Ref HttpApi
 #  ScoreHistoryGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -877,10 +939,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         ScoresCreateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /scores
             Method: post
+            ApiId: !Ref HttpApi
 #  ScoresCreateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -913,10 +976,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         ScoresDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /scores/{quizSessionId}
             Method: delete
+            ApiId: !Ref HttpApi
 #  ScoresDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -949,10 +1013,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         PerformanceAnalysisGetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/{userId}/performance-analysis
             Method: get
+            ApiId: !Ref HttpApi
 #  PerformanceAnalysisGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -991,10 +1056,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         ResourcesCreateEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: post
+            ApiId: !Ref HttpApi
 #  ResourcesCreateFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1027,10 +1093,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         ResourcesListEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /quiz-groups-resources/{groupId}/
             Method: get
+            ApiId: !Ref HttpApi
 #  ResourcesListFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1055,10 +1122,11 @@ Resources:
           QUIZ_GROUPS_TABLE_NAME: !Ref QuizGroupsTableName
       Events:
         ResourcesListAllEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /resources/all
             Method: get
+            ApiId: !Ref HttpApi
 
   ResourcesDeleteFunction:
     Type: AWS::Serverless::Function
@@ -1092,10 +1160,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         ResourcesDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /resources/{resourceId}
             Method: delete
+            ApiId: !Ref HttpApi
 #  ResourcesDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1140,10 +1209,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         AiGenerateQuestionEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /ai/generate-question
             Method: post
+            ApiId: !Ref HttpApi
 #  AiGenerateQuestionFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1187,10 +1257,11 @@ Resources:
           AIMON_SECRET_NAME: !Ref AimonSecretName
       Events:
         AiGenerateChoicesEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /ai/generate-choices
             Method: post
+            ApiId: !Ref HttpApi
 #  AiGenerateChoicesFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1221,10 +1292,11 @@ Resources:
           QUESTIONS_TABLE_NAME: !Ref QuestionsTableName
       Events:
         UsersInactiveDeleteEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
             Path: /users/inactive
             Method: delete
+            ApiId: !Ref HttpApi
 #  UsersInactiveDeleteFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1259,11 +1331,14 @@ Resources:
       DistributionConfig:
         Origins:
           - Id: AimonApiGatewayOrigin
-            DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+            DomainName: !Sub '${HttpApi}.execute-api.${AWS::Region}.amazonaws.com'
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
+            OriginCustomHeaders:
+              - HeaderName: 'x-cloudfront-secret'
+                HeaderValue: !Ref CloudFrontSecretHeaderValue
           - Id: AimonContentsS3Origin
             DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
             OriginAccessControlId: !GetAtt AimonOAC.Id
@@ -1498,8 +1573,8 @@ Resources:
 
 Outputs:
   ApiGatewayEndpoint:
-    Description: "API Gateway endpoint URL for Prod stage"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/"
   SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
     Value: !Ref SharedLogicLayer
