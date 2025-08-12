@@ -4,7 +4,12 @@ exports.lambdaHandler = async (event, context) => {
   const incomingSecret = event.headers['x-cloudfront-secret'];
 
   let effect = 'Deny';
-  if (incomingSecret === secretHeader) {
+  if (
+    secretHeader &&
+    incomingSecret &&
+    Buffer.from(secretHeader).length === Buffer.from(incomingSecret).length &&
+    require('crypto').timingSafeEqual(Buffer.from(secretHeader), Buffer.from(incomingSecret))
+  ) {
     effect = 'Allow';
   } else {
     console.log('Forbidden: Missing or incorrect secret header.');
