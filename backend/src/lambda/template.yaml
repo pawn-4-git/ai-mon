@@ -55,8 +55,10 @@ Resources:
         Authorizers:
           CustomAuthorizer:
             FunctionArn: !GetAtt CustomAuthorizerFunction.Arn
-            AuthorizerPayloadFormatVersion: '2.0'
-            EnableSimpleResponses: true
+            FunctionPayloadType: TOKEN
+            Identity:
+              Headers:
+                - x-cloudfront-secret
       CorsConfiguration:
         AllowOrigins:
           - "*"
