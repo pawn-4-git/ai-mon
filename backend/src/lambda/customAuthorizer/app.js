@@ -15,7 +15,5 @@ exports.lambdaHandler = async (event, context) => {
     console.log('Forbidden: Missing or incorrect secret header.');
   }
 
-  return {
-    isAuthorized: isAuthorized,
-  };
+  return { isAuthorized };
 };
