@@ -1337,7 +1337,7 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
             OriginCustomHeaders:
-              - HeaderName: 'X-CloudFront-Secret'
+              - HeaderName: 'x-cloudfront-secret'
                 HeaderValue: !Ref CloudFrontSecretHeaderValue
           - Id: AimonContentsS3Origin
             DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
