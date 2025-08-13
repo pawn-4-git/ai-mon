@@ -13,6 +13,9 @@ Globals:
       LogFormat: JSON
 
 Parameters:
+  CloudFrontSecretHeaderValue:
+    Type: String
+    Description: "Secret value for CloudFront custom header"
   UsersTableName:
     Type: String
     Description: The name of the DynamoDB table for users.
@@ -1260,6 +1263,9 @@ Resources:
         Origins:
           - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
+            OriginCustomHeaders:
+              - HeaderName: X-CloudFront-Secret
+                HeaderValue: !Ref CloudFrontSecretHeaderValue
             CustomOriginConfig:
               HTTPPort: 80
               HTTPSPort: 443
