@@ -2,6 +2,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { updateUserTtl } from '/opt/userHelper.js'; // Import updateUserTtl
+import { validateCloudFrontSecret } from '/opt/authHelper.js';
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -28,6 +29,14 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
+
+        if (!validateCloudFrontSecret(event.headers)) {
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ message: "Unauthorized: Invalid CloudFront secret." }),
+            };
+        }
+
         if (!event.body) {
             return {
                 statusCode: 400,

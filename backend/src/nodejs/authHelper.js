@@ -79,6 +79,13 @@ export const isAdmin = async (userId) => {
 
 
 export const validateSession = async (event) => {
+    if (!validateCloudFrontSecret(event.headers)) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Unauthorized: Invalid CloudFront secret." }),
+        };
+    }
+
     if (!SESSIONS_TABLE_NAME) {
         return {
             statusCode: 500,
@@ -142,4 +149,21 @@ export const validateSession = async (event) => {
             body: JSON.stringify({ message: "Internal server error during authentication." }),
         };
     }
+};
+
+/**
+ * CloudFrontからのカスタムヘッダーと��境変数の値を比較してリクエストを検証します。
+ * @param {object} headers - リクエストヘッダー
+ * @returns {boolean} - ヘッダーの値が環境変数の値と一致する場合はtrue、それ以外はfalse
+ */
+export const validateCloudFrontSecret = (headers) => {
+    const secretFromHeader = headers['x-cloudfront-secret'];
+    const secretFromEnv = process.env.CLOUD_FRONT_API_SECRET_VALUE;
+
+    if (!secretFromHeader || !secretFromEnv) {
+        console.error("Secret value is missing in header or environment variable.");
+        return false;
+    }
+
+    return secretFromHeader === secretFromEnv;
 };
