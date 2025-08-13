@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main # mainブランチへのプッシュ時にトリガー
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest # ジョブを実行するランナーを指定
@@ -39,4 +39,4 @@ jobs:
           # role-to-assume: ${{secrets.AWS_S3_ROLE}}
 
       - name: Sync frontend-s3 directory to S3 bucket
-        run: aws s3 sync ./frontend-s3/ s3://${{secrets.contents_bucket_name}} --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
+        run: aws s3 sync ${{secrets.LOCAL_FRONTEND_S3}} s3://${{secrets.contents_bucket_name}} --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
