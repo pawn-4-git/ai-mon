@@ -11,11 +11,15 @@ Globals:
     Runtime: nodejs22.x
     LoggingConfig:
       LogFormat: JSON
+    Environment:
+      Variables:
+        CLOUD_FRONT_API_SECRET_VALUE: !Ref CloudFrontSecretHeaderValue
 
 Parameters:
   CloudFrontSecretHeaderValue:
     Type: String
     Description: "Secret value for CloudFront custom header"
+    NoEcho: true
   UsersTableName:
     Type: String
     Description: The name of the DynamoDB table for users.
