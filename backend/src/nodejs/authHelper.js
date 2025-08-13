@@ -157,7 +157,7 @@ export const validateSession = async (event) => {
  * @returns {boolean} - ヘッダーの値が環境変数の値と一致する場合はtrue、それ以外はfalse
  */
 export const validateCloudFrontSecret = (headers) => {
-    const secretFromHeader = headers['x-cloudfront-secret'];
+    const secretFromHeader = headers['X-CloudFront-Secret'];
     const secretFromEnv = process.env.CLOUD_FRONT_API_SECRET_VALUE;
 
     if (!secretFromHeader || !secretFromEnv) {
