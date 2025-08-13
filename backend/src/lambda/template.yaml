@@ -11,6 +11,9 @@ Globals:
     Runtime: nodejs22.x
     LoggingConfig:
       LogFormat: JSON
+    Environment:
+      Variables:
+        CLOUD_FRONT_API_SECRET_VALUE: !Ref CloudFrontSecretHeaderValue
 
 Parameters:
   CloudFrontSecretHeaderValue:
