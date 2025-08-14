@@ -1,11 +1,5 @@
 'use client';
 
-import type { Metadata } from 'next'
-
-export const metadata: Metadata = {
-  title: '問題集一覧 | AI-Mon',
-}
-
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
