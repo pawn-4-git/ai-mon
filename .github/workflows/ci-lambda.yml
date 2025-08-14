@@ -60,4 +60,5 @@ jobs:
       - name: Deploy SAM Application
         env:
           CLOUD_FRONT_API_SECRET_VALUE: ${{ secrets.CLOUD_FRONT_API_SECRET_VALUE }}
-        run: sam deploy --region ap-northeast-1 --stack-name aimon-dev --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml --parameter-overrides "CloudFrontSecretHeaderValue=${CLOUD_FRONT_API_SECRET_VALUE} EnvPrefix="
+          ENV_PREFIX: ${{ secrets.ENV_PREFIX }}
+        run: sam deploy --region ap-northeast-1 --stack-name aimon-dev --no-confirm-changeset --no-fail-on-empty-changeset --config-file ./backend/src/lambda/samconfig.toml --parameter-overrides "CloudFrontSecretHeaderValue=${CLOUD_FRONT_API_SECRET_VALUE} EnvPrefix=${ENV_PREFIX}"
