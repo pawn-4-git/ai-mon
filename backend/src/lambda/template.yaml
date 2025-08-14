@@ -20,30 +20,34 @@ Parameters:
     Type: String
     Description: "Secret value for CloudFront custom header"
     NoEcho: true
+  EnvPrefix:
+    Type: String
+    Description: "Environment prefix for resource names"
+    Default: ""
   UsersTableName:
     Type: String
     Description: The name of the DynamoDB table for users.
-    Default: UsersTable
+    Default: !Sub "${EnvPrefix}UsersTable"
   SessionsTableName:
     Type: String
     Description: The name of the DynamoDB table for sessions.
-    Default: SessionsTable
+    Default: !Sub "${EnvPrefix}SessionsTable"
   ScoresTableName:
     Type: String
     Description: The name of the DynamoDB table for scores.
-    Default: ScoresTable
+    Default: !Sub "${EnvPrefix}ScoresTable"
   ResourcesTableName:
     Type: String
     Description: The name of the DynamoDB table for resources.
-    Default: ResourcesTable
+    Default: !Sub "${EnvPrefix}ResourcesTable"
   QuizGroupsTableName:
     Type: String
     Description: The name of the DynamoDB table for quiz groups.
-    Default: QuizGroupsTable
+    Default: !Sub "${EnvPrefix}QuizGroupsTable"
   QuestionsTableName:
     Type: String
     Description: The name of the DynamoDB table for questions.
-    Default: QuestionsTable
+    Default: !Sub "${EnvPrefix}QuestionsTable"
   AimonSecretName:
     Type: String
     Description: The name of the secret containing application configurations.
