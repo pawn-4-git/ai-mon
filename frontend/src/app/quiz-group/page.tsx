@@ -57,7 +57,7 @@ export default function QuizGroupPage() {
         }
       } catch (error) {
         console.error('Failed to fetch quiz groups:', error);
-        alert('問題グループの取得に失敗しました。');
+        alert('問題集の取得に失敗しました。');
       }
     };
 
@@ -101,7 +101,7 @@ export default function QuizGroupPage() {
       const response = await window.apiClient.post('/Prod/quiz-groups', body) as { GroupId: string };
 
       if (response && response.GroupId) {
-        alert('新しい問題グループが作成されました！');
+        alert('新しい問題集が作成されました！');
         // create-quiz に GroupId と Name を渡して遷移
         router.push(`/create-quiz?id=${response.GroupId}&name=${encodeURIComponent(newGroupName)}`);
       } else {
@@ -109,7 +109,7 @@ export default function QuizGroupPage() {
       }
     } catch (error) {
       console.error('Failed to create quiz group:', error);
-      alert('問題グループの作成に失敗しました。');
+      alert('問題集の作成に失敗しました。');
     }
   };
 
@@ -135,11 +135,11 @@ export default function QuizGroupPage() {
         timeLimitMinutes,
       };
       await window.apiClient.put(`/Prod/quiz-groups/${selectedQuizGroup}`, body);
-      alert('問題グループの設定を更新しました！');
+      alert('問題集の設定を更新しました！');
       router.push(`/create-quiz?id=${selectedQuizGroup}&name=${encodeURIComponent(selectedGroup.name)}`);
     } catch (error) {
       console.error('Failed to update quiz group:', error);
-      alert('問題グループの更新に失敗しました。');
+      alert('問題集の更新に失敗しました。');
     }
   };
 
@@ -161,9 +161,9 @@ export default function QuizGroupPage() {
     <div className="quiz-group-page">
       <Header />
       <div className="container">
-        <h2>問題グループ設定</h2>
+        <h2>問題集設定</h2>
         <div className="form-group">
-          <label htmlFor="quiz-group">問題グループ:</label>
+          <label htmlFor="quiz-group">問題集:</label>
           <select
             id="quiz-group"
             value={selectedQuizGroup}

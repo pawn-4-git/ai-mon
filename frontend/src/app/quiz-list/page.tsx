@@ -1,5 +1,11 @@
 'use client';
 
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: '問題集一覧 | AI-Mon',
+}
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
@@ -193,7 +199,7 @@ export default function QuizListPage() {
       <div className="quiz-list-page">
         <Header />
         <div className="container">
-          <h2>問題グループ一覧</h2>
+          <h2>問題集一覧</h2>
           <p>読み込み中...</p>
         </div>
       </div>
@@ -205,7 +211,7 @@ export default function QuizListPage() {
       <div className="quiz-list-page">
         <Header />
         <div className="container">
-          <h2>問題グループ一覧</h2>
+          <h2>問題集一覧</h2>
           <p>エラー: {error}</p>
         </div>
       </div>
@@ -217,7 +223,7 @@ export default function QuizListPage() {
       <Header />
 
       <div className="container">
-        <h2>問題グループ一覧</h2>
+        <h2>問題集一覧</h2>
         <ul className="quiz-group-list">
           {quizGroups.map((group) => (
             <li key={group.id} className={`quiz-group-item ${getStatusClass(group.status)}`}>
@@ -252,7 +258,7 @@ export default function QuizListPage() {
         </ul>
         {isAdminUser && (
           <button className="add-button" onClick={() => router.push('/quiz-group')}>
-            新しい問題グループを作成
+            新しい問題集を作成
           </button>
         )}
       </div>
