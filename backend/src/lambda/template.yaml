@@ -20,6 +20,10 @@ Parameters:
     Type: String
     Description: "Secret value for CloudFront custom header"
     NoEcho: true
+  ContentsBucketName:
+    Type: String
+  AappBucketName:
+    Type: String
   EnvPrefix:
     Type: String
     Description: "Environment prefix for resource names"
@@ -1271,12 +1275,12 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
           - Id: AimonContentsS3Origin
-            DomainName: !Sub 'ai-mon-contents-files.s3.amazonaws.com'
+            DomainName: !Sub '${ContentsBucketName}-${EnvPrefix}.s3.amazonaws.com'
             OriginAccessControlId: !GetAtt AimonOAC.Id
             S3OriginConfig:
               OriginAccessIdentity: ''
           - Id: AimonAppS3Origin
-            DomainName: !Sub 'ai-mon-app.s3.amazonaws.com'
+            DomainName: !Sub '${AappBucketName}-${EnvPrefix}.s3.amazonaws.com'
             OriginAccessControlId: !GetAtt AimonOAC.Id
             S3OriginConfig:
               OriginAccessIdentity: ''
