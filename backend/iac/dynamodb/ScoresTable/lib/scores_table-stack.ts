@@ -6,8 +6,11 @@ export class ScoresTableStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const tableNamePrefix = this.node.tryGetContext('TableNamePrefix') || '';
+    const tableName = tableNamePrefix ? `${tableNamePrefix}ScoresTable` : 'ScoresTable';
+
     const table = new dynamodb.Table(this, 'ScoresTable', {
-      tableName: 'ScoresTable',
+      tableName: tableName,
       partitionKey: {
         name: 'QuizSessionId',
         type: dynamodb.AttributeType.STRING,
