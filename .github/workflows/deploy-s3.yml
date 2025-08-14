@@ -4,6 +4,15 @@ on:
   push:
     branches:
       - main # mainブランチへのプッシュ時にトリガー
+    paths:
+      - '.github/workflows/deploy-s3.yml'
+      - 'frontend-s3/**'
+  pull_request:
+    branches:
+      - main # mainブランチへのプルリクエスト時にトリガー
+    paths:
+      - '.github/workflows/deploy-s3.yml'
+      - 'frontend-s3/**'
 
 jobs:
   deploy:

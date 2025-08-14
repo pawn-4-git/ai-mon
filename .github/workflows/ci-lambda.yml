@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main # mainブランチへのプッシュをトリガーとする
+    paths:
+      - '.github/workflows/ci-lambda.yml'
+      - 'backend/src/**'
 
 jobs:
   deploy-lambda:

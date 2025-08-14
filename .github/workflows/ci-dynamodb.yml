@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/ci-dynamodb.yml'
+      - 'backend/iac/**'
 
 jobs:
   deploy-dynamodb-tables:

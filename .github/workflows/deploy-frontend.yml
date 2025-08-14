@@ -4,6 +4,9 @@ name: Deploy Next.js App to GitHub Pages
 on:
   push:
     branches: [ main ] # mainブランチへのプッシュでこのワークフローが実行されます
+    paths:
+      - '.github/workflows/deploy-frontend.yml'
+      - 'frontend/**'
 
 jobs:
   build-and-deploy:
