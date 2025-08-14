@@ -7,7 +7,7 @@ export class ScoresTableStack extends cdk.Stack {
     super(scope, id, props);
 
     const tableNamePrefix = this.node.tryGetContext('TableNamePrefix') || '';
-    const tableName = tableNamePrefix ? `${tableNamePrefix}ScoresTable` : 'ScoresTable';
+    const tableName = tableNamePrefix + 'ScoresTable';
 
     const table = new dynamodb.Table(this, 'ScoresTable', {
       tableName: tableName,
