@@ -163,7 +163,7 @@ function CreateQuizContent() {
 
     const handleSaveQuestion = async () => {
         if (!currentGroup) {
-            alert('問題グループが設定されていません。');
+            alert('問題集が設定されていません。');
             return;
         }
         if (!quizTitle || !questionText || !correctChoice || !explanationText) {
@@ -242,7 +242,7 @@ function CreateQuizContent() {
 
     const handleGenerateQuestion = async () => {
         if (!currentGroup) {
-            alert('問題グループが設定されていません。');
+            alert('問題集が設定されていません。');
             return;
         }
         if (!sourceText) {
@@ -374,7 +374,7 @@ function CreateQuizContent() {
 
     const handleOpenQuizListModal = async () => {
         if (!currentGroup) {
-            alert('問題グループが設定されていません。');
+            alert('問題集が設定されていません。');
             return;
         }
         const apiClient = window.apiClient;
@@ -417,7 +417,7 @@ function CreateQuizContent() {
 
     const handleSaveResources = async () => {
         if (!currentGroup) {
-            alert('問題グループが設定されていません。');
+            alert('問題集が設定されていません。');
             return;
         }
         const apiClient = window.apiClient;
@@ -489,7 +489,7 @@ function CreateQuizContent() {
 
                     <p>現在のグループ: <span id="current-group">{currentGroup ? `${currentGroup.name} (ID: ${currentGroup.id})` : '未設定'}</span></p>
                     <div className="button-group">
-                        <Link href="/quiz-group" className="button">問題グループを設定</Link>
+                        <Link href="/quiz-group" className="button">問題集を設定</Link>
                     </div>
 
                     <div className="radio-group">
