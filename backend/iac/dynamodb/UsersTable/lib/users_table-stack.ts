@@ -6,8 +6,11 @@ export class UsersTableStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    const tableNamePrefix = this.node.tryGetContext('TableNamePrefix') || '';
+    const tableName = tableNamePrefix + 'UsersTable';
+
     const table = new dynamodb.Table(this, 'UsersTable', {
-      tableName: 'UsersTable',
+      tableName: tableName,
       partitionKey: {
         name: 'UserId',
         type: dynamodb.AttributeType.STRING,
