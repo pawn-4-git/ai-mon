@@ -22,7 +22,7 @@ Parameters:
     NoEcho: true
   ContentsBucketName:
     Type: String
-  AappBucketName:
+  AppBucketName:
     Type: String
   EnvPrefix:
     Type: String
@@ -1280,7 +1280,7 @@ Resources:
             S3OriginConfig:
               OriginAccessIdentity: ''
           - Id: AimonAppS3Origin
-            DomainName: !Sub '${AappBucketName}-${EnvPrefix}.s3.amazonaws.com'
+            DomainName: !Sub '${AppBucketName}-${EnvPrefix}.s3.amazonaws.com'
             OriginAccessControlId: !GetAtt AimonOAC.Id
             S3OriginConfig:
               OriginAccessIdentity: ''
