@@ -132,7 +132,7 @@ export const validateSession = async (event) => {
             userId: session.UserId,
             sessionId: session.SessionId,
             sessionVersionId: session.SessionVersionId,
-            admin: session.Admin && session.adminCheckExpireAt ? session.Admin : false,
+            admin: !!(session.Admin && session.adminCheckExpireAt),
             adminCheckExpireAt: session.adminCheckExpireAt
         };
 
