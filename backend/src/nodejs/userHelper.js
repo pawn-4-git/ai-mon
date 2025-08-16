@@ -83,3 +83,36 @@ export const updateSessionTtl = async (sessionId) => {
         throw error;
     }
 };
+
+/** 管理者かどうかの判定結果と、その確認日時を更新する関数
+ * @param {string} sessionId - 更新対象のセッションID
+ * @param {boolean} admin -ユーザーが管理者であるかどうかの真偽値
+ * @returns {Promise<void>}
+ */
+export const updateAdminCheckTtl = async (sessionId, admin) => {
+    if (!SESSIONS_TABLE_NAME) {
+        throw new Error("SESSIONS_TABLE_NAME environment variable is not set.");
+    }
+
+    const adminCheckExpiresAt = Math.floor(Date.now() / 1000) + ONE_DAY_IN_SECONDS; // 1 day from now
+
+    const command = new UpdateCommand({
+        TableName: SESSIONS_TABLE_NAME,
+        Key: {
+            SessionId: sessionId,
+        },
+        UpdateExpression: "set Admin = :admin, adminCheckExpireAt = :expiresAt",
+        ExpressionAttributeValues: {
+            ":admin": admin,
+            ":expiresAt": adminCheckExpiresAt,
+        },
+    });
+
+    try {
+        await docClient.send(command);
+        console.log(`Admin status and check expiration updated for sessionId: ${sessionId}`);
+    } catch (error) {
+        console.error(`Error updating admin check TTL for sessionId: ${sessionId}`, error);
+        throw error;
+    }
+};

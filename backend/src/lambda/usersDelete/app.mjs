@@ -1,6 +1,6 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, DeleteCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
-import { validateSession } from "/opt/authHelper.js";
+import { validateSession, isAdmin } from "/opt/authHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -21,6 +21,14 @@ export const lambdaHandler = async (event) => {
         const authResult = await validateSession(event);
         if (!authResult.isValid) {
             return authResult;
+        }
+
+        // 管理者権限チェックの追加
+        if (!await isAdmin(authResult.userId)) {
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ message: "Only administrators can delete users." }),
+            };
         }
 
         const userId = event.pathParameters?.userId;
@@ -48,7 +56,7 @@ export const lambdaHandler = async (event) => {
         });
 
         const sessionsResponse = await docClient.send(deleteSessionsCommand);
-        
+
         if (sessionsResponse.Items) {
             for (const session of sessionsResponse.Items) {
                 const deleteSessionCommand = new DeleteCommand({
