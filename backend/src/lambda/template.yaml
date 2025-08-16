@@ -148,6 +148,8 @@ Resources:
             TableName: !Ref UsersTableName
         - DynamoDBReadPolicy:
             TableName: !Ref SessionsTableName
+        - DynamoDBWritePolicy:
+            TableName: !Ref SessionsTableName
         - Statement:
           - Effect: Allow
             Action:
