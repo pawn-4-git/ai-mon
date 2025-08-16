@@ -1300,7 +1300,7 @@ Resources:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod/resources/all"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
+            FunctionAssociations: &basicAuthFunctionIf !If
               - IsBasicAuthEnabled
               - - EventType: 'viewer-request'
                   FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
@@ -1330,11 +1330,7 @@ Resources:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod/quiz-groups-resources/*"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
-              - IsBasicAuthEnabled
-              - - EventType: 'viewer-request'
-                  FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-              - !Ref AWS::NoValue
+            FunctionAssociations: *basicAuthFunctionIf
             AllowedMethods:
               - GET
               - HEAD
@@ -1366,11 +1362,7 @@ Resources:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod/quiz-groups-list*"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
-              - IsBasicAuthEnabled
-              - - EventType: 'viewer-request'
-                  FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-              - !Ref AWS::NoValue
+            FunctionAssociations: *basicAuthFunctionIf
             AllowedMethods:
               - GET
               - HEAD
@@ -1402,11 +1394,7 @@ Resources:
           - TargetOriginId: AimonApiGatewayOrigin
             PathPattern: "/Prod*"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
-              - IsBasicAuthEnabled
-              - - EventType: 'viewer-request'
-                  FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-              - !Ref AWS::NoValue
+            FunctionAssociations: *basicAuthFunctionIf
             AllowedMethods:
               - GET
               - HEAD
@@ -1442,11 +1430,7 @@ Resources:
           - TargetOriginId: AimonContentsS3Origin
             PathPattern: "/contents/*"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
-              - IsBasicAuthEnabled
-              - - EventType: 'viewer-request'
-                  FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-              - !Ref AWS::NoValue
+            FunctionAssociations: *basicAuthFunctionIf
             AllowedMethods:
               - GET
               - HEAD
@@ -1470,11 +1454,7 @@ Resources:
           - TargetOriginId: AimonAppS3Origin
             PathPattern: !Sub "/${AppBasePath}/*"
             ViewerProtocolPolicy: redirect-to-https
-            FunctionAssociations: !If
-              - IsBasicAuthEnabled
-              - - EventType: 'viewer-request'
-                  FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-              - !Ref AWS::NoValue
+            FunctionAssociations: *basicAuthFunctionIf
             AllowedMethods:
               - GET
               - HEAD
@@ -1498,11 +1478,7 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: AimonAppS3Origin
           ViewerProtocolPolicy: redirect-to-https
-          FunctionAssociations: !If
-            - IsBasicAuthEnabled
-            - - EventType: 'viewer-request'
-                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
-            - !Ref AWS::NoValue
+          FunctionAssociations: *basicAuthFunctionIf
           AllowedMethods:
             - GET
             - HEAD
