@@ -25,22 +25,16 @@ const getCookieValue = (cookieHeader, cookieName) => {
  */
 export const isAdmin = async (userId) => {
     if (!userId) {
-        console.log("userId_0 " + userId);
-
         return false;
     }
 
     // キャッシュがあればそれを使用
     if (cachedAdminUserId) {
-        console.log("userId_1 " + userId);
-
         return userId === cachedAdminUserId;
     }
 
     const secretName = process.env.AIMON_SECRET_NAME;
     if (!secretName) {
-        console.log("userId_2 " + userId);
-
         console.error("Error: AIMON_SECRET_NAME environment variable is not set.");
         return false;
     }
@@ -50,7 +44,6 @@ export const isAdmin = async (userId) => {
 
     try {
         const data = await secretsClient.send(command);
-        console.log("userId_3 " + userId);
 
         if (data.SecretString) {
             const secret = JSON.parse(data.SecretString);
@@ -64,7 +57,6 @@ export const isAdmin = async (userId) => {
             // 取得したIDをキャッシュ
             cachedAdminUserId = adminId;
             console.log("cachedAdminUserId " + cachedAdminUserId);
-            console.log("userId_4 " + userId);
 
             return userId === cachedAdminUserId;
         }
@@ -140,6 +132,8 @@ export const validateSession = async (event) => {
             userId: session.UserId,
             sessionId: session.SessionId,
             sessionVersionId: session.SessionVersionId,
+            admin: session.Admin && session.adminCheckExpireAt ? session.Admin : false,
+            adminCheckExpireAt: session.adminCheckExpireAt
         };
 
     } catch (error) {

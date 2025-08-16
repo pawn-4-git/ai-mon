@@ -83,3 +83,39 @@ export const updateSessionTtl = async (sessionId) => {
         throw error;
     }
 };
+
+/**
+ * セッションの有効期限 (TTL) とセッションバージョンIDを更新する関数
+ * @param {string} sessionId - 更新対象のセッションID
+ * @param {boolean} admin -管理者ユーザーかどうか判定する値
+ * @returns {Promise<string>} - 新しいセッションバージョンID
+ */
+export const updateAdminCheckTtl = async (sessionId, admin) => {
+    if (!SESSIONS_TABLE_NAME) {
+        throw new Error("SESSIONS_TABLE_NAME environment variable is not set.");
+    }
+
+    const newSessionVersionId = randomUUID();
+    const newExpiresAt = Math.floor(Date.now() / 1000) + ONE_DAY_IN_SECONDS; // 1 day from now
+
+    const command = new UpdateCommand({
+        TableName: SESSIONS_TABLE_NAME,
+        Key: {
+            SessionId: sessionId,
+        },
+        UpdateExpression: "set Admin = :v, adminCheckExpireAt = :e",
+        ExpressionAttributeValues: {
+            ":v": admin,
+            ":e": newExpiresAt,
+        },
+    });
+
+    try {
+        await docClient.send(command);
+        console.log(`Session TTL and Version updated for sessionId: ${sessionId}`);
+        return newSessionVersionId;
+    } catch (error) {
+        console.error(`Error updating session for sessionId: ${sessionId}`, error);
+        throw error;
+    }
+};
