@@ -86,7 +86,7 @@ export const updateSessionTtl = async (sessionId) => {
 
 /** 管理者かどうかの判定結果と、その確認日時を更新する関数
  * @param {string} sessionId - 更新対象のセッションID
- * @param {boolean} admin -管理者ユーザーかどうか判定する値
+ * @param {boolean} admin -ユーザーが管理者であるかどうかの真偽値
  * @returns {Promise<void>}
  */
 export const updateAdminCheckTtl = async (sessionId, admin) => {
