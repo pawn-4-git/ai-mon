@@ -24,10 +24,13 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
     }
     if (!window.apiClient) return;
     try {
-      // 型アサーションから .data を削除
-      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string };
+      // response に isAdmin プロパティが含まれていると仮定
+      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string, isAdmin?: boolean };
       if (response && response.AccountName && response.UserId) {
-        setAccountName(response.AccountName);
+        // isAdmin プロパティに基づいて accountName を設定
+        const displayAccountName = response.isAdmin ? '管理者' : response.AccountName;
+        setAccountName(displayAccountName);
+
         // setUser state might be stale here, so we check against the response
         if (!user || user.username !== response.AccountName || user.id !== response.UserId) {
           setUser({ id: response.UserId, username: response.AccountName, email: '' });

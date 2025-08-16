@@ -151,7 +151,7 @@ function QuizResult() {
         </ul>
 
         <div className="reference-links">
-          <h3>参考書・関連リソース</h3>
+          <h3>参考書など</h3>
           <ul id="reference-books-list">
             {resources.map((book) => (
               <li key={book.ResourceId}>

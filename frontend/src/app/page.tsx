@@ -179,7 +179,7 @@ export default function LoginPage() {
 
           {/* 学習リソースセクション */}
           <div className="learning-resources">
-            <h2>参考書・関連リソース</h2>
+            <h2>参考書など</h2>
             {loadingResources ? (
               <p>Loading resources...</p>
             ) : (
