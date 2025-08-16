@@ -24,6 +24,8 @@ Parameters:
     Type: String
   AppBucketName:
     Type: String
+  AppBasePath:
+    Type: String
   EnvPrefix:
     Type: String
     Description: "Environment prefix for resource names"
@@ -1446,7 +1448,7 @@ Resources:
             SmoothStreaming: false
             Compress: true
           - TargetOriginId: AimonAppS3Origin
-            PathPattern: "/ai-mon/*"
+            PathPattern: !Sub "/${AppBasePath}/*"
             ViewerProtocolPolicy: redirect-to-https
             FunctionAssociations:
               - EventType: 'viewer-request'

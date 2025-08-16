@@ -82,7 +82,7 @@ jobs:
           # role-to-assume: ${{secrets.AWS_S3_ROLE}}
 
       - name: Sync frontend-s3 directory to S3 bucket
-        run: aws s3 sync ./frontend/out s3://${{secrets.APP_BUCKET_NAME}}-${{secrets.ENV_PREFIX}}/ai-mon/ --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
+        run: aws s3 sync ./frontend/out s3://${{secrets.APP_BUCKET_NAME}}-${{secrets.ENV_PREFIX}}/${{secrets.APP_BASE_PATH}}/ --delete # frontend-s3 ディレクトリを同期し、不要なファイルは削除
 
       - name: Invalidate CloudFront cache
         run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
