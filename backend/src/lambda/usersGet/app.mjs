@@ -1,6 +1,7 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, QueryCommand } from "@aws-sdk/lib-dynamodb";
 import { validateSession, isAdmin } from "/opt/authHelper.js";
+import { updateAdminCheckTtl } from "/opt/userHelper.js";
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
@@ -25,7 +26,13 @@ export const lambdaHandler = async (event) => {
         const userId = authResult.userId;
 
         // --- Check if user is admin ---
-        const isAdminUser = await isAdmin(userId); // isAdmin を呼び出す
+        // 管理者権限を再確認する必要がある場合のみisAdminを実行
+        let isAdminUser = authResult.admin;
+        const now = Math.floor(Date.now() / 1000);
+        if (!authResult.adminCheckExpireAt || authResult.adminCheckExpireAt <= now) {
+            isAdminUser = await isAdmin(userId);
+            await updateAdminCheckTtl(authResult.sessionId, isAdminUser);
+        }
 
         // --- User Lookup ---
         const getUserCommand = new GetCommand({
