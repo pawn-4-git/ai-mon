@@ -3,7 +3,8 @@ name: Deploy Lambda Functions
 
 on:
   push:
-    branches: [ main,develop ]
+    branches:
+      - main # mainブランチへのプッシュをトリガーとする
     paths:
       - '.github/workflows/ci-lambda.yml'
       - 'backend/src/**'

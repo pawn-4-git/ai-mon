@@ -2,7 +2,8 @@ name: CI-DynamoDB
 
 on:
   push:
-    branches: [ main,develop ]
+    branches:
+      - main
     paths:
       - '.github/workflows/ci-dynamodb.yml'
       - 'backend/iac/**'

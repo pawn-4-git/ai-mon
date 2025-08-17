@@ -2,7 +2,8 @@ name: Deploy frontend-s3 to S3
 
 on:
   push:
-    branches: [ main,develop ]
+    branches:
+      - main # mainブランチへのプッシュ時にトリガー
     paths:
       - '.github/workflows/deploy-s3.yml'
       - 'frontend-s3/**'
