@@ -339,6 +339,9 @@ body {
     border-radius: 4px;
     font-weight: bold;
     color: white;
+    min-width: 80px; /* 最小幅を指定 */
+    text-align: center; /* テキストを中央揃え */
+    display: inline-block; /* 中央揃えと幅指定のため */
 }
 
 .answer-status-page .status-badge.answered {
