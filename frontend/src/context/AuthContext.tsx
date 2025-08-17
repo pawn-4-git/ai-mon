@@ -18,6 +18,7 @@ const publicPaths = ['/'];
 export function AuthProvider({ children, className }: { children: ReactNode, className?: string }) {
   const [user, setUser] = useState<User | null>(null);
   const [accountName, setAccountName] = useState<string | null>(null);
+  const pathname = usePathname();
 
   // For restoring session on page load
   const fetchAccountName = useCallback(async () => {
@@ -26,7 +27,6 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
     }
     if (!window.apiClient) return;
     try {
-      const pathname = usePathname();
       const isPublicPage = publicPaths.includes(pathname);
       if (!isPublicPage) {
         // response に isAdmin プロパティが含まれていると仮定
@@ -48,7 +48,7 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
       setAccountName(null);
       setUser(null);
     }
-  }, [user, accountName]);
+  }, [user, accountName, pathname]);
 
   useEffect(() => {
     fetchAccountName();
