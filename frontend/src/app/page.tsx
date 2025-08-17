@@ -3,10 +3,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Script from 'next/script';
+import Cookies from 'js-cookie';
 import { useAuth } from '@/context/AuthContext';
 import Announcements from '@/components/Announcements';
 import { appTitle } from '@/config';
 import Image from 'next/image';
+
 
 declare global {
   interface Window {
@@ -55,6 +57,12 @@ export default function LoginPage() {
   const [loadingResources, setLoadingResources] = useState<boolean>(true);
 
   useEffect(() => {
+
+
+
+  }, []);
+
+  useEffect(() => {
     const fetchResources = async () => {
       if (!window.apiClient) {
         setTimeout(fetchResources, 100);
@@ -73,7 +81,19 @@ export default function LoginPage() {
       }
     };
 
+    const fetchLogout = async () => {
+      const sessionId = Cookies.get('sessionId');
+      if (sessionId) {
+        if (!window.apiClient) {
+          setTimeout(fetchResources, 100);
+          return;
+        }
+        await window.apiClient.post('/Prod/users/logout', undefined);
+      }
+    };
+
     fetchResources();
+    fetchLogout();
   }, []);
 
   const handleLogin = async () => {
@@ -207,3 +227,4 @@ export default function LoginPage() {
     </>
   );
 }
+
