@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { User } from '@/types';
+import { usePathname } from 'next/navigation';
 
 interface AuthContextType {
   user: User | null;
@@ -12,6 +13,7 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+const publicPaths = ['/'];
 
 export function AuthProvider({ children, className }: { children: ReactNode, className?: string }) {
   const [user, setUser] = useState<User | null>(null);
@@ -24,16 +26,20 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
     }
     if (!window.apiClient) return;
     try {
-      // response に isAdmin プロパティが含まれていると仮定
-      const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string, isAdmin?: boolean };
-      if (response && response.AccountName && response.UserId) {
-        // isAdmin プロパティに基づいて accountName を設定
-        const displayAccountName = response.isAdmin ? '管理者' : response.AccountName;
-        setAccountName(displayAccountName);
+      const pathname = usePathname();
+      const isPublicPage = publicPaths.includes(pathname);
+      if (!isPublicPage) {
+        // response に isAdmin プロパティが含まれていると仮定
+        const response = await window.apiClient.get('/Prod/users/get') as { AccountName: string, UserId: string, isAdmin?: boolean };
+        if (response && response.AccountName && response.UserId) {
+          // isAdmin プロパティに基づいて accountName を設定
+          const displayAccountName = response.isAdmin ? '管理者' : response.AccountName;
+          setAccountName(displayAccountName);
 
-        // setUser state might be stale here, so we check against the response
-        if (!user || user.username !== response.AccountName || user.id !== response.UserId) {
-          setUser({ id: response.UserId, username: response.AccountName, email: '' });
+          // setUser state might be stale here, so we check against the response
+          if (!user || user.username !== response.AccountName || user.id !== response.UserId) {
+            setUser({ id: response.UserId, username: response.AccountName, email: '' });
+          }
         }
       }
     } catch (error) {
