@@ -57,12 +57,6 @@ export default function LoginPage() {
   const [loadingResources, setLoadingResources] = useState<boolean>(true);
 
   useEffect(() => {
-
-
-
-  }, []);
-
-  useEffect(() => {
     const fetchResources = async () => {
       if (!window.apiClient) {
         setTimeout(fetchResources, 100);
@@ -85,10 +79,14 @@ export default function LoginPage() {
       const sessionId = Cookies.get('sessionId');
       if (sessionId) {
         if (!window.apiClient) {
-          setTimeout(fetchResources, 100);
+          setTimeout(fetchLogout, 100);
           return;
         }
-        await window.apiClient.post('/Prod/users/logout', undefined);
+        try {
+          await window.apiClient.post('/Prod/users/logout', undefined);
+        } catch (error) {
+          console.error('Failed to logout:', error);
+        }
       }
     };
 
