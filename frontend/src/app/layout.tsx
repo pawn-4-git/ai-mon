@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ConditionalAuthProvider from "@/components/ConditionalAuthProvider";
+import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 import Footer from "@/components/Footer"; // フッターコンポーネントをインポート
 
@@ -51,9 +51,7 @@ export default function RootLayout({
             </Script>
           </>
         )}
-        <ConditionalAuthProvider className="flex-grow">
-          {children}
-        </ConditionalAuthProvider>
+        <AuthProvider className="flex-grow">{children}</AuthProvider>
         <Footer />
       </body>
     </html>
