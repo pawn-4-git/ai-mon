@@ -94,7 +94,8 @@ export const lambdaHandler = async (event) => {
                     groupName: groupName,
                     afterCheck: questionInfo.AfterCheck,
                     expiresAt: score.ExpiresAt,
-                    startedAt: score.StartedAt
+                    startedAt: score.StartedAt,
+                    answers: score.Answers
                 }),
             };
         }
