@@ -90,9 +90,9 @@ function QuizPlay() {
     fetchQuestion();
   }, [quizSessionId, questionNumber]);
 
-  const submitAnswerIfNeeded = useCallback(async () => {
+  const submitAnswerIfNeeded = useCallback(async (): Promise<boolean> => {
     if (!selectedChoice || !quizSessionId || !window.apiClient) {
-      return;
+      return true;
     }
 
     try {
@@ -101,9 +101,11 @@ function QuizPlay() {
         userAnswer: selectedChoice,
       });
       console.log(`Answer for question ${questionNumber} submitted successfully!`);
+      return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       toast.error(`問題${questionNumber}の回答送信に失敗しました: ${errorMessage}`);
+      return false;
     }
   }, [quizSessionId, questionNumber, selectedChoice]);
 
@@ -117,7 +119,10 @@ function QuizPlay() {
       return;
     }
 
-    await submitAnswerIfNeeded();
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) {
+        return;
+    }
 
     try {
       await window.apiClient.post(`/Prod/quizzes/completion`, {
@@ -216,7 +221,10 @@ function QuizPlay() {
   };
 
   const handlePreviousQuestion = async () => {
-    await submitAnswerIfNeeded();
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) {
+        return;
+    }
     if (questionNumber > 1) {
       const prevQuestionNumber = questionNumber - 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
@@ -226,7 +234,10 @@ function QuizPlay() {
   };
 
   const handleNextQuestion = async () => {
-    await submitAnswerIfNeeded();
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) {
+        return;
+    }
     if (questionData && questionNumber < questionData.totalQuestions) {
       const nextQuestionNumber = questionNumber + 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
@@ -236,7 +247,10 @@ function QuizPlay() {
   };
 
   const handleCheckAnswerStatus = async () => {
-    await submitAnswerIfNeeded();
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) {
+        return;
+    }
     router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
   };
 
