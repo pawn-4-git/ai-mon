@@ -235,6 +235,11 @@ function QuizPlay() {
     }
   };
 
+  const handleCheckAnswerStatus = async () => {
+    await submitAnswerIfNeeded();
+    router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
+  };
+
   const formatTime = (timeInSeconds: number | null) => {
     if (timeInSeconds === null) return '...';
     const minutes = Math.floor(timeInSeconds / 60);
@@ -288,7 +293,7 @@ function QuizPlay() {
           <button onClick={handleNextQuestion}>
             次の問題へ
           </button>
-          <button onClick={() => router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`)}>
+          <button onClick={handleCheckAnswerStatus}>
             解答状況を確認
           </button>
           <button onClick={() => handleFinishTest(false)}>
