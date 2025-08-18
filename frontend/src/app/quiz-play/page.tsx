@@ -90,6 +90,23 @@ function QuizPlay() {
     fetchQuestion();
   }, [quizSessionId, questionNumber]);
 
+  const submitAnswerIfNeeded = useCallback(async () => {
+    if (!selectedChoice || !quizSessionId || !window.apiClient) {
+      return;
+    }
+
+    try {
+      await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
+        questionNumber: questionNumber,
+        userAnswer: selectedChoice,
+      });
+      console.log(`Answer for question ${questionNumber} submitted successfully!`);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+      toast.error(`問題${questionNumber}の回答送信に失敗しました: ${errorMessage}`);
+    }
+  }, [quizSessionId, questionNumber, selectedChoice]);
+
   const handleFinishTest = useCallback(async (autoSubmit = false) => {
     if (!quizSessionId || !window.apiClient) {
       setError('Quiz Session ID or API client is not available.');
@@ -99,6 +116,8 @@ function QuizPlay() {
     if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
       return;
     }
+
+    await submitAnswerIfNeeded();
 
     try {
       await window.apiClient.post(`/Prod/quizzes/completion`, {
@@ -111,7 +130,7 @@ function QuizPlay() {
       toast.error(`テストの終了に失敗しました: ${errorMessage}`);
       setError(`Failed to finish the test: ${errorMessage}`);
     }
-  }, [quizSessionId, router]);
+  }, [quizSessionId, router, submitAnswerIfNeeded]);
 
   // Timer effect - recalculates from expiry time to prevent drift
   useEffect(() => {
@@ -143,27 +162,8 @@ function QuizPlay() {
   }, [remainingTime, handleFinishTest]);
 
 
-  const handleSelectChoice = async (choice: string) => {
+  const handleSelectChoice = (choice: string) => {
     setSelectedChoice(choice);
-
-    if (!quizSessionId || !window.apiClient) {
-      setError('Quiz Session ID or API client is not available.');
-      return;
-    }
-
-    try {
-      await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
-        questionNumber: questionNumber,
-        userAnswer: choice,
-      });
-      console.log('Answer submitted successfully!');
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(`Failed to submit answer: ${err.message}`);
-      } else {
-        setError('Failed to submit answer.');
-      }
-    }
   };
 
   const handleCheckLater = async () => {
@@ -215,7 +215,8 @@ function QuizPlay() {
     }
   };
 
-  const handlePreviousQuestion = () => {
+  const handlePreviousQuestion = async () => {
+    await submitAnswerIfNeeded();
     if (questionNumber > 1) {
       const prevQuestionNumber = questionNumber - 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
@@ -224,7 +225,8 @@ function QuizPlay() {
     }
   };
 
-  const handleNextQuestion = () => {
+  const handleNextQuestion = async () => {
+    await submitAnswerIfNeeded();
     if (questionData && questionNumber < questionData.totalQuestions) {
       const nextQuestionNumber = questionNumber + 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
