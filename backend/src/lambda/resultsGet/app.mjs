@@ -75,14 +75,35 @@ export const lambdaHandler = async (event) => {
         // If questionNumber is specified, return specific question details
         if (questionNumberStr) {
             const questionNumber = parseInt(questionNumberStr, 10);
-            if (isNaN(questionNumber) || questionNumber <= 0 || questionNumber > score.TotalCount + 1) {
+            if (isNaN(questionNumber) || questionNumber < 0 || questionNumber > score.TotalCount) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({ message: "Invalid question number." }),
                 };
             }
 
-            const questionInfo = score.Answers[questionNumber - 1];
+            const questionInfo = score.Answers.find(a => a.questionNumber === questionNumber);
+            if (!questionInfo) {
+                return {
+                    statusCode: 404,
+                    body: JSON.stringify({ message: "Question not found." }),
+                };
+            }
+
+            // questionNumberを基準に、前後30問の範囲を計算
+            const windowSize = 30;
+            const start = Math.max(1, questionNumber - windowSize);
+            const end = Math.min(score.TotalCount, questionNumber + windowSize);
+
+            // QuestionNumberがstartからendまでの範囲の解答を取得
+            const answersWindow = score.Answers.filter(a => a.questionNumber >= start && a.questionNumber <= end);
+            const processedAnswers = answersWindow.map(questionInfo => ({
+                questionText: questionInfo.QuestionText,
+                choices: questionInfo.Choices,
+                userChoice: questionInfo.SelectedChoice,
+                afterCheck: questionInfo.AfterCheck,
+
+            }));
 
             return {
                 statusCode: 200,
@@ -95,7 +116,7 @@ export const lambdaHandler = async (event) => {
                     afterCheck: questionInfo.AfterCheck,
                     expiresAt: score.ExpiresAt,
                     startedAt: score.StartedAt,
-                    answers: score.Answers
+                    answers: processedAnswers,
                 }),
             };
         }
