@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, Suspense, useCallback } from 'react';
+import React, { useState, useEffect, Suspense, useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Script from 'next/script';
@@ -52,6 +52,8 @@ function QuizPlay() {
   const [error, setError] = useState<string | null>(null);
   const [remainingTime, setRemainingTime] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const isSubmittingRef = useRef(isSubmitting);
+  isSubmittingRef.current = isSubmitting;
 
   useEffect(() => {
     const sessionId = searchParams.get('quizSessionId');
@@ -87,7 +89,7 @@ function QuizPlay() {
       try {
         const cachedDataString = sessionStorage.getItem(cacheKey);
         const cachedAnswers = cachedDataString ? JSON.parse(cachedDataString) : {};
-
+        
         let cachedQuestionData = null;
         for (const key in cachedAnswers) {
           if (cachedAnswers[key].questionNumber === questionNumber - 1) {
@@ -196,27 +198,23 @@ function QuizPlay() {
   }, [quizSessionId, questionNumber, selectedChoice]);
 
   // HOC to wrap async handlers with submission state logic
-  const withSubmitting = useCallback((handler: (...args: any[]) => Promise<any>) => {
-    return async (...args: any[]) => {
-      if (isSubmitting) return;
-      setIsSubmitting(true);
-      try {
-        await handler(...args);
-      } finally {
-        setIsSubmitting(false);
-      }
+  const withSubmitting = useMemo(() => {
+    return <A extends unknown[]>(handler: (...args: A) => Promise<unknown>) => {
+      return async (...args: A): Promise<void> => {
+        if (isSubmittingRef.current) return;
+        setIsSubmitting(true);
+        try {
+          await handler(...args);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
     };
-  }, [isSubmitting]);
+  }, [setIsSubmitting]);
 
-  const handleFinishTest = useCallback(withSubmitting(async (autoSubmit = false) => {
+  const handleFinishTest = useCallback(withSubmitting(async () => {
     if (!quizSessionId || !window.apiClient) {
       setError('Quiz Session ID or API client is not available.');
-      return;
-    }
-
-    if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
-      // Manually reset submitting state if user cancels
-      setIsSubmitting(false);
       return;
     }
 
@@ -229,7 +227,7 @@ function QuizPlay() {
       await window.apiClient.post(`/Prod/quizzes/completion`, {
         quizId: quizSessionId,
       });
-      toast.success('テストが完了しました。');
+      toast.success('テストが完��しました。');
       router.push(`/quiz-result?quizSessionId=${quizSessionId}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -237,6 +235,12 @@ function QuizPlay() {
       setError(`Failed to finish the test: ${errorMessage}`);
     }
   }), [quizSessionId, router, submitAnswerIfNeeded, withSubmitting]);
+
+  const handleFinishTestClick = () => {
+    if (confirm('テストを本当に終了しますか？')) {
+      handleFinishTest();
+    }
+  };
 
   // Timer effect
   useEffect(() => {
@@ -256,7 +260,7 @@ function QuizPlay() {
   useEffect(() => {
     if (remainingTime === 0) {
       toast.error("時間切れです。テストを終了します。");
-      handleFinishTest(true);
+      handleFinishTest();
     }
   }, [remainingTime, handleFinishTest]);
 
@@ -341,7 +345,7 @@ function QuizPlay() {
       const prevQuestionNumber = questionNumber - 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
     } else {
-      toast.error('これが最初の問題です。');
+      toast.error('これが最初の問題���す。');
     }
   }), [submitAnswerIfNeeded, questionNumber, quizSessionId, router, withSubmitting]);
 
@@ -390,7 +394,7 @@ function QuizPlay() {
                 : {questionData.questionText}
               </p>
             </div>
-            <p>残り時間: <span id="remaining-time">{formatTime(remainingTime)}</span></p>
+            <p>残り時��: <span id="remaining-time">{formatTime(remainingTime)}</span></p>
             <ul className="choices-list">
               {questionData.choices.map((choice, index) => (
                 <li key={index}>
@@ -419,7 +423,7 @@ function QuizPlay() {
           <button onClick={handleCheckAnswerStatus} disabled={isSubmitting}>
             {isSubmitting ? '処理中...' : '解答状況を確認'}
           </button>
-          <button onClick={() => handleFinishTest(false)} disabled={isSubmitting}>
+          <button onClick={handleFinishTestClick} disabled={isSubmitting}>
             {isSubmitting ? '処理中...' : 'テストを終える'}
           </button>
         </div>
