@@ -75,7 +75,8 @@ export const lambdaHandler = async (event) => {
 
         // If questionNumber is specified, return specific question details
         if (questionNumberStr) {
-            const questionNumber = parseInt(questionNumberStr, 10);
+            const questionNumber = parseInt(questionNumberStr, 10) - 1;
+
             if (isNaN(questionNumber) || questionNumber < 0 || questionNumber > score.TotalCount) {
                 return {
                     statusCode: 400,
@@ -83,7 +84,7 @@ export const lambdaHandler = async (event) => {
                 };
             }
 
-            const questionInfo = score.Answers.find(a => a.questionNumber === questionNumber);
+            const questionInfo = score.Answers.find(a => a.QuestionNumber === questionNumber);
             if (!questionInfo) {
                 return {
                     statusCode: 404,
@@ -96,12 +97,13 @@ export const lambdaHandler = async (event) => {
             const end = Math.min(score.TotalCount, questionNumber + ANSWER_WINDOW_SIZE);
 
             // QuestionNumberがstartからendまでの範囲の解答を取得
-            const answersWindow = score.Answers.filter(a => a.questionNumber >= start && a.questionNumber <= end);
+            const answersWindow = score.Answers.filter(a => a.QuestionNumber >= start && a.QuestionNumber <= end);
             const processedAnswers = answersWindow.map(answer => ({
                 questionText: answer.QuestionText,
                 choices: answer.Choices,
                 userChoice: answer.SelectedChoice,
                 afterCheck: answer.AfterCheck,
+                questionNumber: answer.QuestionNumber
             }));
 
             return {
