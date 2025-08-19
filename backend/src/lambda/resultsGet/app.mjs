@@ -93,7 +93,7 @@ export const lambdaHandler = async (event) => {
             }
 
             // questionNumberを基準に、前後30問の範囲を計算
-            const start = Math.max(1, questionNumber - ANSWER_WINDOW_SIZE);
+            const start = Math.max(0, questionNumber - ANSWER_WINDOW_SIZE);
             const end = Math.min(score.TotalCount, questionNumber + ANSWER_WINDOW_SIZE);
 
             // QuestionNumberがstartからendまでの範囲の解答を取得
