@@ -8,6 +8,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 const SCORES_TABLE_NAME = process.env.SCORES_TABLE_NAME;
 const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 const QUIZ_GROUPS_TABLE_NAME = process.env.QUIZ_GROUPS_TABLE_NAME;
+const ANSWER_WINDOW_SIZE = 30;
 
 export const lambdaHandler = async (event) => {
     if (!SCORES_TABLE_NAME || !QUESTIONS_TABLE_NAME || !QUIZ_GROUPS_TABLE_NAME) {
@@ -91,18 +92,16 @@ export const lambdaHandler = async (event) => {
             }
 
             // questionNumberを基準に、前後30問の範囲を計算
-            const windowSize = 30;
-            const start = Math.max(1, questionNumber - windowSize);
-            const end = Math.min(score.TotalCount, questionNumber + windowSize);
+            const start = Math.max(1, questionNumber - ANSWER_WINDOW_SIZE);
+            const end = Math.min(score.TotalCount, questionNumber + ANSWER_WINDOW_SIZE);
 
             // QuestionNumberがstartからendまでの範囲の解答を取得
             const answersWindow = score.Answers.filter(a => a.questionNumber >= start && a.questionNumber <= end);
-            const processedAnswers = answersWindow.map(questionInfo => ({
-                questionText: questionInfo.QuestionText,
-                choices: questionInfo.Choices,
-                userChoice: questionInfo.SelectedChoice,
-                afterCheck: questionInfo.AfterCheck,
-
+            const processedAnswers = answersWindow.map(answer => ({
+                questionText: answer.QuestionText,
+                choices: answer.Choices,
+                userChoice: answer.SelectedChoice,
+                afterCheck: answer.AfterCheck,
             }));
 
             return {
