@@ -145,6 +145,25 @@ function QuizPlay() {
       return true;
     }
 
+    const cacheKey = `quizCache_${quizSessionId}`;
+    const cachedDataString = sessionStorage.getItem(cacheKey);
+
+    if (cachedDataString) {
+      const cachedAnswers = JSON.parse(cachedDataString);
+      let cachedQuestion = null;
+      for (const key in cachedAnswers) {
+        if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+          cachedQuestion = cachedAnswers[key];
+          break;
+        }
+      }
+
+      if (cachedQuestion && cachedQuestion.userChoice === selectedChoice) {
+        console.log(`Answer for question ${questionNumber} is unchanged. Skipping API call.`);
+        return true;
+      }
+    }
+
     try {
       await window.apiClient.post(`/Prod/quizzes/${quizSessionId}/answers`, {
         questionNumber: questionNumber,
@@ -152,8 +171,6 @@ function QuizPlay() {
       });
       console.log(`Answer for question ${questionNumber} submitted successfully!`);
 
-      const cacheKey = `quizCache_${quizSessionId}`;
-      const cachedDataString = sessionStorage.getItem(cacheKey);
       if (cachedDataString) {
         const cachedAnswers = JSON.parse(cachedDataString);
         let itemKeyToUpdate = null;
@@ -246,19 +263,39 @@ function QuizPlay() {
     }
 
     const afterCheckValue = !isAfterChecked;
-    let updatedLaterQuestions;
+    const cacheKey = `quizCache_${quizSessionId}`;
+    const cachedDataString = sessionStorage.getItem(cacheKey);
 
+    if (cachedDataString) {
+        const cachedAnswers = JSON.parse(cachedDataString);
+        let cachedQuestion = null;
+        for (const key in cachedAnswers) {
+            if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+                cachedQuestion = cachedAnswers[key];
+                break;
+            }
+        }
+
+        if (cachedQuestion && cachedQuestion.afterCheck === afterCheckValue) {
+            console.log(`"Check later" for question ${questionNumber} is unchanged. Skipping API call.`);
+            // Even if we skip the API call, we should ensure the local state is correct.
+            setIsAfterChecked(afterCheckValue);
+            const newQuestionData = { ...questionData, afterCheck: afterCheckValue };
+            setQuestionData(newQuestionData);
+            return;
+        }
+    }
+
+    let updatedLaterQuestions;
     const currentCheckedLater = questionData.checkedLaterQuestions || [];
 
     if (afterCheckValue) {
-      // Add to list if not present
       if (!currentCheckedLater.includes(questionNumber)) {
         updatedLaterQuestions = [...currentCheckedLater, questionNumber].sort((a, b) => a - b);
       } else {
         updatedLaterQuestions = currentCheckedLater;
       }
     } else {
-      // Remove from list
       updatedLaterQuestions = currentCheckedLater.filter(
         (qNum) => qNum !== questionNumber
       );
@@ -272,13 +309,10 @@ function QuizPlay() {
         afterCheckValue: afterCheckValue,
       });
 
-      // Update state after successful API call
       setIsAfterChecked(afterCheckValue);
       const newQuestionData = { ...questionData, checkedLaterQuestions: updatedLaterQuestions, afterCheck: afterCheckValue };
       setQuestionData(newQuestionData);
 
-      const cacheKey = `quizCache_${quizSessionId}`;
-      const cachedDataString = sessionStorage.getItem(cacheKey);
       if (cachedDataString) {
         const cachedAnswers = JSON.parse(cachedDataString);
         let itemKeyToUpdate = null;
