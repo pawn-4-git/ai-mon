@@ -19,6 +19,14 @@ declare global {
   }
 }
 
+interface Answer {
+  questionText: string;
+  choices: string[];
+  userChoice: string | null;
+  afterCheck?: boolean;
+  questionNumber: number; // 0-indexed
+}
+
 interface QuestionData {
   totalQuestions: number;
   questionText: string;
@@ -28,6 +36,8 @@ interface QuestionData {
   checkedLaterQuestions?: number[];
   afterCheck?: boolean;
   expiresAt: string; // APIからの有効期限
+  answers?: Answer[];
+  questionNumber?: number;
 }
 
 function QuizPlay() {
@@ -71,11 +81,51 @@ function QuizPlay() {
 
       setLoading(true);
       setError(null);
+
+      const cacheKey = `quizCache_${quizSessionId}`;
       try {
+        const cachedDataString = sessionStorage.getItem(cacheKey);
+        const cachedAnswers = cachedDataString ? JSON.parse(cachedDataString) : {};
+        
+        let cachedQuestionData = null;
+        for (const key in cachedAnswers) {
+          if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+            cachedQuestionData = cachedAnswers[key];
+            break;
+          }
+        }
+
+        if (cachedQuestionData) {
+          setQuestionData(cachedQuestionData);
+          setSelectedChoice(cachedQuestionData.userChoice);
+          setIsAfterChecked(cachedQuestionData.afterCheck === true);
+          setLoading(false);
+          return;
+        }
+
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData;
         setQuestionData(data);
         setSelectedChoice(data.userChoice);
         setIsAfterChecked(data.afterCheck === true);
+
+        if (data.answers) {
+          const newCachedAnswers = { ...cachedAnswers };
+          data.answers.forEach((answer: Answer) => {
+            const questionDataForCache = {
+              totalQuestions: data.totalQuestions,
+              groupName: data.groupName,
+              expiresAt: data.expiresAt,
+              checkedLaterQuestions: data.checkedLaterQuestions,
+              questionText: answer.questionText,
+              choices: answer.choices,
+              userChoice: answer.userChoice,
+              afterCheck: answer.afterCheck,
+              questionNumber: answer.questionNumber,
+            };
+            newCachedAnswers[answer.questionNumber] = questionDataForCache;
+          });
+          sessionStorage.setItem(cacheKey, JSON.stringify(newCachedAnswers));
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -101,6 +151,24 @@ function QuizPlay() {
         userAnswer: selectedChoice,
       });
       console.log(`Answer for question ${questionNumber} submitted successfully!`);
+
+      const cacheKey = `quizCache_${quizSessionId}`;
+      const cachedDataString = sessionStorage.getItem(cacheKey);
+      if (cachedDataString) {
+        const cachedAnswers = JSON.parse(cachedDataString);
+        let itemKeyToUpdate = null;
+        for (const key in cachedAnswers) {
+          if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+            itemKeyToUpdate = key;
+            break;
+          }
+        }
+
+        if (itemKeyToUpdate) {
+          cachedAnswers[itemKeyToUpdate].userChoice = selectedChoice;
+          sessionStorage.setItem(cacheKey, JSON.stringify(cachedAnswers));
+        }
+      }
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -115,13 +183,13 @@ function QuizPlay() {
       return;
     }
 
-    if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
+    if (!autoSubmit && !confirm('テ��トを本当に終了しますか？')) {
       return;
     }
 
     const submissionSuccess = await submitAnswerIfNeeded();
     if (!submissionSuccess) {
-        return;
+      return;
     }
 
     try {
@@ -206,7 +274,29 @@ function QuizPlay() {
 
       // Update state after successful API call
       setIsAfterChecked(afterCheckValue);
-      setQuestionData({ ...questionData, checkedLaterQuestions: updatedLaterQuestions });
+      const newQuestionData = { ...questionData, checkedLaterQuestions: updatedLaterQuestions, afterCheck: afterCheckValue };
+      setQuestionData(newQuestionData);
+
+      const cacheKey = `quizCache_${quizSessionId}`;
+      const cachedDataString = sessionStorage.getItem(cacheKey);
+      if (cachedDataString) {
+        const cachedAnswers = JSON.parse(cachedDataString);
+        let itemKeyToUpdate = null;
+        for (const key in cachedAnswers) {
+          if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+            itemKeyToUpdate = key;
+            break;
+          }
+        }
+
+        if (itemKeyToUpdate) {
+          cachedAnswers[itemKeyToUpdate].afterCheck = afterCheckValue;
+          Object.keys(cachedAnswers).forEach(key => {
+            cachedAnswers[key].checkedLaterQuestions = updatedLaterQuestions;
+          });
+          sessionStorage.setItem(cacheKey, JSON.stringify(cachedAnswers));
+        }
+      }
 
       if (afterCheckValue) {
         toast.success(`問題${questionNumber}を「後で確認する」に設定しました。`);
@@ -223,7 +313,7 @@ function QuizPlay() {
   const handlePreviousQuestion = async () => {
     const submissionSuccess = await submitAnswerIfNeeded();
     if (!submissionSuccess) {
-        return;
+      return;
     }
     if (questionNumber > 1) {
       const prevQuestionNumber = questionNumber - 1;
@@ -236,7 +326,7 @@ function QuizPlay() {
   const handleNextQuestion = async () => {
     const submissionSuccess = await submitAnswerIfNeeded();
     if (!submissionSuccess) {
-        return;
+      return;
     }
     if (questionData && questionNumber < questionData.totalQuestions) {
       const nextQuestionNumber = questionNumber + 1;
@@ -249,7 +339,7 @@ function QuizPlay() {
   const handleCheckAnswerStatus = async () => {
     const submissionSuccess = await submitAnswerIfNeeded();
     if (!submissionSuccess) {
-        return;
+      return;
     }
     router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
   };
