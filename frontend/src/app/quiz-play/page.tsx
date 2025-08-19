@@ -87,7 +87,7 @@ function QuizPlay() {
       try {
         const cachedDataString = sessionStorage.getItem(cacheKey);
         const cachedAnswers = cachedDataString ? JSON.parse(cachedDataString) : {};
-        
+
         let cachedQuestionData = null;
         for (const key in cachedAnswers) {
           if (cachedAnswers[key].questionNumber === questionNumber - 1) {
@@ -195,24 +195,37 @@ function QuizPlay() {
     }
   }, [quizSessionId, questionNumber, selectedChoice]);
 
-  const handleFinishTest = useCallback(async (autoSubmit = false) => {
-    if (isSubmitting) return;
+  // HOC to wrap async handlers with submission state logic
+  const withSubmitting = useCallback((handler: (...args: any[]) => Promise<any>) => {
+    return async (...args: any[]) => {
+      if (isSubmitting) return;
+      setIsSubmitting(true);
+      try {
+        await handler(...args);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+  }, [isSubmitting]);
+
+  const handleFinishTest = useCallback(withSubmitting(async (autoSubmit = false) => {
     if (!quizSessionId || !window.apiClient) {
       setError('Quiz Session ID or API client is not available.');
       return;
     }
 
     if (!autoSubmit && !confirm('テストを本当に終了しますか？')) {
+      // Manually reset submitting state if user cancels
+      setIsSubmitting(false);
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const submissionSuccess = await submitAnswerIfNeeded();
-      if (!submissionSuccess) {
-        return;
-      }
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) {
+      return;
+    }
 
+    try {
       await window.apiClient.post(`/Prod/quizzes/completion`, {
         quizId: quizSessionId,
       });
@@ -222,92 +235,70 @@ function QuizPlay() {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       toast.error(`テストの終了に失敗しました: ${errorMessage}`);
       setError(`Failed to finish the test: ${errorMessage}`);
-    } finally {
-      setIsSubmitting(false);
     }
-  }, [quizSessionId, router, submitAnswerIfNeeded, isSubmitting]);
+  }), [quizSessionId, router, submitAnswerIfNeeded, withSubmitting]);
 
-  // Timer effect - recalculates from expiry time to prevent drift
+  // Timer effect
   useEffect(() => {
-    if (!questionData?.expiresAt) {
-      return;
-    }
-
+    if (!questionData?.expiresAt) return;
     const expiryTime = new Date(questionData.expiresAt).getTime();
-
     const updateRemainingTime = () => {
       const now = new Date().getTime();
       const timeLeft = Math.round((expiryTime - now) / 1000);
       setRemainingTime(timeLeft > 0 ? timeLeft : 0);
     };
-
-    // Set time immediately and then every second
     updateRemainingTime();
     const timerId = setInterval(updateRemainingTime, 1000);
-
     return () => clearInterval(timerId);
   }, [questionData?.expiresAt]);
 
-  // Effect for when time runs out
+  // Time out effect
   useEffect(() => {
     if (remainingTime === 0) {
       toast.error("時間切れです。テストを終了します。");
-      handleFinishTest(true); // auto-submit
+      handleFinishTest(true);
     }
   }, [remainingTime, handleFinishTest]);
-
 
   const handleSelectChoice = (choice: string) => {
     setSelectedChoice(choice);
   };
 
-  const handleCheckLater = async () => {
-    if (isSubmitting) return;
+  const handleCheckLater = useCallback(withSubmitting(async () => {
     if (!quizSessionId || !window.apiClient || !questionData) {
       setError('Quiz Session ID, API client, or question data is not available.');
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      const afterCheckValue = !isAfterChecked;
-      const cacheKey = `quizCache_${quizSessionId}`;
-      const cachedDataString = sessionStorage.getItem(cacheKey);
+    const afterCheckValue = !isAfterChecked;
+    const cacheKey = `quizCache_${quizSessionId}`;
+    const cachedDataString = sessionStorage.getItem(cacheKey);
 
-      if (cachedDataString) {
-          const cachedAnswers = JSON.parse(cachedDataString);
-          let cachedQuestion = null;
-          for (const key in cachedAnswers) {
-              if (cachedAnswers[key].questionNumber === questionNumber - 1) {
-                  cachedQuestion = cachedAnswers[key];
-                  break;
-              }
-          }
-
-          if (cachedQuestion && cachedQuestion.afterCheck === afterCheckValue) {
-              console.log(`"Check later" for question ${questionNumber} is unchanged. Skipping API call.`);
-              setIsAfterChecked(afterCheckValue);
-              const newQuestionData = { ...questionData, afterCheck: afterCheckValue };
-              setQuestionData(newQuestionData);
-              return;
-          }
-      }
-
-      let updatedLaterQuestions;
-      const currentCheckedLater = questionData.checkedLaterQuestions || [];
-
-      if (afterCheckValue) {
-        if (!currentCheckedLater.includes(questionNumber)) {
-          updatedLaterQuestions = [...currentCheckedLater, questionNumber].sort((a, b) => a - b);
-        } else {
-          updatedLaterQuestions = currentCheckedLater;
+    if (cachedDataString) {
+      const cachedAnswers = JSON.parse(cachedDataString);
+      let cachedQuestion = null;
+      for (const key in cachedAnswers) {
+        if (cachedAnswers[key].questionNumber === questionNumber - 1) {
+          cachedQuestion = cachedAnswers[key];
+          break;
         }
-      } else {
-        updatedLaterQuestions = currentCheckedLater.filter(
-          (qNum) => qNum !== questionNumber
-        );
       }
+      if (cachedQuestion && cachedQuestion.afterCheck === afterCheckValue) {
+        setIsAfterChecked(afterCheckValue);
+        setQuestionData({ ...questionData, afterCheck: afterCheckValue });
+        return;
+      }
+    }
 
+    let updatedLaterQuestions;
+    const currentCheckedLater = questionData.checkedLaterQuestions || [];
+    if (afterCheckValue) {
+      updatedLaterQuestions = [...new Set([...currentCheckedLater, questionNumber])].sort((a, b) => a - b);
+    } else {
+      updatedLaterQuestions = currentCheckedLater.filter(qNum => qNum !== questionNumber);
+    }
+
+    try {
       await window.apiClient.post(`/Prod/quizzes/user-answer`, {
         scoreId: quizSessionId,
         questionNumber: questionNumber,
@@ -328,7 +319,6 @@ function QuizPlay() {
             break;
           }
         }
-
         if (itemKeyToUpdate) {
           cachedAnswers[itemKeyToUpdate].afterCheck = afterCheckValue;
           Object.keys(cachedAnswers).forEach(key => {
@@ -337,72 +327,40 @@ function QuizPlay() {
           sessionStorage.setItem(cacheKey, JSON.stringify(cachedAnswers));
         }
       }
-
-      if (afterCheckValue) {
-        toast.success(`問題${questionNumber}を「後で確認する」に設定しました。`);
-      } else {
-        toast.success(`問題${questionNumber}の「後で確認する」を解除しました。`);
-      }
+      toast.success(`問題${questionNumber}の「後で確認する」を更新しました。`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       toast.error(`更新に失敗しました: ${errorMessage}`);
-      setError(`Failed to update check later status: ${errorMessage}`);
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+  }), [quizSessionId, questionData, isAfterChecked, withSubmitting]);
 
-  const handlePreviousQuestion = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const submissionSuccess = await submitAnswerIfNeeded();
-      if (!submissionSuccess) {
-        return;
-      }
-      if (questionNumber > 1) {
-        const prevQuestionNumber = questionNumber - 1;
-        router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
-      } else {
-        toast.error('これが最初の問題です。');
-      }
-    } finally {
-      setIsSubmitting(false);
+  const handlePreviousQuestion = useCallback(withSubmitting(async () => {
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) return;
+    if (questionNumber > 1) {
+      const prevQuestionNumber = questionNumber - 1;
+      router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
+    } else {
+      toast.error('これが最初の問題です。');
     }
-  };
+  }), [submitAnswerIfNeeded, questionNumber, quizSessionId, router, withSubmitting]);
 
-  const handleNextQuestion = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const submissionSuccess = await submitAnswerIfNeeded();
-      if (!submissionSuccess) {
-        return;
-      }
-      if (questionData && questionNumber < questionData.totalQuestions) {
-        const nextQuestionNumber = questionNumber + 1;
-        router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
-      } else {
-        toast.error('これが最後の問題です。');
-      }
-    } finally {
-      setIsSubmitting(false);
+  const handleNextQuestion = useCallback(withSubmitting(async () => {
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) return;
+    if (questionData && questionNumber < questionData.totalQuestions) {
+      const nextQuestionNumber = questionNumber + 1;
+      router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${nextQuestionNumber}`);
+    } else {
+      toast.error('これが最後の問題です。');
     }
-  };
+  }), [submitAnswerIfNeeded, questionData, questionNumber, quizSessionId, router, withSubmitting]);
 
-  const handleCheckAnswerStatus = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-    try {
-      const submissionSuccess = await submitAnswerIfNeeded();
-      if (!submissionSuccess) {
-        return;
-      }
-      router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const handleCheckAnswerStatus = useCallback(withSubmitting(async () => {
+    const submissionSuccess = await submitAnswerIfNeeded();
+    if (!submissionSuccess) return;
+    router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
+  }), [submitAnswerIfNeeded, quizSessionId, questionNumber, router, withSubmitting]);
 
   const formatTime = (timeInSeconds: number | null) => {
     if (timeInSeconds === null) return '...';
