@@ -89,7 +89,7 @@ function QuizPlay() {
       try {
         const cachedDataString = sessionStorage.getItem(cacheKey);
         const cachedAnswers = cachedDataString ? JSON.parse(cachedDataString) : {};
-        
+
         let cachedQuestionData = null;
         for (const key in cachedAnswers) {
           if (cachedAnswers[key].questionNumber === questionNumber - 1) {
@@ -394,7 +394,7 @@ function QuizPlay() {
                 : {questionData.questionText}
               </p>
             </div>
-            <p>残り時��: <span id="remaining-time">{formatTime(remainingTime)}</span></p>
+            <p>残り時間: <span id="remaining-time">{formatTime(remainingTime)}</span></p>
             <ul className="choices-list">
               {questionData.choices.map((choice, index) => (
                 <li key={index}>
