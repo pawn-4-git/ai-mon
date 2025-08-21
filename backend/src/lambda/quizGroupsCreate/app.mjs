@@ -78,10 +78,18 @@ export const lambdaHandler = async (event) => {
         await docClient.send(putCommand);
 
         await updateUserTtl(authResult.userId);
-        await updateSessionTtl(authResult.sessionId);
+        newSession = await updateSessionTtl(authResult.sessionId);
 
         return {
             statusCode: 201,
+            multiValueHeaders: {
+                "Content-Type": ["application/json"], // Content-Typeも配列にする
+                // Set-Cookieを配列として指定する
+                "Set-Cookie": [
+                    `sessionId=${authResult.sessionId}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`,
+                    `sessionVersionId=${newSession}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=86400`
+                ]
+            },
             body: JSON.stringify({
                 message: "Quiz group created successfully.",
                 GroupId: groupId,
