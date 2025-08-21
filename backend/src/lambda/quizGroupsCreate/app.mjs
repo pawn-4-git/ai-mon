@@ -78,7 +78,7 @@ export const lambdaHandler = async (event) => {
         await docClient.send(putCommand);
 
         await updateUserTtl(authResult.userId);
-        newSession = await updateSessionTtl(authResult.sessionId);
+        const newSession = await updateSessionTtl(authResult.sessionId);
 
         return {
             statusCode: 201,
