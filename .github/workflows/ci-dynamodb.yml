@@ -2,8 +2,7 @@ name: CI-DynamoDB
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main,develop ] # mainブランチへのプッシュでこのワークフローが実行されます
     paths:
       - '.github/workflows/ci-dynamodb.yml'
       - 'backend/iac/**'
