@@ -1591,6 +1591,10 @@ Resources:
             ResponsePagePath: !Sub "/${AppBasePath}/index.html"
             ResponseCode: 200
             ErrorCachingMinTTL: 0
+          - ErrorCode: 400
+            ResponsePagePath: !Sub "/${AppBasePath}/index.html"
+            ResponseCode: 200
+            ErrorCachingMinTTL: 0
         Enabled: true
         HttpVersion: http2
         PriceClass: PriceClass_All
