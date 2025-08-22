@@ -1535,11 +1535,14 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: AimonAppS3Origin
           ViewerProtocolPolicy: redirect-to-https
-          FunctionAssociations:
-              - EventType: 'viewer-request'
+          FunctionAssociations: !If
+            - IsBasicAuthEnabled
+            - - EventType: 'viewer-request'
                 FunctionARN: !GetAtt RootObjectFunction.Arn
               - EventType: 'viewer-request'
                 FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
+            - - EventType: 'viewer-request'
+                FunctionARN: !GetAtt RootObjectFunction.Arn
           AllowedMethods:
             - GET
             - HEAD
