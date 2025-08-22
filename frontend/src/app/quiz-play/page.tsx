@@ -20,11 +20,15 @@ declare global {
 }
 
 interface Answer {
-  questionText: string;
-  choices: string[];
-  userChoice: string | null;
-  afterCheck?: boolean;
-  questionNumber: number; // 0-indexed
+  QuestionId: string;
+  QuestionNumber: number;
+  QuestionText: string;
+  Choices: string[];
+  SelectedChoice: string | null;
+  CorrectChoice: string;
+  IsCorrect: boolean | null;
+  Explanation: string;
+  AfterCheck: boolean | null;
 }
 
 interface QuestionData {
@@ -114,13 +118,13 @@ function QuizPlay() {
               groupName: data.groupName,
               expiresAt: data.expiresAt,
               checkedLaterQuestions: data.checkedLaterQuestions,
-              questionText: answer.questionText,
-              choices: answer.choices,
-              userChoice: answer.userChoice,
-              afterCheck: answer.afterCheck,
-              questionNumber: answer.questionNumber,
+              questionText: answer.QuestionText,
+              choices: answer.Choices,
+              userChoice: answer.SelectedChoice,
+              afterCheck: answer.AfterCheck,
+              questionNumber: answer.QuestionNumber,
             };
-            newCachedAnswers[answer.questionNumber] = questionDataForCache;
+            newCachedAnswers[answer.QuestionNumber] = questionDataForCache;
           });
         } else {
           // If the response is for a single question, cache just that one
