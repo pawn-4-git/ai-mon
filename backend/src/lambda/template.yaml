@@ -1538,11 +1538,11 @@ Resources:
           FunctionAssociations: !If
             - IsBasicAuthEnabled
             - - EventType: 'viewer-request'
-                FunctionARN: !GetAtt RootObjectFunction.Arn
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/${AWS::StackName}-RootObjectFunction"
               - EventType: 'viewer-request'
                 FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
             - - EventType: 'viewer-request'
-                FunctionARN: !GetAtt RootObjectFunction.Arn
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/${AWS::StackName}-RootObjectFunction"
           AllowedMethods:
             - GET
             - HEAD
