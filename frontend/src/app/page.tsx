@@ -150,7 +150,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleAnonymousCreation = async () => {
+  const handleAnonymousCreation = async (anonymous = true) => {
     try {
       if (!window.apiClient) {
         alert('機能の準備中です。少し待ってからもう一度お試しください。');
@@ -158,21 +158,31 @@ export default function LoginPage() {
       }
 
       const endpoint = '/Prod/users/register';
+      const accountName = registerUsernameRef.current?.value.trim();
+
+      if (!anonymous && !accountName) {
+        alert('アカウント名を入力してください。');
+        return;
+      }
+
+      const requestBody = anonymous ? { anonymous: true } : { accountName, anonymous: false };
+
       const response = await window.apiClient.post(
         endpoint,
-        { anonymous: true }
-      ) as { AccountName: string };
+        requestBody
+      ) as { AccountName: string, message?: string };
 
       if (response && response.AccountName) {
         auth.login(response.AccountName);
-        alert('匿名アカウントが作成されました！');
+        alert(anonymous ? '匿名アカウントが作成されました！' : 'アカウントが登録されました！');
         router.push('/quiz-list');
       } else {
-        alert('匿名アカウントの作成に失敗しました。');
+        alert(response?.message || (anonymous ? '匿名アカウントの作成に失敗しました。' : 'アカウントの登録に失敗しました。'));
       }
 
     } catch (error) {
-      console.error('Failed to create anonymous user:', error);
+      console.error('Failed to create user:', error);
+      alert('処理中にエラーが発生しました。');
     }
   };
 
