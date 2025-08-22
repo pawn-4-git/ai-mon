@@ -20,11 +20,15 @@ declare global {
 }
 
 interface Answer {
-  questionText: string;
-  choices: string[];
-  userChoice: string | null;
-  afterCheck?: boolean;
-  questionNumber: number; // 0-indexed
+  QuestionId: string;
+  QuestionNumber: number;
+  QuestionText: string;
+  Choices: string[];
+  SelectedChoice: string | null;
+  CorrectChoice: string;
+  IsCorrect: boolean | null;
+  Explanation: string;
+  AfterCheck: boolean | null;
 }
 
 interface QuestionData {
@@ -35,7 +39,7 @@ interface QuestionData {
   groupName: string;
   checkedLaterQuestions?: number[];
   afterCheck?: boolean;
-  expiresAt: string; // APIからの有効期限
+  expiresAt: number; // APIからの有効期限 (Unixタイムスタンプ)
   answers?: Answer[];
   questionNumber?: number;
 }
@@ -89,14 +93,7 @@ function QuizPlay() {
       try {
         const cachedDataString = sessionStorage.getItem(cacheKey);
         const cachedAnswers = cachedDataString ? JSON.parse(cachedDataString) : {};
-
-        let cachedQuestionData = null;
-        for (const key in cachedAnswers) {
-          if (cachedAnswers[key].questionNumber === questionNumber - 1) {
-            cachedQuestionData = cachedAnswers[key];
-            break;
-          }
-        }
+        const cachedQuestionData = cachedAnswers[questionNumber - 1];
 
         if (cachedQuestionData) {
           setQuestionData(cachedQuestionData);
@@ -111,24 +108,41 @@ function QuizPlay() {
         setSelectedChoice(data.userChoice);
         setIsAfterChecked(data.afterCheck === true);
 
-        if (data.answers) {
-          const newCachedAnswers = { ...cachedAnswers };
+        // Cache the fetched data
+        const newCachedAnswers = { ...cachedAnswers };
+        if (data.answers && data.answers.length > 0) {
+          // If the response contains all answers, update the cache with all of them
           data.answers.forEach((answer: Answer) => {
             const questionDataForCache = {
               totalQuestions: data.totalQuestions,
               groupName: data.groupName,
               expiresAt: data.expiresAt,
               checkedLaterQuestions: data.checkedLaterQuestions,
-              questionText: answer.questionText,
-              choices: answer.choices,
-              userChoice: answer.userChoice,
-              afterCheck: answer.afterCheck,
-              questionNumber: answer.questionNumber,
+              questionText: answer.QuestionText,
+              choices: answer.Choices,
+              userChoice: answer.SelectedChoice,
+              afterCheck: answer.AfterCheck,
+              questionNumber: answer.QuestionNumber,
             };
-            newCachedAnswers[answer.questionNumber] = questionDataForCache;
+            newCachedAnswers[answer.QuestionNumber] = questionDataForCache;
           });
-          sessionStorage.setItem(cacheKey, JSON.stringify(newCachedAnswers));
+        } else {
+          // If the response is for a single question, cache just that one
+          const questionDataForCache = {
+            totalQuestions: data.totalQuestions,
+            groupName: data.groupName,
+            expiresAt: data.expiresAt,
+            checkedLaterQuestions: data.checkedLaterQuestions,
+            questionText: data.questionText,
+            choices: data.choices,
+            userChoice: data.userChoice,
+            afterCheck: data.afterCheck,
+            questionNumber: questionNumber - 1, // Use 0-indexed number for the key
+          };
+          newCachedAnswers[questionNumber - 1] = questionDataForCache;
         }
+        sessionStorage.setItem(cacheKey, JSON.stringify(newCachedAnswers));
+
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
