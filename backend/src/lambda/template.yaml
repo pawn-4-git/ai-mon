@@ -824,6 +824,11 @@ Resources:
           Properties:
             Path: /results/{quizSessionId}
             Method: get
+        ResultsGetCacheEvent:
+          Type: Api
+          Properties:
+            Path: /answeredresults/{quizSessionId}
+            Method: get
 #  ResultsGetFunctionLogGroup:
 #    Type: AWS::Logs::LogGroup
 #    Properties:
@@ -1376,6 +1381,38 @@ Resources:
             MinTTL: 600
             DefaultTTL: 600
             MaxTTL: 600
+            ForwardedValues:
+              QueryString: true
+              Cookies:
+                Forward: whitelist
+                WhitelistedNames:
+                  - username
+                  - sessionId
+                  - sessionVersionId
+              Headers:
+                - Accept
+                - Accept-Language
+                - Content-Language
+                - Content-Type
+                - Referer
+                - User-Agent
+                - X-Forwarded-For
+                - X-Forwarded-Proto
+          - TargetOriginId: AimonApiGatewayOrigin
+            PathPattern: "/Prod/answeredresults/*"
+            ViewerProtocolPolicy: redirect-to-https
+            FunctionAssociations: *basicAuthFunctionIf
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            CachedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+            MinTTL: 86400
+            DefaultTTL: 604800
+            MaxTTL: 2592000
             ForwardedValues:
               QueryString: true
               Cookies:
