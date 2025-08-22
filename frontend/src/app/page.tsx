@@ -139,7 +139,7 @@ export default function LoginPage() {
         return;
       }
 
-      const requestBody = anonymous ? { anonymous: true } : { accountName, anonymous: false };
+      const requestBody = anonymous ? { anonymous: true } : { AccountName: accountName, anonymous: false };
 
       const response = await window.apiClient.post(
         endpoint,
