@@ -1301,7 +1301,7 @@ Resources:
           Action:
             Block: {}
           Statement:
-            RateLimitStatement:
+            RateBasedStatement:
               Limit: 2000
               AggregateKeyType: IP
           VisibilityConfig:
