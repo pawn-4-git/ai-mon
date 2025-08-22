@@ -86,6 +86,34 @@ export const lambdaHandler = async (event) => {
         }
 
         // 1. Generate Question, Answer, and Explanation from sourceText
+        const questionGenerationSourcePrompt = `以下の文章から、特定の事実を抜き出してください。
+        作成するのは文章だけとします。
+        事実は文章から特定できる内容に限定します。
+        事実に関する内容に人物名や固有名詞がある場合は文章に入れてください。
+        人名の場合は「・・・さん」と表記してください
+        文章が短いなど問題が作れない場合は、問題作成失敗と返してください。
+        文章は30文字以内としてください。
+
+        文章:
+        """
+        ${sourceText}
+        """`;
+
+        const questionGenerationSourceSystemPrompt = "あなたは、与えられた文章からクイズにする文章を作成する専門家です。";
+        const generatedSourceQuestion = await invokeBedrock(questionGenerationSourcePrompt, questionGenerationSourceSystemPrompt);
+        if (!generatedSourceQuestion) {
+            console.error("Bedrock did not return a valid question.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
+        }
+
+        if (generatedSourceQuestion.includes('問題作成失敗')) {
+            console.error("AI failed to generate a question from the source text.");
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: "問題の作成に失敗しました。文章が短すぎるか、内容が不適切である可能性があります。" })
+            };
+        }
+
         const questionGenerationPrompt = `以下の文章から、重要な情報に基づいた問題を生成してください。
         作成するのは問題文だけとします。
         問題は文章から特定できる内容に限定します。
@@ -94,10 +122,11 @@ export const lambdaHandler = async (event) => {
         ヒントは不要です。回答例も不要です。
         問題は1問だけとしてください。
         文章が短いなど問題が作れない場合は、問題作成失敗と返してください。
+    
 
         文章:
         """
-        ${sourceText}
+        ${generatedSourceQuestion}
         """`;
 
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
