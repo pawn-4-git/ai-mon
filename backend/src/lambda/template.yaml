@@ -1270,6 +1270,23 @@ Resources:
   #     ResourceGroupName:
   #       Ref: ApplicationResourceGroup
   #     AutoConfigurationEnabled: 'true'
+  RootObjectFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub "${AWS::StackName}-RootObjectFunction"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: "Rewrites the app root URI to index.html"
+        Runtime: cloudfront-js-2.0
+      FunctionCode: !Sub |
+        function handler(event) {
+          var request = event.request;
+          if (request.uri === '/${AppBasePath}' || request.uri === '/${AppBasePath}/') {
+            request.uri = '/${AppBasePath}/index.html';
+          }
+          return request;
+        }
+
   AimonOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -1518,7 +1535,14 @@ Resources:
         DefaultCacheBehavior:
           TargetOriginId: AimonAppS3Origin
           ViewerProtocolPolicy: redirect-to-https
-          FunctionAssociations: *basicAuthFunctionIf
+          FunctionAssociations: !If
+            - IsBasicAuthEnabled
+            - - EventType: 'viewer-request'
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/${AWS::StackName}-RootObjectFunction"
+              - EventType: 'viewer-request'
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/basic_auth"
+            - - EventType: 'viewer-request'
+                FunctionARN: !Sub "arn:aws:cloudfront::${AWS::AccountId}:function/${AWS::StackName}-RootObjectFunction"
           AllowedMethods:
             - GET
             - HEAD
