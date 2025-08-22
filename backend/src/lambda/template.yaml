@@ -1588,7 +1588,7 @@ Resources:
           Compress: true
         CustomErrorResponses:
           - ErrorCode: 403
-            ResponsePagePath: !Sub '/${AppBasePath}/index.html
+            ResponsePagePath: !Sub "/${AppBasePath}/index.html"
             ResponseCode: 200
             ErrorCachingMinTTL: 0
         Enabled: true
