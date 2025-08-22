@@ -82,7 +82,7 @@ function QuizResult() {
       setError(null);
 
       try {
-        const data = await window.apiClient.get(`/Prod/results/${quizSessionId}`) as ApiResponse;
+        const data = await window.apiClient.get(`/Prod/answeredresults/${quizSessionId}`) as ApiResponse;
         setResultData(data.results);
 
         if (data.results.GroupId) {
