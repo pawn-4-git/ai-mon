@@ -1281,7 +1281,7 @@ Resources:
       FunctionCode: !Sub |
         function handler(event) {
           var request = event.request;
-          if (uri === '/${AppBasePath}' || uri === '/${AppBasePath}/') {
+          if (request.uri === '/${AppBasePath}' || request.uri === '/${AppBasePath}/') {
             request.uri = '/${AppBasePath}/index.html';
           }
           return request;
