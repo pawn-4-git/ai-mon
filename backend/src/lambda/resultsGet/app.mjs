@@ -61,9 +61,9 @@ export const lambdaHandler = async (event) => {
         const isExpired = score.ExpiresAt && now > Math.floor(new Date(score.ExpiresAt).getTime() / 1000);
         const showAnswers = !!score.SubmittedAt || isExpired;
 
-        // Process answers to set CorrectChoice to empty string if not submitted or expired
+        // Process answers to set CorrectChoice and Explanation to empty string if not submitted or expired
         const processedAnswersList = score.Answers.map(answer =>
-            showAnswers ? answer : { ...answer, CorrectChoice: '' }
+            showAnswers ? answer : { ...answer, CorrectChoice: '', Explanation: '' }
         );
         
         // Replace original answers with processed ones
