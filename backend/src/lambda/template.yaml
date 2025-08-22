@@ -60,6 +60,7 @@ Parameters:
 
 Conditions:
   IsBasicAuthEnabled: !Equals [!Ref EnableBasicAuth, "true"]
+  EnableWAFCondition: !Equals [!Ref EnableWAF, "false"]
 
 Resources:
   SharedLogicLayer:
@@ -1279,10 +1280,50 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
+  CloudFrontWebACL:
+    Type: AWS::WAFv2::WebACL
+    Condition: EnableWAFCondition
+    Properties:
+      Scope: CLOUDFRONT
+      DefaultAction:
+        Allow: {}
+      Rules:
+        # レートリミットルール
+        - Name: RateLimitRule
+          Priority: 1
+          Action:
+            Block: {}
+          Statement:
+            RateLimitStatement:
+              Limit: 2000
+              AggregateKeyType: IP
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: RateLimitMetric
+            SampledRequestsEnabled: true
+        # SQLインジェクション保護のマネージドルール
+        - Name: AWS-AWSManagedRulesSQLiRuleSet
+          Priority: 2
+          OverrideAction:
+            None: {}
+          Statement:
+            ManagedRuleGroupStatement:
+              VendorName: AWS
+              Name: AWSManagedRulesSQLiRuleSet
+          VisibilityConfig:
+            CloudWatchMetricsEnabled: true
+            MetricName: AWS-AWSManagedRulesSQLiRuleSet
+            SampledRequestsEnabled: true
+      VisibilityConfig:
+        CloudWatchMetricsEnabled: true
+        MetricName: CloudFrontWebACLMetrics
+        SampledRequestsEnabled: true
+
   AimonCloudfront:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        WebACLId: !If [EnableWAFCondition, !GetAtt CloudFrontWebACL.Arn, !Ref "AWS::NoValue"]
         Origins:
           - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
@@ -1540,7 +1581,7 @@ Resources:
           Compress: true
         CustomErrorResponses:
           - ErrorCode: 403
-            ResponsePagePath: /ai-mon/index.html
+            ResponsePagePath: Sub '/${AppBasePath}/index.html
             ResponseCode: 200
             ErrorCachingMinTTL: 0
         Enabled: true
