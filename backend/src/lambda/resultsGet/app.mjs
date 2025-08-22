@@ -57,6 +57,20 @@ export const lambdaHandler = async (event) => {
             };
         }
 
+        const now = Math.floor(Date.now() / 1000);
+        const isExpired = score.ExpiresAt && now > score.ExpiresAt;
+
+        // Process answers to set CorrectChoice to empty string if not expired
+        const processedAnswersList = score.Answers.map(answer => {
+            if (isExpired) {
+                return answer; // return full answer if expired
+            }
+            return { ...answer, CorrectChoice: '' }; // return answer with CorrectChoice as empty string
+        });
+        
+        // Replace original answers with processed ones
+        const processedScore = { ...score, Answers: processedAnswersList };
+
         // Get group name from QuizGroupsTable
         const groupCommand = new GetCommand({
             TableName: QUIZ_GROUPS_TABLE_NAME,
@@ -77,14 +91,14 @@ export const lambdaHandler = async (event) => {
         if (questionNumberStr) {
             const questionNumber = parseInt(questionNumberStr, 10) - 1;
 
-            if (isNaN(questionNumber) || questionNumber < 0 || questionNumber > score.TotalCount) {
+            if (isNaN(questionNumber) || questionNumber < 0 || questionNumber > processedScore.TotalCount) {
                 return {
                     statusCode: 400,
                     body: JSON.stringify({ message: "Invalid question number." }),
                 };
             }
 
-            const questionInfo = score.Answers.find(a => a.QuestionNumber === questionNumber);
+            const questionInfo = processedScore.Answers.find(a => a.QuestionNumber === questionNumber);
             if (!questionInfo) {
                 return {
                     statusCode: 404,
@@ -94,30 +108,23 @@ export const lambdaHandler = async (event) => {
 
             // questionNumberを基準に、前後30問の範囲を計算
             const start = Math.max(0, questionNumber - ANSWER_WINDOW_SIZE);
-            const end = Math.min(score.TotalCount, questionNumber + ANSWER_WINDOW_SIZE);
+            const end = Math.min(processedScore.TotalCount, questionNumber + ANSWER_WINDOW_SIZE);
 
             // QuestionNumberがstartからendまでの範囲の解答を取得
-            const answersWindow = score.Answers.filter(a => a.QuestionNumber >= start && a.QuestionNumber <= end);
-            const processedAnswers = answersWindow.map(answer => ({
-                questionText: answer.QuestionText,
-                choices: answer.Choices,
-                userChoice: answer.SelectedChoice,
-                afterCheck: answer.AfterCheck,
-                questionNumber: answer.QuestionNumber
-            }));
+            const answersWindow = processedScore.Answers.filter(a => a.QuestionNumber >= start && a.QuestionNumber <= end);
 
             return {
                 statusCode: 200,
                 body: JSON.stringify({
-                    totalQuestions: score.TotalCount,
+                    totalQuestions: processedScore.TotalCount,
                     questionText: questionInfo.QuestionText,
                     choices: questionInfo.Choices,
                     userChoice: questionInfo.SelectedChoice,
                     groupName: groupName,
                     afterCheck: questionInfo.AfterCheck,
-                    expiresAt: score.ExpiresAt,
-                    startedAt: score.StartedAt,
-                    answers: processedAnswers,
+                    expiresAt: processedScore.ExpiresAt,
+                    startedAt: processedScore.StartedAt,
+                    answers: answersWindow,
                 }),
             };
         }
@@ -127,7 +134,7 @@ export const lambdaHandler = async (event) => {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Quiz results retrieved successfully.",
-                results: { ...score, GroupName: groupName },
+                results: { ...processedScore, GroupName: groupName },
             }),
         };
     } catch (error) {
