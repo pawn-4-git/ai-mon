@@ -23,6 +23,13 @@ Parameters:
     AllowedValues:
       - "true"
       - "false"
+  EnableWAF:
+    Type: String
+    Description: "Enable WAF for CloudFront"
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
   CloudFrontSecretHeaderValue:
     Type: String
     Description: "Secret value for CloudFront custom header"
