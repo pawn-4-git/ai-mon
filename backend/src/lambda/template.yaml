@@ -1283,6 +1283,7 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
+        #  WebACLId: !If [EnableWAFCondition, !GetAtt CloudFrontWebACL.Arn, !Ref "AWS::NoValue"]
         Origins:
           - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
@@ -1540,7 +1541,11 @@ Resources:
           Compress: true
         CustomErrorResponses:
           - ErrorCode: 403
-            ResponsePagePath: /ai-mon/index.html
+            ResponsePagePath: !Sub "/${AppBasePath}/index.html"
+            ResponseCode: 200
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 400
+            ResponsePagePath: !Sub "/${AppBasePath}/index.html"
             ResponseCode: 200
             ErrorCachingMinTTL: 0
         Enabled: true
