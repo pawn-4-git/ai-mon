@@ -20,15 +20,15 @@ declare global {
 }
 
 interface Answer {
-  QuestionId: string;
-  QuestionNumber: number;
-  QuestionText: string;
-  Choices: string[];
-  SelectedChoice: string | null;
-  CorrectChoice: string;
-  IsCorrect: boolean | null;
-  Explanation: string;
-  AfterCheck: boolean | null;
+  questionId: string;
+  questionNumber: number;
+  questionText: string;
+  choices: string[];
+  selectedChoice: string | null;
+  correctChoice: string;
+  isCorrect: boolean | null;
+  explanation: string;
+  afterCheck: boolean | null;
 }
 
 interface QuestionData {
@@ -40,7 +40,7 @@ interface QuestionData {
   checkedLaterQuestions?: number[];
   afterCheck?: boolean;
   expiresAt: number; // APIからの有効期限 (Unixタイムスタンプ)
-  answers?: Answer[];
+  answers?: any[]; // APIレスポンスはPascalCaseのためany型に
   questionNumber?: number;
 }
 
@@ -112,19 +112,26 @@ function QuizPlay() {
         const newCachedAnswers = { ...cachedAnswers };
         if (data.answers && data.answers.length > 0) {
           // If the response contains all answers, update the cache with all of them
-          data.answers.forEach((answer: Answer) => {
-            const questionDataForCache = {
+          data.answers.forEach((answer) => {
+            const questionDataForCache: Answer = {
+              questionId: answer.QuestionId,
+              questionNumber: answer.QuestionNumber,
+              questionText: answer.QuestionText,
+              choices: answer.Choices,
+              selectedChoice: answer.SelectedChoice,
+              correctChoice: answer.CorrectChoice,
+              isCorrect: answer.IsCorrect,
+              explanation: answer.Explanation,
+              afterCheck: answer.AfterCheck,
+            };
+            newCachedAnswers[answer.QuestionNumber] = {
+              ...questionDataForCache,
               totalQuestions: data.totalQuestions,
               groupName: data.groupName,
               expiresAt: data.expiresAt,
               checkedLaterQuestions: data.checkedLaterQuestions,
-              questionText: answer.QuestionText,
-              choices: answer.Choices,
               userChoice: answer.SelectedChoice,
-              afterCheck: answer.AfterCheck,
-              questionNumber: answer.QuestionNumber,
             };
-            newCachedAnswers[answer.QuestionNumber] = questionDataForCache;
           });
         } else {
           // If the response is for a single question, cache just that one
