@@ -124,8 +124,30 @@ export default function LoginPage() {
     }
   };
 
-  const handleNavigation = () => {
-    router.push('/quiz-list');
+  const handleCreation = async () => {
+    try {
+      if (!window.apiClient) {
+        alert('機能の準備中です。少し待ってからもう一度お試しください。');
+        throw new Error('apiClient is not available');
+      }
+
+      const endpoint = '/Prod/users/register';
+      const response = await window.apiClient.post(
+        endpoint,
+        { anonymous: false }
+      ) as { AccountName: string };
+
+      if (response && response.AccountName) {
+        auth.login(response.AccountName);
+        alert('アカウントが作成されました！');
+        router.push('/quiz-list');
+      } else {
+        alert('アカウントの作成に失敗しました。');
+      }
+
+    } catch (error) {
+      console.error('Failed to create anonymous user:', error);
+    }
   };
 
   const handleAnonymousCreation = async () => {
@@ -184,7 +206,7 @@ export default function LoginPage() {
               <label htmlFor="register-username">アカウント名:</label>
               <input type="text" id="register-username" placeholder="8桁以上の英数字" ref={registerUsernameRef} />
             </div>
-            <button onClick={handleNavigation}>登録</button>
+            <button onClick={handleCreation}>登録</button>
             <button onClick={handleAnonymousCreation}>
               匿名でアカウント作成
             </button>
