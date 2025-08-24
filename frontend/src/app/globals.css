@@ -1414,3 +1414,16 @@ body {
 .reference-books-list img {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
+
+@media (max-width: 768px) {
+    .quiz-play-page .action-buttons {
+        flex-direction: column;
+        gap: 10px;
+        /* Add some space between the buttons */
+    }
+
+    .quiz-play-page .action-buttons button {
+        width: 100%;
+        /* Make buttons take full width */
+    }
+}
