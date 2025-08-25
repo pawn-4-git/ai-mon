@@ -172,7 +172,7 @@ export default function ScoreHistoryPage() {
                                 <h3>グループ別分析</h3>
                                 {groupAnalysis.length > 0 ? (
                                     groupAnalysis.map((group) => (
-                                        <div key={group.groupId} className="group-analysis-record" style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+                                        <div key={group.groupId} className="group-analysis-record">
                                             <h4>{group.groupName}</h4>
                                             <p>受験回数: {group.attemptCount}回</p>
                                             <p>最高得点: {group.highestScore}%</p>
