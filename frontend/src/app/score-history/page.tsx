@@ -17,6 +17,15 @@ interface ScoreRecord {
     TotalCount: number;
 }
 
+// Define the structure for group analysis
+interface GroupAnalysis {
+    groupId: string;
+    groupName: string;
+    highestScore: number;
+    averageScore: number;
+    attemptCount: number;
+}
+
 // Define the structure of the API response
 interface ApiResponse {
     scores: ScoreRecord[];
@@ -39,6 +48,7 @@ export default function ScoreHistoryPage() {
     const { user } = useAuth();
     const userId = user?.id;
     const [scores, setScores] = useState<ScoreRecord[]>([]);
+    const [groupAnalysis, setGroupAnalysis] = useState<GroupAnalysis[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -63,8 +73,39 @@ export default function ScoreHistoryPage() {
                 // Sort by SubmittedAt in descending order (newest first)
                 completedScores.sort((a, b) => new Date(b.SubmittedAt).getTime() - new Date(a.SubmittedAt).getTime());
 
-                // Take the top 10
+                // Take the top 10 for individual records
                 setScores(completedScores.slice(0, 10));
+
+                // --- Group Analysis Calculation ---
+                const analysis: { [key: string]: { scores: number[], name: string, count: number } } = {};
+
+                completedScores.forEach(score => {
+                    if (!analysis[score.GroupId]) {
+                        analysis[score.GroupId] = { scores: [], name: score.QuizGroupName || `グループID: ${score.GroupId}`, count: 0 };
+                    }
+                    const accuracy = score.TotalCount > 0 ? (score.CorrectCount / score.TotalCount) * 100 : 0;
+                    analysis[score.GroupId].scores.push(accuracy);
+                    analysis[score.GroupId].count++;
+                });
+
+                const formattedAnalysis: GroupAnalysis[] = Object.keys(analysis).map(groupId => {
+                    const groupData = analysis[groupId];
+                    const sum = groupData.scores.reduce((acc, current) => acc + current, 0);
+                    const average = groupData.scores.length > 0 ? sum / groupData.scores.length : 0;
+                    const highest = groupData.scores.length > 0 ? Math.max(...groupData.scores) : 0;
+
+                    return {
+                        groupId: groupId,
+                        groupName: groupData.name,
+                        highestScore: Math.floor(highest),
+                        averageScore: Math.floor(average),
+                        attemptCount: groupData.count
+                    };
+                });
+
+                setGroupAnalysis(formattedAnalysis);
+                // --- End of Group Analysis Calculation ---
+
             } else {
                 throw new Error("取得したデータの形式が正しくありません。");
             }
@@ -78,7 +119,6 @@ export default function ScoreHistoryPage() {
 
     useEffect(() => {
         // apiClient.js is loaded via the Script tag, so we wait for it.
-        // A simple delay might work for now, but a more robust solution would be preferable.
         const checkApiClient = setInterval(() => {
             if (window.apiClient) {
                 clearInterval(checkApiClient);
@@ -129,7 +169,23 @@ export default function ScoreHistoryPage() {
                     {!loading && !error && (
                         <>
                             <div className="section">
-                                <h3>個別の成績記録</h3>
+                                <h3>グループ別分析</h3>
+                                {groupAnalysis.length > 0 ? (
+                                    groupAnalysis.map((group) => (
+                                        <div key={group.groupId} className="group-analysis-record" style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '10px' }}>
+                                            <h4>{group.groupName}</h4>
+                                            <p>受験回数: {group.attemptCount}回</p>
+                                            <p>最高得点: {group.highestScore}%</p>
+                                            <p>平均得点: {group.averageScore}%</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p>分析できる十分なデータがありません。</p>
+                                )}
+                            </div>
+
+                            <div className="section">
+                                <h3>個別の成績記録 (直近10件)</h3>
                                 {scores.length > 0 ? (
                                     scores.map((record) => {
                                         const accuracy = record.TotalCount > 0 ? Math.floor((record.CorrectCount / record.TotalCount) * 100) : 0;
@@ -154,24 +210,7 @@ export default function ScoreHistoryPage() {
                                 )}
                             </div>
 
-                            {/* Placeholder sections for future implementation */}
-                            {/* <div className="section">
-                                <h3>グループ別分析</h3>
-                                <p>（この機能は現在開発中です）</p>
-                            </div>
-                            <div className="section">
-                                <h3>得点推移グラフ</h3>
-                                <div className="graph-placeholder">（グラフ表示は現在開発中です）</div>
-                            </div>
-                            <div className="section">
-                                <h3>苦手傾向分析</h3>
-                                <p>（この機能は現在開発中です）</p>
-                            </div> */}
-
                             <div className="action-buttons">
-                                {/* <button onClick={() => alert('すべての成績記録を削除します。（機能は未実装）')}>
-                                    すべての成績記録を削除
-                                </button> */}
                                 <button onClick={() => router.push('/quiz-list')}>
                                     問題一覧に戻る
                                 </button>
