@@ -1427,3 +1427,9 @@ body {
         /* Make buttons take full width */
     }
 }
+
+.score-history-page .group-analysis-record {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+}
