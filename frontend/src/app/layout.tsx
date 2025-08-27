@@ -4,6 +4,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Script from "next/script";
 import Footer from "@/components/Footer"; // フッターコンポーネントをインポート
+import { appTitle } from '@/config';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI-Mon Quiz Application",
+  title: {
+    default: "AI-Mon Quiz Application",
+    template: `%s | ${appTitle}`,
+  },
   description: "クイズアプリケーション - 問題作成・受験・成績管理",
 };
 

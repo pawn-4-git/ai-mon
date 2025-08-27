@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: `問題集一覧`,
+  title: `Create Quiz`,
 };
 
-export default function QuizListLayout({
+export default function CreateQuizLayout({
   children,
 }: {
   children: React.ReactNode;
