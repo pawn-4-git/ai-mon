@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `Terms | ${appTitle}`,
+  title: `Terms`,
 };
 
 export default function TermsLayout({

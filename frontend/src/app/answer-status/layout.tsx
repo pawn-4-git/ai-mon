@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `Answer Status | ${appTitle}`,
+  title: `Answer Status`,
 };
 
 export default function AnswerStatusLayout({

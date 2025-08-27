@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `Quiz Result | ${appTitle}`,
+  title: `Quiz Result`,
 };
 
 export default function QuizResultLayout({

@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `Quiz Group ${appTitle}`,
+  title: `Quiz Group`,
 };
 
 export default function QuizGroupLayout({

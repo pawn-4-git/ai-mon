@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
-import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `Score History | ${appTitle}`,
+  title: `Score History`,
 };
 
 export default function ScoreHistoryLayout({
