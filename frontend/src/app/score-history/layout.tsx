@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `問題集一覧 | ${appTitle}`,
+  title: `Score History | ${appTitle}`,
 };
 
-export default function QuizListLayout({
+export default function ScoreHistoryLayout({
   children,
 }: {
   children: React.ReactNode;

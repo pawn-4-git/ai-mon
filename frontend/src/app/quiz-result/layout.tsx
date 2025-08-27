@@ -2,10 +2,10 @@ import type { Metadata } from 'next';
 import { appTitle } from '@/config';
 
 export const metadata: Metadata = {
-  title: `問題集一覧 | ${appTitle}`,
+  title: `Quiz Result | ${appTitle}`,
 };
 
-export default function QuizListLayout({
+export default function QuizResultLayout({
   children,
 }: {
   children: React.ReactNode;
