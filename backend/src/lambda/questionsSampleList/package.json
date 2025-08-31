@@ -1,0 +1,14 @@
+{
+  "name": "questionsSampleList",
+  "version": "1.0.0",
+  "description": "Questions sample list Lambda function",
+  "main": "app.mjs",
+  "type": "module",
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "^4.3.6",
+    "mocha": "^10.2.0"
+  }
+}
