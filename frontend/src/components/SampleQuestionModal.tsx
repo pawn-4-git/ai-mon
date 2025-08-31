@@ -65,7 +65,7 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
           </div>
         </div>
         {!showAnswer && (
-          <button onClick={() => setShowAnswer(true)} className="view-answer-btn">
+          <button onClick={() => setShowAnswer(true)} className="btn-primary">
             正解と解説を見る
           </button>
         )}
