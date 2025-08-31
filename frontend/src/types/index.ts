@@ -80,3 +80,14 @@ export interface ReferenceBook {
   url: string;
   description: string;
 }
+
+export interface SampleQuestion {
+  CorrectChoice: string;
+  CreatedAt: string;
+  CreatedBy: string;
+  Explanation: string;
+  GroupId: string;
+  IncorrectChoices: string[];
+  QuestionId: string;
+  QuestionText: string;
+}
