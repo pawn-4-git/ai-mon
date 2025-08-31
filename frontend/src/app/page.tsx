@@ -6,9 +6,11 @@ import Script from 'next/script';
 import Cookies from 'js-cookie';
 import { useAuth } from '@/context/AuthContext';
 import Announcements from '@/components/Announcements';
+import SampleQuestionModal from '@/components/SampleQuestionModal'; // 追加
 import { appTitle } from '@/config';
 import Image from 'next/image';
-
+import { API_BASE_URL } from '@/lib/api_domain';
+import { Question } from '@/types'; // Question 型をインポート
 
 declare global {
   interface Window {
@@ -45,6 +47,10 @@ interface ResourcesApiResponse {
   resourcesByGroup: ResourcesByGroup;
 }
 
+interface SampleQuestionsApiResponse {
+  questions: Question[];
+}
+
 export default function LoginPage() {
   const [isLoginView, setIsLoginView] = useState(true);
   const router = useRouter();
@@ -55,6 +61,11 @@ export default function LoginPage() {
 
   const [resourcesByGroup, setResourcesByGroup] = useState<ResourcesByGroup>({});
   const [loadingResources, setLoadingResources] = useState<boolean>(true);
+
+  // モーダル用のstate
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   useEffect(() => {
     const fetchResources = async () => {
@@ -160,6 +171,30 @@ export default function LoginPage() {
     }
   };
 
+  // サンプル問題モーダル表示ハンドラ
+  const handleSampleLinkClick = async (groupId: string) => {
+    if (!window.apiClient) {
+      alert('APIクライアントが利用できません。ページを再読み込みしてください。');
+      return;
+    }
+    setIsLoadingSample(true);
+    try {
+      const data = await window.apiClient.get(`/Prod/questions/sample/${groupId}`) as SampleQuestionsApiResponse;
+      if (data.questions && data.questions.length > 0) {
+        const randomIndex = Math.floor(Math.random() * data.questions.length);
+        setSelectedQuestion(data.questions[randomIndex]);
+        setIsModalOpen(true);
+      } else {
+        alert('このグループにはサンプル問題がありません。');
+      }
+    } catch (error) {
+      console.error('Error fetching sample questions:', error);
+      alert('サンプル問題の取得中にエラーが発生しました。');
+    } finally {
+      setIsLoadingSample(false);
+    }
+  };
+
   return (
     <>
       <Script
@@ -209,7 +244,12 @@ export default function LoginPage() {
             ) : (
               Object.entries(resourcesByGroup).map(([groupId, groupData]) => (
                 <div key={groupId} className="resource-group">
-                  <h3>{groupData.GroupName}</h3>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1rem' }}>
+                    <h3>{groupData.GroupName}</h3>
+                    <button onClick={() => handleSampleLinkClick(groupId)} disabled={isLoadingSample} className="btn-primary" style={{ padding: '5px 10px', fontSize: '12px' }}>
+                      {isLoadingSample ? '読込中...' : 'サンプル問題はこちら'}
+                    </button>
+                  </div>
                   <ul className="reference-books-list">
                     {groupData.resources.map((resource) => (
                       <li key={resource.ResourceId}>
@@ -228,6 +268,11 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+      <SampleQuestionModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        question={selectedQuestion}
+      />
     </>
   );
 }
