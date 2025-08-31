@@ -12,6 +12,7 @@ interface SampleQuestionModalProps {
 const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClose, question }) => {
   const [shuffledChoices, setShuffledChoices] = useState<string[]>([]);
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null); // 選択された回答を保持する状態
+  const [showAnswer, setShowAnswer] = useState(false); // 正解と解説の表示状態を管理する状態
 
   useEffect(() => {
     if (isOpen && question) {
@@ -29,6 +30,7 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
 
       setShuffledChoices(finalShuffledChoices);
       setSelectedChoice(null); // モーダルが開くたびに選択をリセット
+      setShowAnswer(false); // モーダルが開くたびに回答表示をリセット
     }
   }, [isOpen, question]);
 
@@ -54,36 +56,35 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
         </div>
         <div className="choices-section">
           <h3>選択肢</h3>
-          <ul>
+          <div className="choices-grid">
             {shuffledChoices.map((choice, index) => (
-              <li key={index}>
-                <label>
-                  <input
-                    type="radio"
-                    name="sample-question-choice"
-                    value={choice}
-                    checked={selectedChoice === choice}
-                    onChange={() => handleChoiceSelect(choice)}
-                  />
-                  {choice}
-                </label>
-              </li>
+              <button
+                key={index}
+                className={`choice-button ${selectedChoice === choice ? 'selected' : ''}`}
+                onClick={() => handleChoiceSelect(choice)}
+              >
+                {choice}
+              </button>
             ))}
-          </ul>
+          </div>
         </div>
-        {/* 正解と解説は、回答送信後にのみ表示するように変更することも可能です */}
-        {/* 必要に応じて、以下のセクションを条件付きで表示するように変更してください */}
-        <div className="answer-section">
-          <h3>正解</h3>
-          <p>{question.CorrectChoice}</p>
-        </div>
-        <div className="explanation-section">
-          <h3>解説</h3>
-          <p>{question.Explanation}</p>
-        </div>
-        <button onClick={handleSubmit} className="modal-submit-btn"> {/* 送信ボタンを追加 */}
-          回答を送信
-        </button>
+        {!showAnswer && (
+          <button onClick={() => setShowAnswer(true)} className="view-answer-btn">
+            正解と解説を見る
+          </button>
+        )}
+        {showAnswer && (
+          <>
+            <div className="answer-section">
+              <h3>正解</h3>
+              <p>{question.CorrectChoice}</p>
+            </div>
+            <div className="explanation-section">
+              <h3>解説</h3>
+              <p>{question.Explanation}</p>
+            </div>
+          </>
+        )}
         <button onClick={onClose} className="modal-close-btn">
           閉じる
         </button>
