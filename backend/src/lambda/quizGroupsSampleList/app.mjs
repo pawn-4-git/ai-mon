@@ -16,18 +16,29 @@ export const lambdaHandler = async (event) => {
     }
 
     try {
-        const scanParams = {
-            TableName: QUIZ_GROUPS_TABLE_NAME,
-        };
+        const allItems = [];
+        let lastEvaluatedKey;
 
-        const scanCommand = new ScanCommand(scanParams);
-        const response = await docClient.send(scanCommand);
+        do {
+            const scanParams = {
+                TableName: QUIZ_GROUPS_TABLE_NAME,
+                ExclusiveStartKey: lastEvaluatedKey,
+            };
+
+            const scanCommand = new ScanCommand(scanParams);
+            const response = await docClient.send(scanCommand);
+
+            if (response.Items) {
+                allItems.push(...response.Items);
+            }
+            lastEvaluatedKey = response.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
 
         return {
             statusCode: 200,
             body: JSON.stringify({
                 message: "Quiz groups retrieved successfully.",
-                groups: response.Items || [],
+                groups: allItems,
             }),
         };
     } catch (error) {

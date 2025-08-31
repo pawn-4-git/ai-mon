@@ -8,12 +8,15 @@ const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 
 // Fisher-Yates shuffle algorithm
 const shuffle = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
     }
-    return array;
+    return newArray;
 };
+
+const SAMPLE_QUESTION_COUNT = 50;
 
 export const lambdaHandler = async (event) => {
     if (!QUESTIONS_TABLE_NAME) {
@@ -33,20 +36,31 @@ export const lambdaHandler = async (event) => {
             };
         }
 
-        const queryCommand = new QueryCommand({
-            TableName: QUESTIONS_TABLE_NAME,
-            IndexName: "GroupIdIndex",
-            KeyConditionExpression: "GroupId = :groupId",
-            ExpressionAttributeValues: {
-                ":groupId": groupId,
-            },
-        });
+        const allItems = [];
+        let lastEvaluatedKey;
 
-        const response = await docClient.send(queryCommand);
-        const questions = response.Items || [];
+        do {
+            const command = new QueryCommand({
+                TableName: QUESTIONS_TABLE_NAME,
+                IndexName: "GroupIdIndex",
+                KeyConditionExpression: "GroupId = :groupId",
+                ExpressionAttributeValues: {
+                    ":groupId": groupId,
+                },
+                ExclusiveStartKey: lastEvaluatedKey,
+            });
+
+            const response = await docClient.send(command);
+            if (response.Items) {
+                allItems.push(...response.Items);
+            }
+            lastEvaluatedKey = response.LastEvaluatedKey;
+        } while (lastEvaluatedKey);
+
+        const questions = allItems;
 
         const shuffledQuestions = shuffle(questions);
-        const sampleQuestions = shuffledQuestions.slice(0, 50);
+        const sampleQuestions = shuffledQuestions.slice(0, SAMPLE_QUESTION_COUNT);
 
         return {
             statusCode: 200,
