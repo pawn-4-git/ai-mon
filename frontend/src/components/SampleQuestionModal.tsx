@@ -38,10 +38,6 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
     setSelectedChoice(choice);
   };
 
-  const handleSubmit = () => {
-
-  };
-
   if (!isOpen || !question) {
     return null;
   }
