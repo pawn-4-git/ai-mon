@@ -11,6 +11,7 @@ interface SampleQuestionModalProps {
 
 const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClose, question }) => {
   const [shuffledChoices, setShuffledChoices] = useState<string[]>([]);
+  const [selectedChoice, setSelectedChoice] = useState<string | null>(null); // 選択された回答を保持する状態
 
   useEffect(() => {
     if (isOpen && question) {
@@ -27,8 +28,17 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
       const finalShuffledChoices = allChoices.sort(() => 0.5 - Math.random());
 
       setShuffledChoices(finalShuffledChoices);
+      setSelectedChoice(null); // モーダルが開くたびに選択をリセット
     }
   }, [isOpen, question]);
+
+  const handleChoiceSelect = (choice: string) => {
+    setSelectedChoice(choice);
+  };
+
+  const handleSubmit = () => {
+
+  };
 
   if (!isOpen || !question) {
     return null;
@@ -46,10 +56,23 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
           <h3>選択肢</h3>
           <ul>
             {shuffledChoices.map((choice, index) => (
-              <li key={index}>{choice}</li>
+              <li key={index}>
+                <label>
+                  <input
+                    type="radio"
+                    name="sample-question-choice"
+                    value={choice}
+                    checked={selectedChoice === choice}
+                    onChange={() => handleChoiceSelect(choice)}
+                  />
+                  {choice}
+                </label>
+              </li>
             ))}
           </ul>
         </div>
+        {/* 正解と解説は、回答送信後にのみ表示するように変更することも可能です */}
+        {/* 必要に応じて、以下のセクションを条件付きで表示するように変更してください */}
         <div className="answer-section">
           <h3>正解</h3>
           <p>{question.CorrectChoice}</p>
@@ -58,6 +81,9 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
           <h3>解説</h3>
           <p>{question.Explanation}</p>
         </div>
+        <button onClick={handleSubmit} className="modal-submit-btn"> {/* 送信ボタンを追加 */}
+          回答を送信
+        </button>
         <button onClick={onClose} className="modal-close-btn">
           閉じる
         </button>
