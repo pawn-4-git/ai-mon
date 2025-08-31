@@ -9,7 +9,6 @@ import Announcements from '@/components/Announcements';
 import SampleQuestionModal from '@/components/SampleQuestionModal'; // 追加
 import { appTitle } from '@/config';
 import Image from 'next/image';
-import { API_BASE_URL } from '@/lib/api_domain';
 import { Question } from '@/types'; // Question 型をインポート
 
 declare global {

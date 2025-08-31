@@ -31,7 +31,7 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
         </div>
         <div className="answer-section">
           <h3>正解</h3>
-          <p>{question.correctAnswer}</p>
+          <p>{question.choices[question.correctAnswer]}</p>
         </div>
         <div className="explanation-section">
           <h3>解説</h3>
@@ -41,7 +41,7 @@ const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClo
           閉じる
         </button>
       </div>
-    </div>
+    </div >
   );
 };
 
