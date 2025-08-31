@@ -247,7 +247,7 @@ export default function LoginPage() {
                 <div key={groupId} className="resource-group">
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '1rem' }}>
                     <h3>{groupData.GroupName}</h3>
-                    <button onClick={() => handleSampleLinkClick(groupId)} disabled={isLoadingSample} className="btn-primary" style={{ padding: '5px 10px', fontSize: '12px' }}>
+                    <button onClick={() => handleSampleLinkClick(groupId)} disabled={isLoadingSample} className="btn-primary" style={{ padding: '5px 10px', fontSize: '12px', width: '120px' }}>
                       {isLoadingSample ? '読込中...' : 'サンプル問題はこちら'}
                     </button>
                   </div>
@@ -269,6 +269,7 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
       <SampleQuestionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
