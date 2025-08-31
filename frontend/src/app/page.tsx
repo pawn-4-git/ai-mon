@@ -9,7 +9,7 @@ import Announcements from '@/components/Announcements';
 import SampleQuestionModal from '@/components/SampleQuestionModal'; // 追加
 import { appTitle } from '@/config';
 import Image from 'next/image';
-import { Question } from '@/types'; // Question 型をインポート
+import { SampleQuestion } from '@/types'; // Question 型をインポート
 
 declare global {
   interface Window {
@@ -47,7 +47,7 @@ interface ResourcesApiResponse {
 }
 
 interface SampleQuestionsApiResponse {
-  questions: Question[];
+  questions: SampleQuestion[];
 }
 
 export default function LoginPage() {
@@ -63,7 +63,7 @@ export default function LoginPage() {
 
   // モーダル用のstate
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
+  const [selectedQuestion, setSelectedQuestion] = useState<SampleQuestion | null>(null);
   const [isLoadingSample, setIsLoadingSample] = useState(false);
 
   useEffect(() => {

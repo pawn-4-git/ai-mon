@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Question } from '../types';
+import { SampleQuestion } from '../types';
 
 interface SampleQuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  question: Question | null;
+  question: SampleQuestion | null;
 }
 
 const SampleQuestionModal: React.FC<SampleQuestionModalProps> = ({ isOpen, onClose, question }) => {
