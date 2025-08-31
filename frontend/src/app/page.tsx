@@ -178,8 +178,10 @@ export default function LoginPage() {
     }
     setIsLoadingSample(true);
     try {
+      // ここで /Prod/questions/sample/{groupId} からデータを取得します。
       const data = await window.apiClient.get(`/Prod/questions/sample/${groupId}`) as SampleQuestionsApiResponse;
       if (data.questions && data.questions.length > 0) {
+        // ランダムに1つの質問を選択
         const randomIndex = Math.floor(Math.random() * data.questions.length);
         setSelectedQuestion(data.questions[randomIndex]);
         setIsModalOpen(true);
