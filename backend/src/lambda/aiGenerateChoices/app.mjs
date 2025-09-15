@@ -2,6 +2,9 @@ import { validateSession } from "/opt/authHelper.js";
 import { isAdmin } from "/opt/authHelper.js";
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 
+// Helper function to introduce a delay
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const lambdaHandler = async (event) => {
     try {
         const authResult = await validateSession(event);
@@ -95,6 +98,7 @@ ${questionContext}
 
         const command = new InvokeModelCommand(input);
         const bedrockResponse = await bedrockClient.send(command);
+        await sleep(3000);
 
         // BedrockからのレスポンスをデコードしてJSONを抽出
         const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
