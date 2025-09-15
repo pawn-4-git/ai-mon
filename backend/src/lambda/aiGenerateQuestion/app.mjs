@@ -13,6 +13,9 @@ const bedrockClient = new BedrockRuntimeClient({ region: "ap-northeast-1" });
 const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 const MODEL_ID = "amazon.nova-lite-v1:0";
 
+// Helper function to introduce a delay
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Helper function to invoke Bedrock model
 const invokeBedrock = async (prompt, systemPrompt) => {
     const inputBody = JSON.stringify({
@@ -104,6 +107,7 @@ export const lambdaHandler = async (event) => {
             console.error("Bedrock did not return a valid question.");
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
         }
+        await sleep(3000);
 
         if (generatedSourceQuestion.includes('問題作成失敗')) {
             console.error("AI failed to generate a question from the source text.");
@@ -134,6 +138,7 @@ export const lambdaHandler = async (event) => {
             console.error("Bedrock did not return a valid question.");
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for question generation." }) };
         }
+        await sleep(3000);
 
         if (generatedQuestion.includes('問題作成失敗')) {
             console.error("AI failed to generate a question from the source text.");
@@ -164,6 +169,7 @@ export const lambdaHandler = async (event) => {
             console.error("Bedrock did not return a valid correct choice.");
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for correct choice generation." }) };
         }
+        await sleep(3000);
 
 
         const questionGenerationPromptExplanation = `以下の文章から、重要な情報に基づいた解説を生成してください。
@@ -182,6 +188,7 @@ export const lambdaHandler = async (event) => {
         
         `;
         const explanation = await invokeBedrock(questionGenerationPromptExplanation, questionGenerationSystemPrompt);
+        await sleep(3000);
 
         // 2. Generate Incorrect Choices
         const choiceGenerationPrompt = `以下の質問コンテキストに基づいて、不正解の選択肢を10個生成してください。正解は「${correctChoice}」です。
@@ -206,6 +213,7 @@ export const lambdaHandler = async (event) => {
             console.error("Bedrock did not return valid text for choices.");
             return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for choice generation." }) };
         }
+        await sleep(3000);
 
         let incorrectChoices = generatedChoicesText.split('\n').map(line => line.trim()).filter(line => line !== '');
 
