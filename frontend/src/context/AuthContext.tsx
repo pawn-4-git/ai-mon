@@ -10,6 +10,7 @@ interface AuthContextType {
   login: (accountName: string) => void; // API call is removed, just updates state
   logout: () => void;
   isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,8 +38,8 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
           setAccountName(displayAccountName);
 
           // setUser state might be stale here, so we check against the response
-          if (!user || user.username !== response.AccountName || user.id !== response.UserId) {
-            setUser({ id: response.UserId, username: response.AccountName, email: '' });
+          if (!user || user.username !== response.AccountName || user.id !== response.UserId || user.isAdmin !== response.isAdmin) {
+            setUser({ id: response.UserId, username: response.AccountName, email: '', isAdmin: response.isAdmin });
           }
         }
       }
@@ -82,7 +83,8 @@ export function AuthProvider({ children, className }: { children: ReactNode, cla
       accountName,
       login,
       logout,
-      isAuthenticated: !!accountName
+      isAuthenticated: !!accountName,
+      isAdmin: !!user?.isAdmin
     }}>
       <div className={className}>{children}</div>
     </AuthContext.Provider>

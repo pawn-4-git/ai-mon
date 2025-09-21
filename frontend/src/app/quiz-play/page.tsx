@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import Script from 'next/script';
 import { Toaster, toast } from 'react-hot-toast';
+import { useAuth } from '@/context/AuthContext';
 
 // apiClient の型定義を追加
 declare global {
@@ -42,11 +43,13 @@ interface QuestionData {
   expiresAt: number; // APIからの有効期限 (Unixタイムスタンプ)
   answers?: Answer[];
   questionNumber?: number;
+  questionId?: string; // 追加
 }
 
 function QuizPlay() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { isAdmin } = useAuth();
   const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
   const [quizSessionId, setQuizSessionId] = useState<string | null>(null);
   const [questionNumber, setQuestionNumber] = useState<number>(1);
@@ -103,8 +106,9 @@ function QuizPlay() {
           return;
         }
 
-        const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData;
-        setQuestionData(data);
+        const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData & { QuestionId?: string };
+        const { QuestionId, ...rest } = data; // 分割代入で QuestionId と残りのプロパティを分離
+        setQuestionData({ ...rest, questionId: QuestionId }); // questionId にマッピングして state を更新
         setSelectedChoice(data.userChoice);
         setIsAfterChecked(data.afterCheck === true);
 
@@ -123,6 +127,7 @@ function QuizPlay() {
               userChoice: answer.SelectedChoice,
               afterCheck: answer.AfterCheck,
               questionNumber: answer.QuestionNumber,
+              questionId: answer.QuestionId,
             };
             newCachedAnswers[answer.QuestionNumber] = questionDataForCache;
           });
@@ -138,6 +143,7 @@ function QuizPlay() {
             userChoice: data.userChoice,
             afterCheck: data.afterCheck,
             questionNumber: questionNumber - 1, // Use 0-indexed number for the key
+            questionId: data.QuestionId,
           };
           newCachedAnswers[questionNumber - 1] = questionDataForCache;
         }
@@ -241,7 +247,7 @@ function QuizPlay() {
       await window.apiClient.post(`/Prod/quizzes/completion`, {
         quizId: quizSessionId,
       });
-      toast.success('テストが完��しました。');
+      toast.success('テストが完了しました。');
       router.push(`/quiz-result?quizSessionId=${quizSessionId}`);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
@@ -359,7 +365,7 @@ function QuizPlay() {
       const prevQuestionNumber = questionNumber - 1;
       router.push(`/quiz-play?quizSessionId=${quizSessionId}&questionNumber=${prevQuestionNumber}`);
     } else {
-      toast.error('これが最初の問題���す。');
+      toast.error('これが最初の問題です。');
     }
   }), [submitAnswerIfNeeded, questionNumber, quizSessionId, router, withSubmitting]);
 
@@ -379,6 +385,38 @@ function QuizPlay() {
     if (!submissionSuccess) return;
     router.push(`/answer-status?quizSessionId=${quizSessionId}&questionNumber=${questionNumber}`);
   }), [submitAnswerIfNeeded, quizSessionId, questionNumber, router, withSubmitting]);
+
+  const handleDeleteQuestion = useCallback(async () => {
+    if (!questionData?.questionId) {
+      toast.error('削除対象の問題IDが見つかりません。');
+      return;
+    }
+
+    if (!window.confirm('本当にこの問題を削除しますか？')) {
+      return;
+    }
+
+    const apiClient = window.apiClient;
+    if (!apiClient) {
+      toast.error('APIクライアントの準備ができていません。');
+      return;
+    }
+
+    try {
+      await apiClient.del(`/Prod/questions/${questionData.questionId}`);
+      toast.success('問題を削除しました。');
+
+      const cacheKey = `quizCache_${quizSessionId}`;
+      sessionStorage.removeItem(cacheKey);
+
+      router.push('/quiz-list');
+
+    } catch (error) {
+      console.error('Failed to delete question:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred.';
+      toast.error(`問題の削除に失敗しました: ${errorMessage}`);
+    }
+  }, [questionData, quizSessionId, router]);
 
   const formatTime = (timeInSeconds: number | null) => {
     if (timeInSeconds === null) return '...';
@@ -440,6 +478,11 @@ function QuizPlay() {
           <button onClick={handleFinishTestClick} disabled={isSubmitting}>
             {isSubmitting ? '処理中...' : 'テストを終える'}
           </button>
+          {isAdmin && (
+            <button onClick={handleDeleteQuestion} disabled={isSubmitting} className="delete-button">
+              {isSubmitting ? '削除中...' : 'この問題を削除'}
+            </button>
+          )}
         </div>
       </div>
     </div>
