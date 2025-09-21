@@ -479,7 +479,7 @@ function QuizPlay() {
             {isSubmitting ? '処理中...' : 'テストを終える'}
           </button>
           {isAdmin && (
-            <button onClick={handleDeleteQuestion} disabled={isSubmitting} style={{ backgroundColor: '#dc3545', color: 'white', marginTop: '10px' }}>
+            <button onClick={handleDeleteQuestion} disabled={isSubmitting} className="delete-button">
               {isSubmitting ? '削除中...' : 'この問題を削除'}
             </button>
           )}
