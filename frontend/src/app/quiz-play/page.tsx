@@ -107,7 +107,8 @@ function QuizPlay() {
         }
 
         const data = await window.apiClient.get(`/Prod/results/${quizSessionId}?questionNumber=${questionNumber}`) as QuestionData & { QuestionId?: string };
-        setQuestionData({ ...data, questionId: data.QuestionId });
+        const { QuestionId, ...rest } = data; // 分割代入で QuestionId と残りのプロパティを分離
+        setQuestionData({ ...rest, questionId: QuestionId }); // questionId にマッピングして state を更新
         setSelectedChoice(data.userChoice);
         setIsAfterChecked(data.afterCheck === true);
 
