@@ -64,10 +64,10 @@ Conditions:
   IsBasicAuthEnabled: !Equals [!Ref EnableBasicAuth, "true"]
 
 Resources:
-  SharedLayer:
+  SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: "SharedLayer"
+      LayerName: "SharedLogicLayer"
       Description: "Shared logic and Node.js modules layer"
       ContentUri: ../nodejs/
       CompatibleRuntimes:
@@ -78,7 +78,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersRegister/
       Handler: app.lambdaHandler
       Policies:
@@ -105,7 +105,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersLogin/
       Handler: app.lambdaHandler
       Policies:
@@ -134,7 +134,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersGet/
       Handler: app.lambdaHandler
       Policies:
@@ -169,7 +169,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersLogout/
       Handler: app.lambdaHandler
       Policies:
@@ -196,7 +196,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -225,7 +225,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsCreate/
       Handler: app.lambdaHandler
       Policies:
@@ -262,7 +262,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsList/
       Handler: app.lambdaHandler
       Policies:
@@ -292,7 +292,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsList/
       Handler: app.lambdaHandler
       Policies:
@@ -323,7 +323,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsSampleList/
       Handler: app.lambdaHandler
       Policies:
@@ -343,7 +343,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsGet/
       Handler: app.lambdaHandler
       Policies:
@@ -374,7 +374,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsUpdate/
       Handler: app.lambdaHandler
       Policies:
@@ -411,7 +411,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizGroupsDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -448,7 +448,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsCreate/
       Handler: app.lambdaHandler
       Policies:
@@ -485,7 +485,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsList/
       Handler: app.lambdaHandler
       Policies:
@@ -516,7 +516,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsSampleList/
       Handler: app.lambdaHandler
       Policies:
@@ -536,7 +536,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsGet/
       Handler: app.lambdaHandler
       Policies:
@@ -567,7 +567,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsUpdate/
       Handler: app.lambdaHandler
       Policies:
@@ -604,7 +604,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: questionsDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -641,7 +641,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: answersSubmit/
       Handler: app.lambdaHandler
       Policies:
@@ -674,7 +674,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: quizCompletion/
       Handler: app.lambdaHandler
       Policies:
@@ -710,7 +710,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: userAnswerSelection/
       Handler: app.lambdaHandler
       Policies:
@@ -743,7 +743,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: resultsGet/
       Handler: app.lambdaHandler
       Policies:
@@ -783,7 +783,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: scoreHistoryGet/
       Handler: app.lambdaHandler
       Policies:
@@ -814,7 +814,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: scoresCreate/
       Handler: app.lambdaHandler
       Policies:
@@ -851,7 +851,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: scoresDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -882,7 +882,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: performanceAnalysisGet/
       Handler: app.lambdaHandler
       Policies:
@@ -913,7 +913,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: resourcesCreate/
       Handler: app.lambdaHandler
       Policies:
@@ -950,7 +950,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: resourcesList/
       Handler: app.lambdaHandler
       Policies:
@@ -981,7 +981,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: resourcesListAll/
       Handler: app.lambdaHandler
       Policies:
@@ -1004,7 +1004,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: resourcesDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -1041,7 +1041,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: aiGenerateQuestion/
       Handler: app.lambdaHandler
       Policies:
@@ -1087,7 +1087,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: aiGenerateChoices/
       Handler: app.lambdaHandler
       Timeout: 30
@@ -1132,7 +1132,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Layers:
-        - !Ref SharedLayer
+        - !Ref SharedLogicLayer
       CodeUri: usersInactiveDelete/
       Handler: app.lambdaHandler
       Policies:
@@ -1527,9 +1527,9 @@ Outputs:
   ApiGatewayEndpoint:
     Description: "API Gateway endpoint URL for Prod stage"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/"
-  SharedLayerArn:
+  SharedLogicLayerArn:
     Description: "ARN of the shared logic Lambda Layer"
-    Value: !Ref SharedLayer
+    Value: !Ref SharedLogicLayer
   AimonCloudfrontDomainName:
     Description: "Domain name of the CloudFront distribution"
     Value: !GetAtt AimonCloudfront.DomainName
