@@ -1,6 +1,6 @@
 import { validateSession } from "/opt/authHelper.js";
 import { isAdmin } from "/opt/authHelper.js";
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
+import { invokeBedrock } from "/opt/bedrockHelper.js";
 
 // Helper function to introduce a delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -40,10 +40,6 @@ export const lambdaHandler = async (event) => {
 
         const { correctChoice, questionContext } = body;
 
-        const bedrockClient = new BedrockRuntimeClient({
-            region: "ap-northeast-1",
-        });
-
         const prompt = `以下の質問コンテキストに基づいて、不正解の選択肢を20個生成してください。正解は「${correctChoice}」です。
         結果は改行で分けて、不正解の選択肢以外は返さないでください。
         選択肢の先頭に数値は不要です。
@@ -59,50 +55,15 @@ export const lambdaHandler = async (event) => {
 質問コンテキスト:
 ${questionContext}
 `;
+        const systemPrompt = "あなたはクイズを制作する製作者です。";
 
-        // 呼び出すモデルIDを指定します。
-        const modelId = "amazon.nova-lite-v1:0";
-
-        // Novaモデルに渡すプロンプトとパラメータをJSON形式で定義します。
-        // Novaモデルは「messages」スキーマを使用します。
-        const inputBody = JSON.stringify({
-            schemaVersion: "messages-v1",
-            system: [
-                {
-                    text: "あなたはクイズを制作する製作者です。"
-                }
-            ],
-            messages: [
-                {
-                    role: "user",
-                    content: [
-                        {
-                            text: prompt
-                        }
-                    ]
-                }
-            ],
-            inferenceConfig: {
-                max_new_tokens: 500,
-                temperature: 0.7,
-                top_p: 0.9
-            }
-        });
-
-        const input = {
-            modelId,
-            contentType: "application/json",
-            accept: "application/json",
-            body: Buffer.from(inputBody),
-        };
-
-        const command = new InvokeModelCommand(input);
-        const bedrockResponse = await bedrockClient.send(command);
+        const generatedText = await invokeBedrock(prompt, systemPrompt);
         await sleep(3000);
 
-        // BedrockからのレスポンスをデコードしてJSONを抽出
-        const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
-        const generatedText = responseBody.output.message.content[0].text;
+        if (!generatedText) {
+            console.error("Bedrock did not return valid text for choices.");
+            return { statusCode: 500, body: JSON.stringify({ message: "Failed to get a valid response from AI for choice generation." }) };
+        }
 
         // 生成されたテキストから不正解の選択肢を抽出（例：箇条書き形式を想定）
         const generatedChoices = generatedText.split('\n').filter(line => line.trim() !== '');

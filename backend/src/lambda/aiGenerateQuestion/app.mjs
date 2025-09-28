@@ -2,44 +2,21 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { randomUUID } from "crypto";
 import { validateSession } from "/opt/authHelper.js";
-import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 import { isAdmin } from "/opt/authHelper.js";
 import { updateSessionTtl } from "/opt/userHelper.js";
+import { invokeBedrock } from "/opt/bedrockHelper.js";
 
-// Bedrock API configuration
-const BEDROCK_REGION = "ap-northeast-1";
-const BEDROCK_MODEL_ID = "amazon.nova-lite-v1:0";
 const API_CALL_INTERVAL_MS = 3000;
 
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
-const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });
 
 const QUESTIONS_TABLE_NAME = process.env.QUESTIONS_TABLE_NAME;
 
 // Helper function to introduce a delay
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Helper function to invoke Bedrock model
-const invokeBedrock = async (prompt, systemPrompt) => {
-    const inputBody = JSON.stringify({
-        schemaVersion: "messages-v1",
-        system: [{ text: systemPrompt }],
-        messages: [{ role: "user", content: [{ text: prompt }] }],
-        inferenceConfig: { max_new_tokens: 1000, temperature: 0.7, top_p: 0.9 },
-    });
 
-    const command = new InvokeModelCommand({
-        modelId: BEDROCK_MODEL_ID,
-        contentType: "application/json",
-        accept: "application/json",
-        body: Buffer.from(inputBody),
-    });
-
-    const bedrockResponse = await bedrockClient.send(command);
-    const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
-    return responseBody.output?.message?.content?.[0]?.text;
-};
 
 
 export const lambdaHandler = async (event) => {
