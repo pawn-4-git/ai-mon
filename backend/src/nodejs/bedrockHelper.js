@@ -2,7 +2,12 @@
 
 import { BedrockRuntimeClient, InvokeModelCommand } from "@aws-sdk/client-bedrock-runtime";
 
-const BEDROCK_REGION = process.env.BEDROCK_REGION || "ap-northeast-1";
+const modelConfigs = {
+    "anthropic.claude-3-sonnet-20240229-v1:0": { region: "ap-northeast-1" },
+    "anthropic.claude-3-haiku-20240307-v1:0": { region: "ap-northeast-1" },
+    "openai.gpt-oss-20b-1:0": { region: "us-west-2" },
+    "amazon.nova-lite-v1:0": { region: "ap-northeast-1" }
+};
 
 const getModelId = () => {
     const llmModel = process.env.LLM_MODEL;
@@ -19,10 +24,20 @@ const getModelId = () => {
     }
 };
 
-const bedrockClient = new BedrockRuntimeClient({ region: BEDROCK_REGION });
+// リージョンごとにBedrockクライアントをキャッシュする
+const bedrockClients = {};
+
+const getBedrockClient = (modelId) => {
+    const region = modelConfigs[modelId]?.region || process.env.BEDROCK_REGION || "ap-northeast-1";
+    if (!bedrockClients[region]) {
+        bedrockClients[region] = new BedrockRuntimeClient({ region });
+    }
+    return bedrockClients[region];
+};
 
 export const invokeBedrock = async (prompt, systemPrompt) => {
     const modelId = getModelId();
+    const bedrockClient = getBedrockClient(modelId);
 
     const inputBody = JSON.stringify({
         schemaVersion: "messages-v1",
