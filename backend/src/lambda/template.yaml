@@ -68,7 +68,6 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: "SharedLogicLayer"
-      Description: "Shared logic and Node.js modules layer"
       ContentUri: ../nodejs/
       CompatibleRuntimes:
         - nodejs22.x
