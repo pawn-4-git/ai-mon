@@ -72,7 +72,7 @@ Resources:
       ContentUri: ../nodejs/
       CompatibleRuntimes:
         - nodejs22.x
-      RetentionPolicy: "Delete"
+      Description: Shared utility functions for AI-Mon application.
 
   UsersRegisterFunction:
     Type: AWS::Serverless::Function
