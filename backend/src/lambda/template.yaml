@@ -14,6 +14,8 @@ Globals:
     Environment:
       Variables:
         CLOUD_FRONT_API_SECRET_VALUE: !Ref CloudFrontSecretHeaderValue
+        LLM_MODEL: "gpt-oss-20b"
+        BEDROCK_REGION: "us-west-2"
 
 Parameters:
   EnableBasicAuth:
@@ -65,6 +67,7 @@ Resources:
   SharedLogicLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
+      LayerName: "SharedLogicLayer"
       ContentUri: ../nodejs/
       CompatibleRuntimes:
         - nodejs22.x
@@ -96,11 +99,6 @@ Resources:
           Properties:
             Path: /users/register
             Method: post
-#  UsersRegisterFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersRegisterFunction}
-#      RetentionInDays: 1
 
   UsersLoginFunction:
     Type: AWS::Serverless::Function
@@ -130,11 +128,6 @@ Resources:
           Properties:
             Path: /users/login
             Method: post
-#  UsersLoginFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersLoginFunction}
-#      RetentionInDays: 1
 
   UsersGetFunction:
     Type: AWS::Serverless::Function
@@ -170,11 +163,6 @@ Resources:
           Properties:
             Path: /users/get
             Method: get
-#  UsersGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersGetFunction}
-#      RetentionInDays: 1
 
   UsersLogoutFunction:
     Type: AWS::Serverless::Function
@@ -202,11 +190,6 @@ Resources:
           Properties:
             Path: /users/logout
             Method: post
-#  UsersLogoutFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersLogoutFunction}
-#      RetentionInDays: 1
 
   UsersDeleteFunction:
     Type: AWS::Serverless::Function
@@ -236,11 +219,6 @@ Resources:
           Properties:
             Path: /users/{userId}
             Method: delete
-#  UsersDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersDeleteFunction}
-#      RetentionInDays: 1
 
   QuizGroupsCreateFunction:
     Type: AWS::Serverless::Function
@@ -278,11 +256,6 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: post
-#  QuizGroupsCreateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsCreateFunction}
-#      RetentionInDays: 1
 
   QuizGroupsListFunction:
     Type: AWS::Serverless::Function
@@ -314,11 +287,6 @@ Resources:
           Properties:
             Path: /quiz-groups
             Method: get
-#  QuizGroupsListFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsListFunction}
-#      RetentionInDays: 1
   QuizGroupsListCacheFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -349,11 +317,6 @@ Resources:
           Properties:
             Path: /quiz-groups-list
             Method: get
-#  QuizGroupsListFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsListFunction}
-#      RetentionInDays: 1
 
   QuizGroupsSampleListFunction:
     Type: AWS::Serverless::Function
@@ -405,11 +368,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: get
-#  QuizGroupsGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsGetFunction}
-#      RetentionInDays: 1
 
   QuizGroupsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -447,11 +405,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: put
-#  QuizGroupsUpdateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsUpdateFunction}
-#      RetentionInDays: 1
 
   QuizGroupsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -489,11 +442,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}
             Method: delete
-#  QuizGroupsDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizGroupsDeleteFunction}
-#      RetentionInDays: 1
 
   QuestionsCreateFunction:
     Type: AWS::Serverless::Function
@@ -531,11 +479,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: post
-#  QuestionsCreateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuestionsCreateFunction}
-#      RetentionInDays: 1
 
   QuestionsListFunction:
     Type: AWS::Serverless::Function
@@ -567,11 +510,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/questions
             Method: get
-#  QuestionsListFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuestionsListFunction}
-#      RetentionInDays: 1
 
   QuestionsSampleListFunction:
     Type: AWS::Serverless::Function
@@ -623,11 +561,6 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: get
-#  QuestionsGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuestionsGetFunction}
-#      RetentionInDays: 1
 
   QuestionsUpdateFunction:
     Type: AWS::Serverless::Function
@@ -665,11 +598,6 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: put
-#  QuestionsUpdateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuestionsUpdateFunction}
-#      RetentionInDays: 1
 
   QuestionsDeleteFunction:
     Type: AWS::Serverless::Function
@@ -707,11 +635,6 @@ Resources:
           Properties:
             Path: /questions/{questionId}
             Method: delete
-#  QuestionsDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuestionsDeleteFunction}
-#      RetentionInDays: 1
 
   AnswersSubmitFunction:
     Type: AWS::Serverless::Function
@@ -745,11 +668,6 @@ Resources:
           Properties:
             Path: /quizzes/{quizId}/answers
             Method: post
-#  AnswersSubmitFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${AnswersSubmitFunction}
-#      RetentionInDays: 1
 
   QuizCompletionFunction: # 追加された関数
     Type: AWS::Serverless::Function
@@ -786,11 +704,6 @@ Resources:
           Properties:
             Path: /quizzes/completion
             Method: post
-#  QuizCompletionFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${QuizCompletionFunction}
-#      RetentionInDays: 1
 
   UserAnswerSelectionFunction: # 追加された関数
     Type: AWS::Serverless::Function
@@ -824,11 +737,6 @@ Resources:
           Properties:
             Path: /quizzes/user-answer
             Method: post
-#  UserAnswerSelectionFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UserAnswerSelectionFunction}
-#      RetentionInDays: 1
 
   ResultsGetFunction:
     Type: AWS::Serverless::Function
@@ -869,11 +777,6 @@ Resources:
           Properties:
             Path: /answeredresults/{quizSessionId}
             Method: get
-#  ResultsGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ResultsGetFunction}
-#      RetentionInDays: 1
 
   ScoreHistoryGetFunction:
     Type: AWS::Serverless::Function
@@ -905,11 +808,6 @@ Resources:
           Properties:
             Path: /scores
             Method: get
-#  ScoreHistoryGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ScoreHistoryGetFunction}
-#      RetentionInDays: 1
 
   ScoresCreateFunction:
     Type: AWS::Serverless::Function
@@ -947,11 +845,6 @@ Resources:
           Properties:
             Path: /scores
             Method: post
-#  ScoresCreateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ScoresCreateFunction}
-#      RetentionInDays: 1
 
   ScoresDeleteFunction:
     Type: AWS::Serverless::Function
@@ -983,11 +876,6 @@ Resources:
           Properties:
             Path: /scores/{quizSessionId}
             Method: delete
-#  ScoresDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ScoresDeleteFunction}
-#      RetentionInDays: 1
 
   PerformanceAnalysisGetFunction:
     Type: AWS::Serverless::Function
@@ -1019,11 +907,6 @@ Resources:
           Properties:
             Path: /users/{userId}/performance-analysis
             Method: get
-#  PerformanceAnalysisGetFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${PerformanceAnalysisGetFunction}
-#      RetentionInDays: 1
 
   ResourcesCreateFunction:
     Type: AWS::Serverless::Function
@@ -1061,11 +944,6 @@ Resources:
           Properties:
             Path: /quiz-groups/{groupId}/resources
             Method: post
-#  ResourcesCreateFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ResourcesCreateFunction}
-#      RetentionInDays: 1
 
   ResourcesListFunction:
     Type: AWS::Serverless::Function
@@ -1097,11 +975,6 @@ Resources:
           Properties:
             Path: /quiz-groups-resources/{groupId}/
             Method: get
-#  ResourcesListFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ResourcesListFunction}
-#      RetentionInDays: 1
 
   ResourcesListAllFunction:
     Type: AWS::Serverless::Function
@@ -1162,11 +1035,6 @@ Resources:
           Properties:
             Path: /resources/{resourceId}
             Method: delete
-#  ResourcesDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${ResourcesDeleteFunction}
-#      RetentionInDays: 1
 
   AiGenerateQuestionFunction:
     Type: AWS::Serverless::Function
@@ -1195,6 +1063,9 @@ Resources:
               - bedrock:InvokeModel
             Resource:
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.nova-lite-v1:0"
+              - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+              - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+              - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-20b-1:0"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -1210,11 +1081,6 @@ Resources:
           Properties:
             Path: /ai/generate-question
             Method: post
-#  AiGenerateQuestionFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${AiGenerateQuestionFunction}
-#      RetentionInDays: 1
 
   AiGenerateChoicesFunction:
     Type: AWS::Serverless::Function
@@ -1242,6 +1108,9 @@ Resources:
               - bedrock:InvokeModel
             Resource:
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/amazon.nova-lite-v1:0"
+              - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
+              - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
+              - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-20b-1:0"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -1257,11 +1126,6 @@ Resources:
           Properties:
             Path: /ai/generate-choices
             Method: post
-#  AiGenerateChoicesFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${AiGenerateChoicesFunction}
-#      RetentionInDays: 1
 
   UsersInactiveDeleteFunction:
     Type: AWS::Serverless::Function
@@ -1291,11 +1155,6 @@ Resources:
           Properties:
             Path: /users/inactive
             Method: delete
-#  UsersInactiveDeleteFunctionLogGroup:
-#    Type: AWS::Logs::LogGroup
-#    Properties:
-#      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-${UsersInactiveDeleteFunction}
-#      RetentionInDays: 1
 
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
@@ -1304,12 +1163,6 @@ Resources:
         Fn::Sub: ApplicationInsights-SAM-${AWS::StackName}
       ResourceQuery:
         Type: CLOUDFORMATION_STACK_1_0
-  # ApplicationInsightsMonitoring:
-  #   Type: AWS::ApplicationInsights::Application
-  #   Properties:
-  #     ResourceGroupName:
-  #       Ref: ApplicationResourceGroup
-  #     AutoConfigurationEnabled: 'true'
   RootObjectFunction:
     Type: AWS::CloudFront::Function
     Properties:
@@ -1340,7 +1193,6 @@ Resources:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        #  WebACLId: !If [EnableWAFCondition, !GetAtt CloudFrontWebACL.Arn, !Ref "AWS::NoValue"]
         Origins:
           - Id: AimonApiGatewayOrigin
             DomainName: !Sub '${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com'
