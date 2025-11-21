@@ -39,12 +39,37 @@ export const invokeBedrock = async (prompt, systemPrompt) => {
     const modelId = getModelId();
     const bedrockClient = getBedrockClient(modelId);
 
-    const inputBody = JSON.stringify({
-        schemaVersion: "messages-v1",
-        system: [{ text: systemPrompt }],
-        messages: [{ role: "user", content: [{ text: prompt }] }],
-        inferenceConfig: { max_new_tokens: 1000, temperature: 0.7, top_p: 0.9 },
-    });
+    let inputBody;
+
+    // modelIdに応じてinputBodyを生成
+    if (modelId.startsWith("anthropic.claude")) {
+        inputBody = JSON.stringify({
+            anthropic_version: "bedrock-2023-05-31",
+            max_tokens: 1000,
+            temperature: 0.7,
+            top_p: 0.9,
+            system: systemPrompt,
+            messages: [{ role: "user", content: [{ type: "text", text: prompt }] }],
+        });
+    } else if (modelId.startsWith("amazon.nova-lite")) {
+        inputBody = JSON.stringify({
+            schemaVersion: "messages-v1",
+            system: [{ text: systemPrompt }],
+            messages: [{ role: "user", content: [{ text: prompt }] }],
+            inferenceConfig: { max_new_tokens: 1000, temperature: 0.7, top_p: 0.9 },
+        });
+    } else if (modelId.startsWith("openai.gpt-oss")) {
+        inputBody = JSON.stringify({
+            system: [{ text: systemPrompt }],
+            messages: [{ role: "user", content: [{ text: prompt }] }],
+            inferenceConfig: { max_new_tokens: 1000, temperature: 0.7, top_p: 0.9 },
+        });
+    } else {
+        // サポートされていないモデルIDの場合
+        const errorMessage = `The specified model "${modelId}" is not supported.`;
+        console.error(errorMessage);
+        throw new Error(errorMessage);
+    }
 
     const command = new InvokeModelCommand({
         modelId: modelId,
@@ -56,7 +81,13 @@ export const invokeBedrock = async (prompt, systemPrompt) => {
     try {
         const bedrockResponse = await bedrockClient.send(command);
         const responseBody = JSON.parse(new TextDecoder().decode(bedrockResponse.body));
-        return responseBody.output?.message?.content?.[0]?.text;
+
+        // modelIdに応じてレスポンスをパース
+        if (modelId.startsWith("anthropic.claude")) {
+            return responseBody.content?.[0]?.text;
+        } else { // amazon.nova-lite and openai.gpt-oss
+            return responseBody.output?.message?.content?.[0]?.text;
+        }
     } catch (error) {
         console.error(`Error invoking Bedrock model ${modelId}:`, error);
         throw new Error("Failed to get a valid response from AI.");
