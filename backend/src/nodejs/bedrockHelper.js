@@ -6,6 +6,7 @@ const modelConfigs = {
     "anthropic.claude-3-sonnet-20240229-v1:0": { region: "ap-northeast-1" },
     "anthropic.claude-3-haiku-20240307-v1:0": { region: "ap-northeast-1" },
     "openai.gpt-oss-20b-1:0": { region: "us-west-2" },
+    "openai.gpt-oss-120b-1:0": { region: "us-west-2" },
     "amazon.nova-lite-v1:0": { region: "ap-northeast-1" }
 };
 
