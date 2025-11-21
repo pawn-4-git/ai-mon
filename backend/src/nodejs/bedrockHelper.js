@@ -86,6 +86,7 @@ export const invokeBedrock = async (prompt, systemPrompt) => {
         if (modelId.startsWith("anthropic.claude")) {
             return responseBody.content?.[0]?.text;
         } else { // amazon.nova-lite and openai.gpt-oss
+            console.info(responseBody);
             return responseBody.output?.message?.content?.[0]?.text;
         }
     } catch (error) {
