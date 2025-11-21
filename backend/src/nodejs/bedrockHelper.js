@@ -60,8 +60,7 @@ export const invokeBedrock = async (prompt, systemPrompt) => {
         });
     } else if (modelId.startsWith("openai.gpt-oss")) {
         inputBody = JSON.stringify({
-            system: [{ text: systemPrompt }],
-            messages: [{ role: "user", content: [{ text: prompt }] }],
+            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: prompt }],
             inferenceConfig: { max_new_tokens: 1000, temperature: 0.7, top_p: 0.9 },
         });
     } else {
