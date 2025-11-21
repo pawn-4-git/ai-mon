@@ -71,7 +71,7 @@ export const lambdaHandler = async (event) => {
 
         // 1. Generate Question, Answer, and Explanation from sourceText
         const questionGenerationSourcePrompt = `以下の文章から、特定の事実を抜き出してください。
-        作成するのは文章だけとします。
+        日本語で作成するのは文章だけとします。
         事実は文章から特定できる内容に限定します。
         事実に関する内容に人物名や固有名詞がある場合は文章に入れてください。
         人名の場合は「・・・さん」と表記してください
@@ -111,7 +111,9 @@ export const lambdaHandler = async (event) => {
         文章:
         """
         ${generatedSourceQuestion}
-        """`;
+        """
+        最終的な出力は抜き出した文章とします。
+        `;
 
         const questionGenerationSystemPrompt = "あなたは、与えられた文章からクイズの問題を作成する専門家です。";
         const generatedQuestion = await invokeBedrock(questionGenerationPrompt, questionGenerationSystemPrompt);

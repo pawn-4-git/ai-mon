@@ -15,7 +15,7 @@ Globals:
       Variables:
         CLOUD_FRONT_API_SECRET_VALUE: !Ref CloudFrontSecretHeaderValue
         # LLM_MODEL: "nova-lite"
-        LLM_MODEL: "gpt-oss-20b"
+        LLM_MODEL: "gpt-oss-120b"
         BEDROCK_REGION: "ap-northeast-1"
 
 Parameters:
