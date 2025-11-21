@@ -1067,6 +1067,8 @@ Resources:
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
               - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-20b-1:0"
+              - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-120b-1:0"
+              
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
@@ -1112,6 +1114,7 @@ Resources:
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-sonnet-20240229-v1:0"
               - !Sub "arn:aws:bedrock:ap-northeast-1::foundation-model/anthropic.claude-3-haiku-20240307-v1:0"
               - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-20b-1:0"
+              - !Sub "arn:aws:bedrock:us-west-2::foundation-model/openai.gpt-oss-120b-1:0"
       Environment:
         Variables:
           USERS_TABLE_NAME: !Ref UsersTableName
